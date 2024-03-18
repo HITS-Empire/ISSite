@@ -180,3 +180,14 @@ a {
 		cursor: pointer;
 	}
 }
+
+button {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+
+	&:disabled {
+		cursor: default;
+	}
+}

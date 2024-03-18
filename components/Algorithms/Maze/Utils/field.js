@@ -23,3 +23,12 @@ export function getField(count) {
 
     return field;
 }
+
+// Получить нужную ячейку
+export function getCell(field, key) {
+    for (const line of field) {
+        for (const cell of line) {
+            if (cell[key]) return cell;
+        }
+    }
+}

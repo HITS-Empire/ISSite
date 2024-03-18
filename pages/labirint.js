@@ -9,7 +9,6 @@ export default function Maze() {
     const [field, setField] = useState([]);
 
     // Состояния редактирования
-    const [borderEditorIsActive, setBorderEditorIsActive] = useState(false);
     const [startEditorIsActive, setStartEditorIsActive] = useState(false);
     const [endEditorIsActive, setEndEditorIsActive] = useState(false);
 
@@ -33,21 +32,16 @@ export default function Maze() {
             <Menu
                 count={count}
                 setCount={setCount}
-                borderEditorIsActive={borderEditorIsActive}
-                setBorderEditorIsActive={setBorderEditorIsActive}
-                startEditorIsActive={startEditorIsActive}
-                setStartEditorIsActive={setStartEditorIsActive}
-                endEditorIsActive={endEditorIsActive}
-                setEndEditorIsActive={setEndEditorIsActive}
             />
 
             <Field
                 count={count}
                 field={field}
                 setField={setField}
-                borderEditorIsActive={borderEditorIsActive}
                 startEditorIsActive={startEditorIsActive}
+                setStartEditorIsActive={setStartEditorIsActive}
                 endEditorIsActive={endEditorIsActive}
+                setEndEditorIsActive={setEndEditorIsActive}
             />
         </>
     );

@@ -1,25 +1,36 @@
 import Cell from "./Cell";
-import Screen from "../../../Screen";
+import style from "./style.module.scss";
+import { getCell } from "../Utils/field";
 
 export default function Field({
     count,
     field,
     setField,
-    borderEditorIsActive,
     startEditorIsActive,
-    endEditorIsActive
+    setStartEditorIsActive,
+    endEditorIsActive,
+    setEndEditorIsActive
 }) {
+    const startCell = getCell(field, "isStart");
+    const endCell = getCell(field, "isEnd");
+
     return (
-        <Screen>
-            {field.map((line) => line.map((cell, key) => (
+        <div className={style.field}>
+            {field.map((line, row) => line.map((cell, column) => (
                 <Cell
-                    key={key}
+                    key={(row + 1) * column}
                     count={count}
-                    isBarrier={cell.isBarrier}
-                    isStart={cell.isStart}
-                    isEnd={cell.isEnd}
+                    field={field}
+                    setField={setField}
+                    cell={cell}
+                    startEditorIsActive={startEditorIsActive}
+                    setStartEditorIsActive={setStartEditorIsActive}
+                    endEditorIsActive={endEditorIsActive}
+                    setEndEditorIsActive={setEndEditorIsActive}
+                    startCell={startCell}
+                    endCell={endCell}
                 />
             )))}
-        </Screen>
+        </div>
     );
 }

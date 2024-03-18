@@ -1,19 +1,70 @@
-import style from "./style.module.scss";
+import style from "../style.module.scss";
 
 export default function Cell({
     count,
-    isBarrier,
-    isStart,
-    isEnd
+    field,
+    setField,
+    cell,
+    startEditorIsActive,
+    setStartEditorIsActive,
+    endEditorIsActive,
+    setEndEditorIsActive,
+    startCell,
+    endCell
 }) {
+    const {
+        isBarrier,
+        isStart,
+        isEnd
+    } = cell;
+
+    const status = isBarrier ? "barrier" : isStart ? "start" : isEnd ? "end" : "active";
+
+    const onClick = () => {
+        if (startEditorIsActive) {
+            if (cell !== startCell) {
+                startCell.isStart = false;
+                cell.isStart = true;
+                setField([...field]);
+            }
+
+            return setStartEditorIsActive(false);
+        }
+
+        if (endEditorIsActive) {
+            if (cell !== endCell) {
+                endCell.isEnd = false;
+                cell.isEnd = true;
+                setField([...field]);
+            }
+
+            return setEndEditorIsActive(false);
+        }
+
+        if (isStart) {
+            return setStartEditorIsActive(true);
+        }
+
+        if (isEnd) {
+            return setEndEditorIsActive(true);
+        }
+
+        cell.isBarrier = !isBarrier;
+        setField([...field]);
+    };
+
+    const active = startEditorIsActive && isStart || endEditorIsActive && isEnd ? "true" : "false";
+    const disabled = startEditorIsActive && (isEnd || isBarrier) || endEditorIsActive && (isStart || isBarrier);
+
     return (
-        <div
-            className={style[isStart ? "start" : isEnd ? "end" : isBarrier ? "barrier" : "active"]}
+        <button
+            className={`${style.cell} ${style[status]}`}
+            onClick={onClick}
+            active={active}
+            disabled={disabled}
             style={{
-                width: `calc(95% / ${count})`,
-                height: `calc(95% / ${count})`,
-                margin: `calc(2.5% / ${count})`,
-                "border-radius": "5%"
+                width: `calc(100% / ${count})`,
+                height: `calc(100% / ${count})`
             }}
         />
     );
