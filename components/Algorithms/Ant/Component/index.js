@@ -1,5 +1,7 @@
+import Nothing from "../../../Nothing";
+
 export default function Component() {
     return (
-        <>Здесь будет задание Муравьиный алгоритм</>
+        <Nothing text={`Здесь будет задание "Муравьиный алгоритм"`} />
     );
 }

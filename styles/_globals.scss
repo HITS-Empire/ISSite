@@ -1,0 +1,182 @@
+$fontPath: "/fonts/";
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Bold.woff2");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-ExtraBoldItalic.woff2");
+	font-weight: 800;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-ExtraLightItalic.woff2");
+	font-weight: 200;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Thin.woff2");
+	font-weight: 100;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-ExtraBold.woff2");
+	font-weight: 800;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Regular.woff2");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-ThinItalic.woff2");
+	font-weight: 100;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Light.woff2");
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-MediumItalic.woff2");
+	font-weight: 500;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro ExtraBlack";
+	src: url($fontPath + "TTNormsPro-ExtraBlackItalic.woff2");
+	font-weight: 900;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-ExtraLight.woff2");
+	font-weight: 200;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-LightItalic.woff2");
+	font-weight: 300;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Medium.woff2");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro ExtraBlack";
+	src: url($fontPath + "TTNormsPro-ExtraBlack.woff2");
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-BoldItalic.woff2");
+	font-weight: bold;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-BlackItalic.woff2");
+	font-weight: 900;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Black.woff2");
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "TT Norms Pro";
+	src: url($fontPath + "TTNormsPro-Italic.woff2");
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
+}
+
+:root {
+	color-scheme: dark;
+}
+
+html {
+	font-family: "TT Norms Pro";
+	background: #000000;
+	overflow-x: hidden;
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	color: white;
+	background: black;
+	overflow-x: hidden;
+}
+
+#__next {
+	width: 100%;
+	height: 100%;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+	cursor: pointer;
+
+	& > * {
+		cursor: pointer;
+	}
+}

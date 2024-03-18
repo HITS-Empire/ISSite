@@ -1,5 +1,7 @@
+import Nothing from "../../../Nothing";
+
 export default function Component() {
     return (
-        <>Здесь будет задание А*</>
+        <Nothing text={`Здесь будет задание "А*"`} />
     );
 }

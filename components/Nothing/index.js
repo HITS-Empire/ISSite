@@ -1,5 +1,9 @@
-export default function Nothing() {
+import style from "./style.module.scss";
+
+export default function Nothing({ text }) {
     return (
-        <>Здесь пока ничего нет...</>
+        <div className={style.nothing}>
+            {text}
+        </div>
     );
 }
