@@ -6,7 +6,11 @@ export default function MainLayout({ children }) {
         <>
             <Header />
 
-            <main className={style.main}>{children}</main>
+            <main className={style.main}>
+                <div className={style.container}>
+                    {children}
+                </div>
+            </main>
         </>
     );
 }
