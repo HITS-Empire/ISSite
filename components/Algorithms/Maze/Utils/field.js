@@ -6,14 +6,24 @@ export function getField(count) {
         const line = [];
 
         for (let j = 0; j < count; j++) {
+            let cell;
+            
             const isStart = !i && !j;
             const isEnd = i === count - 1 && j === count - 1;
 
-            const cell = {
-                isBarrier: !isStart && !isEnd && Math.random() < 0.5,
-                isStart,
-                isEnd
-            };
+            if (!isStart && !isEnd) {
+                if (Math.random() < 0.5) {
+                    cell = 0;
+                } else {
+                    cell = 1;
+                }
+            }
+            if (isStart) {
+                cell = 2;
+            }
+            if (isEnd) {
+                cell = 3;
+            }
 
             line.push(cell);
         }
@@ -21,14 +31,15 @@ export function getField(count) {
         field.push(line);
     }
 
-    return field;
-}
-
-// Получить нужную ячейку
-export function getCell(field, key) {
-    for (const line of field) {
-        for (const cell of line) {
-            if (cell[key]) return cell;
+    return {
+        field,
+        startCell: {
+            row: 0,
+            column: 0
+        },
+        endCell: {
+            row: count - 1,
+            column: count - 1
         }
-    }
+    };
 }

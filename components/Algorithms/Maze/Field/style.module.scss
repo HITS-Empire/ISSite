@@ -13,17 +13,23 @@
         size: 105% 105%;
     }
 
+    &.empty {
+        background-image: url("/grass.svg")
+    }
+    &.barrier {
+        background-image: url("/bedrock.svg")
+    }
     &.start {
         background-image: url("/steve.svg");
     }
     &.end {
         background-image: url("/diamond.svg");
     }
-    &.active {
-        background-image: url("/grass.svg")
+    &.process {
+        background-image: url("/water.svg");
     }
-    &.barrier {
-        background-image: url("/bedrock.svg")
+    &.path {
+        background-image: url("/gold.svg");
     }
 
     &[active="true"] {

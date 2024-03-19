@@ -8,9 +8,22 @@ export default function Maze() {
     const [count, setCount] = useState(0);
     const [field, setField] = useState([]);
 
+    // Стартовая и конечная ячейка
+    const [startCell, setStartCell] = useState();
+    const [endCell, setEndCell] = useState();
+
     // Состояния редактирования
     const [startEditorIsActive, setStartEditorIsActive] = useState(false);
     const [endEditorIsActive, setEndEditorIsActive] = useState(false);
+
+    // Перезагрузить поле
+    const refreshField = () => {
+        const { field, startCell, endCell } = getField(count);
+
+        setField(field);
+        setStartCell(startCell);
+        setEndCell(endCell);
+    };
 
     // При заходе пользователя установить поле размером 10 x 10
     useEffect(() => {
@@ -19,18 +32,13 @@ export default function Maze() {
 
     // Получить новое поле при изменении размера
     useEffect(() => {
-        setField(getField(count));
+        refreshField();
     }, [count]);
 
     // Распечатать поле в консоль после изменения
     useEffect(() => {
         console.log(field);
     }, [field]);
-
-    // Перезагрузить поле
-    const refreshField = () => {
-        setField(getField(count));
-    };
 
     return (
         <>
@@ -44,6 +52,10 @@ export default function Maze() {
                 count={count}
                 field={field}
                 setField={setField}
+                startCell={startCell}
+                setStartCell={setStartCell}
+                endCell={endCell}
+                setEndCell={setEndCell}
                 startEditorIsActive={startEditorIsActive}
                 setStartEditorIsActive={setStartEditorIsActive}
                 endEditorIsActive={endEditorIsActive}

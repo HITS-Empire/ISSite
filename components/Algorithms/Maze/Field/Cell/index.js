@@ -1,30 +1,49 @@
 import style from "../style.module.scss";
 
 export default function Cell({
+    row,
+    column,
+    cell,
     count,
     field,
     setField,
-    cell,
+    startCell,
+    setStartCell,
+    endCell,
+    setEndCell,
     startEditorIsActive,
     setStartEditorIsActive,
     endEditorIsActive,
-    setEndEditorIsActive,
-    startCell,
-    endCell
+    setEndEditorIsActive
 }) {
-    const {
-        isBarrier,
-        isStart,
-        isEnd
-    } = cell;
-
-    const status = isBarrier ? "barrier" : isStart ? "start" : isEnd ? "end" : "active";
+    let status;
+    switch (cell) {
+        case 0:
+            status = "empty";
+            break;
+        case 1:
+            status = "barrier";
+            break;
+        case 2:
+            status = "start";
+            break;
+        case 3:
+            status = "end";
+            break;
+        case 4:
+            status = "process";
+            break;
+        case 5:
+            status = "path";
+    }
 
     const onClick = () => {
         if (startEditorIsActive) {
-            if (cell !== startCell) {
-                startCell.isStart = false;
-                cell.isStart = true;
+            if (row !== startCell.row || column !== startCell.column) {
+                field[startCell.row][startCell.column] = 0;
+                field[row][column] = 2;
+
+                setStartCell({ row, column });
                 setField([...field]);
             }
 
@@ -32,29 +51,36 @@ export default function Cell({
         }
 
         if (endEditorIsActive) {
-            if (cell !== endCell) {
-                endCell.isEnd = false;
-                cell.isEnd = true;
+            if (row !== endCell.row || column !== endCell.column) {
+                field[endCell.row][endCell.column] = 0;
+                field[row][column] = 3;
+
+                setEndCell({ row, column });
                 setField([...field]);
             }
 
             return setEndEditorIsActive(false);
         }
 
-        if (isStart) {
+        if (cell === 2) {
             return setStartEditorIsActive(true);
         }
 
-        if (isEnd) {
+        if (cell === 3) {
             return setEndEditorIsActive(true);
         }
 
-        cell.isBarrier = !isBarrier;
+        field[row][column] = Number(!cell);
         setField([...field]);
     };
 
-    const active = startEditorIsActive && isStart || endEditorIsActive && isEnd ? "true" : "false";
-    const disabled = startEditorIsActive && (isEnd || isBarrier) || endEditorIsActive && (isStart || isBarrier);
+    const active = startEditorIsActive && cell === 2 || endEditorIsActive && cell === 3 ? "true" : "false";
+
+    const disabled = (
+        startEditorIsActive && (cell === 1 || cell === 3)
+    ) || (
+        endEditorIsActive && (cell === 1 || cell === 2)
+    );
 
     return (
         <button

@@ -6,29 +6,34 @@ export default function Field({
     count,
     field,
     setField,
+    startCell,
+    setStartCell,
+    endCell,
+    setEndCell,
     startEditorIsActive,
     setStartEditorIsActive,
     endEditorIsActive,
     setEndEditorIsActive
 }) {
-    const startCell = getCell(field, "isStart");
-    const endCell = getCell(field, "isEnd");
-
     return (
         <div className={style.field}>
             {field.map((line, row) => line.map((cell, column) => (
                 <Cell
                     key={(row + 1) * column}
+                    row={row}
+                    column={column}
+                    cell={cell}
                     count={count}
                     field={field}
                     setField={setField}
-                    cell={cell}
+                    startCell={startCell}
+                    setStartCell={setStartCell}
+                    endCell={endCell}
+                    setEndCell={setEndCell}
                     startEditorIsActive={startEditorIsActive}
                     setStartEditorIsActive={setStartEditorIsActive}
                     endEditorIsActive={endEditorIsActive}
                     setEndEditorIsActive={setEndEditorIsActive}
-                    startCell={startCell}
-                    endCell={endCell}
                 />
             )))}
         </div>
