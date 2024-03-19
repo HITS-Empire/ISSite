@@ -1,9 +1,11 @@
 .main {
     display: flex;
-    height: calc(100% - 90px);
+    height: calc(100% - 80px);
+    margin-top: 10px;
 }
 
 .container {
+    display: flex;
     height: 100%;
-    margin: 20px auto 0 auto;
+    margin: auto;
 }
