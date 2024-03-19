@@ -3,7 +3,8 @@ import style from "./style.module.scss";
 
 export default function Menu({
     count,
-    setCount
+    setCount,
+    refreshField
 }) {
     return (
         <div className={style.menu}>
@@ -14,7 +15,9 @@ export default function Menu({
 
             <div className={style.container}>
                 <Button type="primary">Запустить</Button>
-                <Button type="soft">Перезагрузить</Button>
+                <Button type="soft" onClick={refreshField}>
+                    Перезагрузить
+                </Button>
             </div>
         </div>
     );

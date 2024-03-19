@@ -27,11 +27,17 @@ export default function Maze() {
         console.log(field);
     }, [field]);
 
+    // Перезагрузить поле
+    const refreshField = () => {
+        setField(getField(count));
+    };
+
     return (
         <>
             <Menu
                 count={count}
                 setCount={setCount}
+                refreshField={refreshField}
             />
 
             <Field
