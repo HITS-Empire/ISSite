@@ -63,6 +63,55 @@ export function cellIsExists(row, column, count) {
     return 0 <= row && row < count && 0 <= column && column < count;
 }
 
+// Получить следующую итерацию
+export function getNextCell(i, { row, column }) {
+    switch (i) {
+        case 0:
+            row++;
+            break;
+        case 1:
+            row--;
+            break;
+        case 2:
+            column++;
+            break;
+        case 3:
+            column--;
+    }
+
+    return { row, column };
+}
+
+// Построить путь
+export function constructPath({
+    count,
+    field,
+    setField,
+    endCell,
+    extendedField
+}) {
+    let extendedCell = extendedField[endCell.row][endCell.column];
+    let step = extendedCell.move;
+
+    while (step > 1) {
+        for (let i = 0; i < 4; i++) {
+            const { row, column } = getNextCell(i, extendedCell);
+
+            if (!cellIsExists(row, column, count)) continue;
+            if (extendedField[row][column].move === -1) continue;
+            if (extendedField[row][column].move >= step) continue;
+            if (extendedField[row][column].type) continue;
+
+            field[row][column] = 5;
+            extendedCell = extendedField[row][column];
+            step = extendedCell.move;
+            break;
+        }
+    }
+
+    setField([...field]);
+}
+
 // Найти путь до конца поля
 export async function findPathInField({
     count,
@@ -77,6 +126,7 @@ export async function findPathInField({
     extendedField[startCell.row][startCell.column].move = 0;
 
     const queue = [extendedField[startCell.row][startCell.column]];
+    let found = false;
     let step = 0;
 
     while (queue.length) {
@@ -86,29 +136,23 @@ export async function findPathInField({
             setField([...field]);
             step++;
 
+            if (found) {
+                constructPath({
+                    count,
+                    field,
+                    setField,
+                    endCell,
+                    extendedField
+                });
+
+                return setStatus("success");
+            }
+
             await sleep(50);
         }
 
-        if (extendedCell.row === endCell.row && extendedCell.column === endCell.column) {
-            return setStatus("success");
-        }
-
         for (let i = 0; i < 4; i++) {
-            let { row, column } = extendedCell;
-
-            switch (i) {
-                case 0:
-                    row++;
-                    break;
-                case 1:
-                    row--;
-                    break;
-                case 2:
-                    column++;
-                    break;
-                case 3:
-                    column--;
-            }
+            const { row, column } = getNextCell(i, extendedCell);
 
             if (!cellIsExists(row, column, count)) continue;
             if (extendedField[row][column].move !== -1) continue;
@@ -118,6 +162,9 @@ export async function findPathInField({
             }
             if (extendedField[row][column].type === 0) {
                 field[row][column] = 4;
+            }
+            if (extendedField[row][column].type === 3) {
+                found = true;
             }
             if (extendedField[row][column].type === 0 || extendedField[row][column].type === 3) {
                 queue.push(extendedField[row][column]);
