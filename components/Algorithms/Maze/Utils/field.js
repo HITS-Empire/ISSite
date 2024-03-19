@@ -90,6 +90,9 @@ export function constructPath({
     endCell,
     extendedField
 }) {
+    // Обновить поле перед проходом
+    setField((field) => field);
+
     let extendedCell = extendedField[endCell.row][endCell.column];
     let step = extendedCell.move;
 
@@ -126,7 +129,6 @@ export async function findPathInField({
     extendedField[startCell.row][startCell.column].move = 0;
 
     const queue = [extendedField[startCell.row][startCell.column]];
-    let found = false;
     let step = 0;
 
     while (queue.length) {
@@ -135,18 +137,6 @@ export async function findPathInField({
         if (extendedCell.move > step) {
             setField([...field]);
             step++;
-
-            if (found) {
-                constructPath({
-                    count,
-                    field,
-                    setField,
-                    endCell,
-                    extendedField
-                });
-
-                return setStatus("success");
-            }
 
             await sleep(50);
         }
@@ -160,17 +150,26 @@ export async function findPathInField({
             if (extendedField[row][column].type === 0 || extendedField[row][column].type === 3) {
                 extendedField[row][column].move = extendedCell.move + 1;
             }
-            if (extendedField[row][column].type === 0) {
-                field[row][column] = 4;
-            }
+
+            // Нашли конец пути
             if (extendedField[row][column].type === 3) {
-                found = true;
+                constructPath({
+                    count,
+                    field,
+                    setField,
+                    endCell,
+                    extendedField
+                });
+
+                return setStatus("success");
             }
-            if (extendedField[row][column].type === 0 || extendedField[row][column].type === 3) {
-                queue.push(extendedField[row][column]);
-            }
+
+            if (extendedField[row][column].type) continue;
+
+            field[row][column] = 4;
+            queue.push(extendedField[row][column]);
         }
     }
-    
+
     setStatus("error");
 }
