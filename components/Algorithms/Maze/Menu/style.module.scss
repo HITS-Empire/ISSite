@@ -19,10 +19,21 @@
 
     .buttonContainer {
         display: flex;
-        margin-top: 20px;
+        margin: 20px 0;
 
         button {
             margin-right: 10px;
+        }
+    }
+
+    .status {
+        font-size: 18px;
+
+        &.success {
+            color: $success;
+        }
+        &.error {
+            color: $error;
         }
     }
 }

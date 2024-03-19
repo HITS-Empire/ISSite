@@ -14,7 +14,8 @@ export default function Cell({
     startEditorIsActive,
     setStartEditorIsActive,
     endEditorIsActive,
-    setEndEditorIsActive
+    setEndEditorIsActive,
+    processIsActive
 }) {
     let status;
     switch (cell) {
@@ -74,9 +75,13 @@ export default function Cell({
         setField([...field]);
     };
 
-    const active = startEditorIsActive && cell === 2 || endEditorIsActive && cell === 3 ? "true" : "false";
+    const active = (
+        startEditorIsActive && cell === 2
+    ) || (
+        endEditorIsActive && cell === 3
+    ) ? "true" : "false";
 
-    const disabled = (
+    const disabled = processIsActive || (
         startEditorIsActive && (cell === 1 || cell === 3)
     ) || (
         endEditorIsActive && (cell === 1 || cell === 2)

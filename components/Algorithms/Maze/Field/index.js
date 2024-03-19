@@ -1,6 +1,5 @@
 import Cell from "./Cell";
 import style from "./style.module.scss";
-import { getCell } from "../Utils/field";
 
 export default function Field({
     count,
@@ -13,7 +12,8 @@ export default function Field({
     startEditorIsActive,
     setStartEditorIsActive,
     endEditorIsActive,
-    setEndEditorIsActive
+    setEndEditorIsActive,
+    processIsActive
 }) {
     return (
         <div className={style.field}>
@@ -34,6 +34,7 @@ export default function Field({
                     setStartEditorIsActive={setStartEditorIsActive}
                     endEditorIsActive={endEditorIsActive}
                     setEndEditorIsActive={setEndEditorIsActive}
+                    processIsActive={processIsActive}
                 />
             )))}
         </div>

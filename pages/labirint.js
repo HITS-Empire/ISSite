@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import {
+    getField,
+    findPathInField
+} from "../components/Algorithms/Maze/Utils/field";
 import Menu from "../components/Algorithms/Maze/Menu";
 import Field from "../components/Algorithms/Maze/Field";
-import { getField } from "../components/Algorithms/Maze/Utils/field";
 
 export default function Maze() {
     // Поле и его размеры
@@ -16,6 +19,12 @@ export default function Maze() {
     const [startEditorIsActive, setStartEditorIsActive] = useState(false);
     const [endEditorIsActive, setEndEditorIsActive] = useState(false);
 
+    // Активен ли процесс поиска пути
+    const [processIsActive, setProcessIsActive] = useState(false);
+
+    // Статус поиска ("success" или "error")
+    const [status, setStatus] = useState();
+
     // Перезагрузить поле
     const refreshField = () => {
         const { field, startCell, endCell } = getField(count);
@@ -23,6 +32,8 @@ export default function Maze() {
         setField(field);
         setStartCell(startCell);
         setEndCell(endCell);
+        setProcessIsActive(false);
+        setStatus();
     };
 
     // При заходе пользователя установить поле размером 10 x 10
@@ -40,12 +51,27 @@ export default function Maze() {
         console.log(field);
     }, [field]);
 
+    // Начать процесс поиска пути
+    useEffect(() => {
+        if (!processIsActive) return;
+
+        findPathInField({
+            count,
+            field,
+            setField,
+            setStatus
+        });
+    }, [processIsActive]);
+
     return (
         <>
             <Menu
                 count={count}
                 setCount={setCount}
+                processIsActive={processIsActive}
+                setProcessIsActive={setProcessIsActive}
                 refreshField={refreshField}
+                status={status}
             />
 
             <Field
@@ -60,6 +86,7 @@ export default function Maze() {
                 setStartEditorIsActive={setStartEditorIsActive}
                 endEditorIsActive={endEditorIsActive}
                 setEndEditorIsActive={setEndEditorIsActive}
+                processIsActive={processIsActive}
             />
         </>
     );

@@ -43,3 +43,13 @@ export function getField(count) {
         }
     };
 }
+
+// Найти путь до конца поля
+export function findPathInField({
+    count,
+    field,
+    setField,
+    setStatus
+}) {
+    setStatus("error");
+}

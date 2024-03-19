@@ -5,8 +5,17 @@ import style from "./style.module.scss";
 export default function Menu({
     count,
     setCount,
-    refreshField
+    processIsActive,
+    setProcessIsActive,
+    refreshField,
+    status
 }) {
+    // Запустить процесс нахождения пути
+    const runProcess = () => {
+        setProcessIsActive(true);
+    };
+
+    // Изменить размеры поля
     const changeCountEvent = (event) => {
         const value = event.target.value;
 
@@ -14,6 +23,15 @@ export default function Menu({
             setCount(Math.max(value, 0));
         }
     };
+
+    let statusDescription;
+    switch (status) {
+        case "success":
+            statusDescription = "Путь успешно найден!";
+            break;
+        case "error":
+            statusDescription = "Не удалось найти путь...";
+    }
 
     return (
         <div className={style.menu}>
@@ -29,16 +47,34 @@ export default function Menu({
                     description="Введите размеры поля"
                     maxLength={3}
                     value={count}
+                    disabled={processIsActive}
                     onChange={changeCountEvent}
                 />
             </div>
 
             <div className={style.buttonContainer}>
-                <Button type="primary">Запустить</Button>
-                <Button type="soft" onClick={refreshField}>
+                <Button
+                    type="primary"
+                    onClick={runProcess}
+                    disabled={processIsActive}
+                >
+                    Запустить
+                </Button>
+
+                <Button
+                    type="soft"
+                    onClick={refreshField}
+                    disabled={processIsActive && !status}
+                >
                     Перезагрузить
                 </Button>
             </div>
+
+            {status && (
+                <span className={`${style.status} ${style[status]}`}>
+                    {statusDescription}
+                </span>
+            )}
         </div>
     );
 }
