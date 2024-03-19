@@ -1,3 +1,5 @@
+import { sleep } from "../../../../utils/sleep";
+
 // Получить поле размером N x N
 export function getField(count) {
     const field = [];
@@ -44,12 +46,84 @@ export function getField(count) {
     };
 }
 
+// Получить поле для поиска пути
+export function getExtendedField(field) {
+    return field.map((line, row) => {
+        return line.map((cell, column) => ({
+            row,
+            column,
+            type: cell,
+            move: -1
+        }));
+    });
+}
+
+// Проверить, не выходим ли за границы поля
+export function cellIsExists(row, column, count) {
+    return 0 <= row && row < count && 0 <= column && column < count;
+}
+
 // Найти путь до конца поля
-export function findPathInField({
+export async function findPathInField({
     count,
     field,
     setField,
+    startCell,
+    endCell,
     setStatus
 }) {
+    const extendedField = getExtendedField(field);
+
+    extendedField[startCell.row][startCell.column].move = 0;
+
+    const queue = [extendedField[startCell.row][startCell.column]];
+    let step = 0;
+
+    while (queue.length) {
+        const extendedCell = queue.shift();
+
+        if (extendedCell.move > step) {
+            setField([...field]);
+            step++;
+
+            await sleep(50);
+        }
+
+        if (extendedCell.row === endCell.row && extendedCell.column === endCell.column) {
+            return setStatus("success");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            let { row, column } = extendedCell;
+
+            switch (i) {
+                case 0:
+                    row++;
+                    break;
+                case 1:
+                    row--;
+                    break;
+                case 2:
+                    column++;
+                    break;
+                case 3:
+                    column--;
+            }
+
+            if (!cellIsExists(row, column, count)) continue;
+            if (extendedField[row][column].move !== -1) continue;
+
+            if (extendedField[row][column].type === 0 || extendedField[row][column].type === 3) {
+                extendedField[row][column].move = extendedCell.move + 1;
+            }
+            if (extendedField[row][column].type === 0) {
+                field[row][column] = 4;
+            }
+            if (extendedField[row][column].type === 0 || extendedField[row][column].type === 3) {
+                queue.push(extendedField[row][column]);
+            }
+        }
+    }
+    
     setStatus("error");
 }

@@ -39,6 +39,7 @@ export default function Maze() {
     // При заходе пользователя установить поле размером 10 x 10
     useEffect(() => {
         setCount(10);
+        setStatus();
     }, [])
 
     // Получить новое поле при изменении размера
@@ -59,6 +60,8 @@ export default function Maze() {
             count,
             field,
             setField,
+            startCell,
+            endCell,
             setStatus
         });
     }, [processIsActive]);
