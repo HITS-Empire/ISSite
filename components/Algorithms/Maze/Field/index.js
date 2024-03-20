@@ -127,6 +127,7 @@ export default function Field({
         }
     }, []);
 
+    // Добавить начальную ячейку, когда поле загружено
     useEffect(() => {
         if (currentCell) return;
 
