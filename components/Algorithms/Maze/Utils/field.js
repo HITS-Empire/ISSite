@@ -2,43 +2,38 @@ import { sleep } from "../../../../utils/sleep";
 
 // Получить поле размером N x N
 export function getField(count) {
-    let field = new Array(count).fill(null).map(() => new Array(count).fill(null));
+    const field = new Array(count).fill(1).map(() => new Array(count).fill(1));
 
-    for (let h = 0; h < count; h++) {
-      for (let w = 0; w < count; w++) {
-        field[w][h] = 1;
-      }
-    }
 
-    let y=0;
-    let x=0;
+    let y = 0;
+    let x = 0;
 
-    if(field[x] && field[x][y]) {
+    if (field[x] && field[x][y]) {
       field[x][y] = 0;
     }
     
    
-    let to_check = [];
+    let toCheck = [];
     
     if (y - 2 >= 0) {
-      to_check.push({ x: x, y: y - 2 });
+      toCheck.push({ x, y: y - 2 });
     }
 
     if (y + 2 < count) {
-      to_check.push({ x: x, y: y + 2 });
+      toCheck.push({ x, y: y + 2 });
     }
 
     if (x - 2 >= 0) {
-      to_check.push({ x: x - 2, y: y });
+      toCheck.push({ x: x - 2, y });
     }
 
     if (x + 2 < count) {
-      to_check.push({ x: x + 2, y: y });
+      toCheck.push({ x: x + 2, y });
     }
   
-    while (to_check.length > 0) {
-      let index = Math.floor(Math.random() * to_check.length);
-      let cell = to_check[index];
+    while (toCheck.length > 0) {
+      let index = Math.floor(Math.random() * toCheck.length);
+      let cell = toCheck[index];
 
       x = cell.x;
       y = cell.y;
@@ -47,36 +42,37 @@ export function getField(count) {
           field[x][y] = 0;
       }
       
-      to_check.splice(index, 1);
+      toCheck.splice(index, 1);
   
-      let directions = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
+      let directions = ["NORTH", "SOUTH", "EAST", "WEST"];
       while (directions.length > 0) {
         let dirIndex = Math.floor(Math.random() * directions.length);
         
         switch (directions[dirIndex]) {
-          case 'NORTH':
+          case "NORTH":
             if (y - 2 >= 0 && field[x][y - 2] == 0) {
               field[x][y - 1] = 0;
               directions = [];
             }
             break;
           
-          case 'SOUTH':
+          case "SOUTH":
             if (y + 2 < count && field[x][y + 2] == 0){
               field[x][y + 1] = 0;
               directions = [];
             }
             break;
 
-          case 'EAST':
+          case "EAST":
             if (x - 2 >= 0 && field[x - 2][y] == 0) {
-              field[x - 1][y]=0;
+              field[x - 1][y] = 0;
               directions = [];
             }
             break;
-          case 'WEST':
+
+          case "WEST":
             if (x + 2 < count && field[x + 2][y] == 0){
-              field[x + 1][y]=0;
+              field[x + 1][y] = 0;
               directions = [];
             }
             break;
@@ -85,50 +81,50 @@ export function getField(count) {
         directions.splice(dirIndex, 1);
       }
   
-      if (y - 2 >= 0 && field[x][y - 2]==1) {
-        to_check.push({ x: x, y: y - 2 });
+      if (y - 2 >= 0 && field[x][y - 2] == 1) {
+        toCheck.push({ x, y: y - 2 });
       }
 
-      if (y + 2 < count && field[x][y + 2]==1) {
-        to_check.push({ x: x, y: y + 2 });
+      if (y + 2 < count && field[x][y + 2] == 1) {
+        toCheck.push({ x, y: y + 2 });
       }
 
-      if (x - 2 >= 0 && field[x - 2][y]==1) {
-        to_check.push({ x: x - 2, y: y });
+      if (x - 2 >= 0 && field[x - 2][y] == 1) {
+        toCheck.push({ x: x - 2, y });
       }
 
-      if (x + 2 < count && field[x + 2][y]==1) {
-        to_check.push({ x: x + 2, y: y });
+      if (x + 2 < count && field[x + 2][y] == 1) {
+        toCheck.push({ x: x + 2, y });
       }
   }
 
   for (let i = 0; i < 2; i++) {
     let dead_ends=[];
       
-    for(let h = 0; h < count; h++){
-      for(let w = 0; w < count ;w++){
+    for(let column = 0; column < count; column++){
+      for(let row = 0; row < count ;row++){
             
-        if(field[w][h] == 0){
+        if(field[row][column] == 0){
           let neighbors = 0;
                 
-          if(h - 1 >= 0 && field[w][h - 1]==0){
+          if(column - 1 >= 0 && field[row][column - 1]==0){
             neighbors++;
           }
 
-          if(h + 1 < count && field[w][h + 1]==0){
+          if(column + 1 < count && field[row][column+ 1]==0){
             neighbors++;
           }
     
-          if(w - 1 >= 0 && field[w - 1][h] == 0){
+          if(row - 1 >= 0 && field[row - 1][column] == 0){
             neighbors++;
           }
     
-          if(w + 1 < count && field[w + 1][h] == 0){
+          if(row + 1 < count && field[row + 1][column] == 0){
             neighbors++;
           }
             
           if(neighbors <= 1){
-            dead_ends.push({x:w,y:h});
+            dead_ends.push({x:row,y:column});
           }
         }
       }
@@ -149,31 +145,27 @@ export function getField(count) {
 
   for (let i = 0; i < 3 && i < count - 1; i++){ 
       for (let j = 0; j < 3 && j < count - 1;j++){
-          if (field[i][j] == 1) {
-              field[i][j] = 0;
-          }
-
-          else if (field[j][i] == 1) {
-              field[j][i] = 0;
-          }
-
-          else break;
+        if (field[i][j] == 1) {
+          field[i][j] = 0;
+        } else if (field[j][i] == 1) {
+          field[j][i] = 0;
+        } else { 
+          break;
+        }
       }
   }
 
   for (let i = count - 1; i >= 0 && i > count - 4; i--){ 
       for (let j = count - 1; j >= 0 && j > count - 4; j--){
-          if (field[i][j] == 1) {
-              field[i][j] = 0;
-          }
-
-          else if (field[j][i] == 1) {
-              field[j][i] = 0;
-          }
-
-          else break;
+        if (field[i][j] == 1) {
+          field[i][j] = 0;
+        } else if (field[j][i] == 1) {
+          field[j][i] = 0;
+        } else { 
+          break;
+        }
       }
-  }
+  } 
 
 return {
   field,
