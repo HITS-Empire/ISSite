@@ -139,14 +139,15 @@ export default function Field({
         if (!ctx || !images) return;
 
         const border = 1000 / count;
+        const ceilBorder = Math.ceil(border);
 
         field.forEach((line, row) => line.forEach((cell, column) => {
-            cell.x = border * row;
-            cell.y = border * column;
+            cell.x = Math.ceil(border * row);
+            cell.y = Math.ceil(border * column);
 
             cell.draw = () => {
-                ctx.clearRect(cell.x, cell.y, border, border);
-                ctx.drawImage(images[cell.type], cell.x, cell.y, border, border);
+                ctx.clearRect(cell.x, cell.y, ceilBorder, ceilBorder);
+                ctx.drawImage(images[cell.type], cell.x, cell.y, ceilBorder, ceilBorder);
             };
 
             cell.draw();
