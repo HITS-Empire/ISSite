@@ -16,7 +16,8 @@ export function getField(count) {
             line.push({
                 row,
                 column,
-                type: 1
+                type: 1,
+                move: -1
             });
         }
 
@@ -82,17 +83,17 @@ export function getField(count) {
             directions.splice(directionIndex, 1);
         }
 
-        if (column >= 2 && field[row][column - 2] === 1) {
-            toCheck.push({ row, column: column - 2 });
+        if (column >= 2 && field[row][column - 2].type === 1) {
+            toCheck.push(field[row][column - 2]);
         }
-        if (column + 2 < count && field[row][column + 2] === 1) {
-            toCheck.push({ row, column: column + 2 });
+        if (column + 2 < count && field[row][column + 2].type === 1) {
+            toCheck.push(field[row][column + 2]);
         }
-        if (row >= 2 && field[row - 2][column] === 1) {
-            toCheck.push({ row: row - 2, column });
+        if (row >= 2 && field[row - 2][column].type === 1) {
+            toCheck.push(field[row - 2][column]);
         }
-        if (row + 2 < count && field[row + 2][column] === 1) {
-            toCheck.push({ row: row + 2, column });
+        if (row + 2 < count && field[row + 2][column].type === 1) {
+            toCheck.push(field[row + 2][column]);
         }
     }
 
@@ -103,13 +104,13 @@ export function getField(count) {
             for (let row = 0; row < count; row++) {  
                 if (field[row][column] === 0) {
                     const neighboursCount = (
-                        column >= 1 && field[row][column - 1] === 0
+                        column >= 1 && field[row][column - 1].type === 0
                     ) + (
-                        column + 1 < count && field[row][column + 1] === 0
+                        column + 1 < count && field[row][column + 1].type === 0
                     ) + (
-                        column + 1 < count && field[row][column + 1] === 0
+                        column + 1 < count && field[row][column + 1].type === 0
                     ) + (
-                        row + 1 < count && field[row + 1][column] === 0
+                        row + 1 < count && field[row + 1][column].type === 0
                     );
 
                     if (neighboursCount <= 1) {
@@ -124,15 +125,15 @@ export function getField(count) {
         }
     }  
 
-    if (startCell) startCell.type = 2;
     if (endCell) endCell.type = 3;
+    if (startCell) startCell.type = 2;
 
     for (let i = 0; i < 3 && i < count - 1; i++) { 
         for (let j = 0; j < 3 && j < count - 1; j++) {
             if (field[i][j] === 1) {
-                field[i][j] = 0;
+                field[i][j].type = 0;
             } else if (field[j][i] === 1) {
-                field[j][i] = 0;
+                field[j][i].type = 0;
             } else {
                 break;
             }
@@ -142,9 +143,9 @@ export function getField(count) {
     for (let i = count - 1; i >= 0 && i > count - 4; i--) { 
         for (let j = count - 1; j >= 0 && j > count - 4; j--) {
             if (field[i][j] === 1) {
-                field[i][j] = 0;
+                field[i][j].type = 0;
             } else if (field[j][i] === 1) {
-                field[j][i] = 0;
+                field[j][i].type = 0;
             } else { 
                 break;
             }
@@ -193,88 +194,86 @@ export function getNextCell(i, { row, column }) {
 export function constructPath({
     count,
     field,
-    setField,
-    endCell,
-    extendedField
+    endCell
 }) {
-    // Обновить поле перед проходом
-    setField((field) => field);
+    let cell = endCell;
 
-    let extendedCell = extendedField[endCell.row][endCell.column];
-    let step = extendedCell.move;
-
-    while (step > 1) {
+    while (cell.move > 1) {
         for (let i = 0; i < 4; i++) {
-            const { row, column } = getNextCell(i, extendedCell);
+            const { row, column } = getNextCell(i, cell);
 
             if (!cellIsExists(row, column, count)) continue;
-            if (extendedField[row][column].move === -1) continue;
-            if (extendedField[row][column].move >= step) continue;
-            if (extendedField[row][column].type) continue;
+            if (field[row][column].type !== 4) continue;
+            if (field[row][column].move >= cell.move) continue;
 
-            field[row][column] = 5;
-            extendedCell = extendedField[row][column];
-            step = extendedCell.move;
+            field[row][column].type = 5;
+            cell = field[row][column];
+            cell.draw();
+
             break;
         }
     }
-
-    setField([...field]);
 }
 
 // Найти путь до конца поля
 export async function findPathInField({
     count,
     field,
-    setField,
     startCell,
     endCell,
     setStatus
 }) {
-    const extendedField = getExtendedField(field);
+    startCell.move = 0;
 
-    extendedField[startCell.row][startCell.column].move = 0;
-
-    const queue = [extendedField[startCell.row][startCell.column]];
+    const queue = [startCell];
+    let found = false;
     let step = 0;
 
     while (queue.length) {
-        const extendedCell = queue.shift();
+        const cell = queue.shift();
 
-        if (extendedCell.move > step) {
-            setField([...field]);
+        if (cell.move > step) {
+            if (found) {
+                constructPath({
+                    count,
+                    field,
+                    endCell
+                });
+
+                return setStatus("success");
+            }
+
             step++;
 
             await sleep(50);
         }
 
         for (let i = 0; i < 4; i++) {
-            const { row, column } = getNextCell(i, extendedCell);
+            const { row, column } = getNextCell(i, cell);
 
             if (!cellIsExists(row, column, count)) continue;
-            if (extendedField[row][column].move !== -1) continue;
+            if (field[row][column].type) continue;
+            if (field[row][column].move !== -1) continue;
 
-            if (extendedField[row][column].type === 0 || extendedField[row][column].type === 3) {
-                extendedField[row][column].move = extendedCell.move + 1;
+            field[row][column].move = cell.move + 1;
+
+            // Проверить, не нашли ли конец пути
+            for (let j = 0; j < 4; j++) {
+                const { row: nextRow, column: nextColumn } = getNextCell(j, field[row][column]);
+
+                if (!cellIsExists(nextRow, nextColumn, count)) continue;
+
+                if (field[nextRow][nextColumn] === endCell) {
+                    endCell.move = field[row][column].move + 1;
+                    found = true;
+                    break;
+                }
             }
 
-            // Нашли конец пути
-            if (extendedField[row][column].type === 3) {
-                constructPath({
-                    count,
-                    field,
-                    setField,
-                    endCell,
-                    extendedField
-                });
+            field[row][column].type = 4;
+            field[row][column].draw();
 
-                return setStatus("success");
-            }
-
-            if (extendedField[row][column].type) continue;
-
-            field[row][column] = 4;
-            queue.push(extendedField[row][column]);
+            queue.push(field[row][column]);
         }
     }
 

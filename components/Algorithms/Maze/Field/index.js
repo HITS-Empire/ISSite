@@ -5,7 +5,6 @@ import { createCanvas } from "../../../../utils/canvas";
 export default function Field({
     count,
     field,
-    setField,
     startCell,
     setStartCell,
     endCell,
@@ -24,6 +23,62 @@ export default function Field({
 
     // Картинки для поля
     const [images, setImages] = useState();
+
+    // Активная ячейка
+    const [currentCell, setCurrentCell] = useState(startCell);
+
+    // Событие перемещения по полю
+    const moveMouseEvent = (event) => {
+        const { width: size } = canvas.getBoundingClientRect();
+        const { offsetX, offsetY } = event.nativeEvent;
+
+        const row = Math.floor(offsetX / size * count);
+        const column = Math.floor(offsetY / size * count);
+
+        if (!field?.[row]?.[column]) return;
+
+        setCurrentCell(field[row][column]);
+    };
+
+    // Событие клика на бокс
+    const clickEvent = () => {
+        if (startEditorIsActive) {
+            if (startCell !== currentCell) {
+                startCell.type = 0;
+                currentCell.type = 2;
+
+                startCell.draw();
+                currentCell.draw();
+
+                setStartCell(currentCell);
+            }
+
+            return setStartEditorIsActive(false);
+        }
+        if (endEditorIsActive) {
+            if (endCell !== currentCell) {
+                endCell.type = 0;
+                currentCell.type = 3;
+
+                endCell.draw();
+                currentCell.draw();
+
+                setEndCell(currentCell);
+            }
+
+            return setEndEditorIsActive(false);
+        }
+
+        if (currentCell.type === 2) {
+            return setStartEditorIsActive(true);
+        }
+        if (currentCell.type === 3) {
+            return setEndEditorIsActive(true);
+        }
+
+        currentCell.type = Number(!currentCell.type);
+        currentCell.draw();
+    };
 
     // Создать Canvas и загрузить картинки
     useEffect(() => {
@@ -82,18 +137,42 @@ export default function Field({
             cell.x = border * row;
             cell.y = border * column;
 
-            cell.changeType = (type) => {
+            cell.draw = () => {
                 ctx.clearRect(cell.x, cell.y, border, border);
-                ctx.drawImage(images[type], cell.x, cell.y, border, border);
+                ctx.drawImage(images[cell.type], cell.x, cell.y, border, border);
             };
 
-            cell.changeType(cell.type);
+            cell.draw();
         }));
     }, [images, field]);
 
+    const extra = (
+        startEditorIsActive && (currentCell.type === 0 || currentCell.type === 2) && style.start
+    ) || (
+        endEditorIsActive && (currentCell.type === 0 || currentCell.type === 3) && style.end
+    ) || "";
+
+    const disabled = processIsActive || (
+        startEditorIsActive && (currentCell.type === 1 || currentCell.type === 3)
+    ) || (
+        endEditorIsActive && (currentCell.type === 1 || currentCell.type === 2)
+    );
+
     return (
         <div className={style.field}>
-            <canvas id="minecraft" ref={canvasRef} />
+            <canvas ref={canvasRef} onMouseMove={moveMouseEvent} />
+            <button
+                className={`${style.box} ${extra}`}
+                disabled={disabled}
+                onClick={clickEvent}
+                style={{
+                    width: `calc(100% / ${count})`,
+                    height: `calc(100% / ${count})`,
+                    margin: currentCell ? (
+                        `calc(100% * ${currentCell.column / count}) 0 0 calc(100% * ${currentCell.row / count})`
+                    ) : 0
+                }}
+            />
         </div>
     );
 }
