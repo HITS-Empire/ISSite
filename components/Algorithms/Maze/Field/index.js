@@ -25,7 +25,7 @@ export default function Field({
     const [images, setImages] = useState();
 
     // Активная ячейка
-    const [currentCell, setCurrentCell] = useState(startCell);
+    const [currentCell, setCurrentCell] = useState();
 
     // Событие перемещения по полю
     const moveMouseEvent = (event) => {
@@ -126,6 +126,12 @@ export default function Field({
             };
         }
     }, []);
+
+    useEffect(() => {
+        if (currentCell) return;
+
+        setCurrentCell(startCell);
+    }, [startCell]);
 
     // Canvas загружен, нужно рассчитать функции и координаты
     useEffect(() => {
