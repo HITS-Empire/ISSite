@@ -4,7 +4,6 @@ import { sleep } from "../../../../utils/sleep";
 export function getField(count) {
     const field = new Array(count).fill(1).map(() => new Array(count).fill(1));
 
-
     let y = 0;
     let x = 0;
 
@@ -99,19 +98,19 @@ export function getField(count) {
   }
 
   for (let i = 0; i < 2; i++) {
-    let dead_ends=[];
+    let dead_ends = [];
       
     for(let column = 0; column < count; column++){
-      for(let row = 0; row < count ;row++){
+      for(let row = 0; row < count ; row++){
             
         if(field[row][column] == 0){
           let neighbors = 0;
                 
-          if(column - 1 >= 0 && field[row][column - 1]==0){
+          if(column - 1 >= 0 && field[row][column - 1] == 0){
             neighbors++;
           }
 
-          if(column + 1 < count && field[row][column+ 1]==0){
+          if(column + 1 < count && field[row][column+ 1] == 0){
             neighbors++;
           }
     
