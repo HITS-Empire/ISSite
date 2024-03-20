@@ -1,6 +1,7 @@
 import Input from "../../../Input";
 import Button from "../../../Button";
 import style from "./style.module.scss";
+import MenuWrapper from "../../../MenuWrapper";
 
 export default function Menu({
     count,
@@ -34,12 +35,10 @@ export default function Menu({
     }
 
     return (
-        <div className={style.menu}>
-            <p className={style.title}>А*</p>
-            <span className={style.description}>
-                Сейчас вы узрите, как работает алгоритм нахождения пути в лабиринте.
-            </span>
-
+        <MenuWrapper
+            title="А*"
+            description="Сейчас вы узрите, как работает алгоритм нахождения пути в лабиринте."
+        >
             <div className={style.inputContainer}>
                 <Input
                     type="text"
@@ -75,6 +74,6 @@ export default function Menu({
                     {statusDescription}
                 </span>
             )}
-        </div>
+        </MenuWrapper>
     );
 }
