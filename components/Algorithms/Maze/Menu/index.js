@@ -20,7 +20,7 @@ export default function Menu({
     const changeCountEvent = (event) => {
         const value = event.target.value;
 
-        if (/^1?\d{0,2}$/.test(value)) {
+        if (/^(1000|\d{0,3})$/.test(value)) {
             setCount(Math.max(value, 0));
         }
     };
@@ -44,7 +44,7 @@ export default function Menu({
                     type="text"
                     label="Размеры поля"
                     description="Введите размеры поля"
-                    maxLength={3}
+                    maxLength={4}
                     value={count}
                     disabled={processIsActive}
                     onChange={changeCountEvent}
@@ -55,7 +55,7 @@ export default function Menu({
                 <Button
                     type="primary"
                     onClick={runProcess}
-                    disabled={processIsActive}
+                    disabled={count <= 1 || processIsActive}
                 >
                     Запустить
                 </Button>
@@ -63,7 +63,7 @@ export default function Menu({
                 <Button
                     type="soft"
                     onClick={refreshField}
-                    disabled={processIsActive && !status}
+                    disabled={count <= 1 || processIsActive && !status}
                 >
                     Перезагрузить
                 </Button>

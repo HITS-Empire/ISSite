@@ -1,0 +1,13 @@
+.empty {
+    display: flex;
+    margin-right: auto;
+    flex-flow: row wrap;
+    height: 90%;
+    aspect-ratio: 1 / 1;
+    background: {
+        image: url("/grass.png");
+        position: center;
+        repeat: no-repeat;
+        size: 100% 100%;
+    }
+}
