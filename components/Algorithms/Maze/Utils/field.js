@@ -75,26 +75,26 @@ export function getField(count) {
                         directions = [];
                     }
                     break;
+            }
+
+            directions.splice(dirIndex, 1);
         }
 
-        directions.splice(dirIndex, 1);
-      }
+        if (y - 2 >= 0 && field[x][y - 2] == 1) {
+            toCheck.push({ x, y: y - 2 });
+        }
 
-      if (y - 2 >= 0 && field[x][y - 2] == 1) {
-        toCheck.push({ x, y: y - 2 });
-      }
+        if (y + 2 < count && field[x][y + 2] == 1) {
+            toCheck.push({ x, y: y + 2 });
+        }
 
-      if (y + 2 < count && field[x][y + 2] == 1) {
-        toCheck.push({ x, y: y + 2 });
-      }
+        if (x - 2 >= 0 && field[x - 2][y] == 1) {
+            toCheck.push({ x: x - 2, y });
+        }
 
-      if (x - 2 >= 0 && field[x - 2][y] == 1) {
-        toCheck.push({ x: x - 2, y });
-      }
-
-      if (x + 2 < count && field[x + 2][y] == 1) {
-        toCheck.push({ x: x + 2, y });
-      }
+        if (x + 2 < count && field[x + 2][y] == 1) {
+            toCheck.push({ x: x + 2, y });
+        }
     }
 
     for (let i = 0; i < 2; i++) {
@@ -105,25 +105,25 @@ export function getField(count) {
                 if (field[row][column] == 0) {
                   let neighbors = 0;
                         
-                  if (column - 1 >= 0 && field[row][column - 1] == 0) {
-                      neighbors++;
-                  }
+                    if (column - 1 >= 0 && field[row][column - 1] == 0) {
+                        neighbors++;
+                    }
 
-                  if (column + 1 < count && field[row][column+ 1] == 0) {
-                      neighbors++;
-                  }
-            
-                  if (row - 1 >= 0 && field[row - 1][column] == 0) {
-                      neighbors++;
-                  }
-            
-                  if (row + 1 < count && field[row + 1][column] == 0) {
-                      neighbors++;
-                  }
-                    
-                  if (neighbors <= 1) {
-                      dead_ends.push({x:row, y:column});
-                  }
+                    if (column + 1 < count && field[row][column + 1] == 0) {
+                        neighbors++;
+                    }
+
+                    if (row - 1 >= 0 && field[row - 1][column] == 0) {
+                        neighbors++;
+                    }
+
+                    if (row + 1 < count && field[row + 1][column] == 0) {
+                        neighbors++;
+                    }
+
+                    if (neighbors <= 1) {
+                        dead_ends.push({x:row, y:column});
+                    }
                 }
             }
         }
