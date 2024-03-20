@@ -37,7 +37,7 @@ export function getField(count) {
       x = cell.x;
       y = cell.y;
       
-      if(field[x] && field[x][y]) {
+      if (field[x] && field[x][y]) {
           field[x][y] = 0;
       }
       
@@ -100,29 +100,29 @@ export function getField(count) {
   for (let i = 0; i < 2; i++) {
     let dead_ends = [];
       
-    for(let column = 0; column < count; column++){
-      for(let row = 0; row < count ; row++){
+    for (let column = 0; column < count; column++){
+      for (let row = 0; row < count ; row++){
             
-        if(field[row][column] == 0){
+        if (field[row][column] == 0){
           let neighbors = 0;
                 
-          if(column - 1 >= 0 && field[row][column - 1] == 0){
+          if (column - 1 >= 0 && field[row][column - 1] == 0){
             neighbors++;
           }
 
-          if(column + 1 < count && field[row][column+ 1] == 0){
+          if (column + 1 < count && field[row][column+ 1] == 0){
             neighbors++;
           }
     
-          if(row - 1 >= 0 && field[row - 1][column] == 0){
+          if (row - 1 >= 0 && field[row - 1][column] == 0){
             neighbors++;
           }
     
-          if(row + 1 < count && field[row + 1][column] == 0){
+          if (row + 1 < count && field[row + 1][column] == 0){
             neighbors++;
           }
             
-          if(neighbors <= 1){
+          if (neighbors <= 1){
             dead_ends.push({x:row,y:column});
           }
         }
