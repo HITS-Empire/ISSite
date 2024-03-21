@@ -1,10 +1,7 @@
-.canvas {
+.field {
     display: flex;
     margin-right: auto;
     flex-flow: row wrap;
     height: 90%;
     aspect-ratio: 1 / 1;
-    border-radius: 12px;
-    background: $gradientCircle;
-    overflow: hidden;
 }
