@@ -5,6 +5,7 @@ import {
 } from "../components/Algorithms/Maze/Utils/field";
 import Menu from "../components/Algorithms/Maze/Menu";
 import Field from "../components/Algorithms/Maze/Field";
+import Empty from "../components/Algorithms/Maze/Empty";
 
 export default function Maze() {
     // Поле и его размеры
@@ -59,7 +60,6 @@ export default function Maze() {
         findPathInField({
             count,
             field,
-            setField,
             startCell,
             endCell,
             setStatus
@@ -77,20 +77,23 @@ export default function Maze() {
                 status={status}
             />
 
-            <Field
-                count={count}
-                field={field}
-                setField={setField}
-                startCell={startCell}
-                setStartCell={setStartCell}
-                endCell={endCell}
-                setEndCell={setEndCell}
-                startEditorIsActive={startEditorIsActive}
-                setStartEditorIsActive={setStartEditorIsActive}
-                endEditorIsActive={endEditorIsActive}
-                setEndEditorIsActive={setEndEditorIsActive}
-                processIsActive={processIsActive}
-            />
+            {count <= 1 ? (
+                <Empty />
+            ) : (
+                <Field
+                    count={count}
+                    field={field}
+                    startCell={startCell}
+                    setStartCell={setStartCell}
+                    endCell={endCell}
+                    setEndCell={setEndCell}
+                    startEditorIsActive={startEditorIsActive}
+                    setStartEditorIsActive={setStartEditorIsActive}
+                    endEditorIsActive={endEditorIsActive}
+                    setEndEditorIsActive={setEndEditorIsActive}
+                    processIsActive={processIsActive}
+                />
+            )}
         </>
     );
 }

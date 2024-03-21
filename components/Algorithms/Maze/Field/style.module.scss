@@ -4,42 +4,38 @@
     flex-flow: row wrap;
     height: 90%;
     aspect-ratio: 1 / 1;
-}
-
-.cell {
-    background: {
-        position: center;
-        repeat: no-repeat;
-        size: 110% 110%;
-        color: $success;
+    background-color: blue;
+    position: relative;
+    
+    canvas {
+        position: absolute;
+        z-index: 0;
     }
 
-    &.empty {
-        background-image: url("/grass.svg")
-    }
-    &.barrier {
-        background-image: url("/bedrock.svg")
-    }
-    &.start {
-        background-image: url("/steve.svg");
-    }
-    &.end {
-        background-image: url("/diamond.svg");
-    }
-    &.process {
-        background-image: url("/water.svg");
-    }
-    &.path {
-        background-image: url("/gold.svg");
-    }
-
-    &[active="true"] {
-        background-blend-mode: soft-light;
-    }
-    &:hover {
+    .box {
+        position: absolute;
         border: 1px solid $grayDark;
-    }
-    &:disabled {
-        border: 0;
+        z-index: 1;
+        background: {
+            color: transparent;
+            position: center;
+            repeat: no-repeat;
+            size: 100% 100%;
+        }
+
+        &:disabled {
+            border: 0;
+        }
+
+        &.start, &.end {
+            opacity: 0.75;
+        }
+
+        &.start {
+            background-image: url("/steve.png");
+        }
+        &.end {
+            background-image: url("/diamond.png");
+        }
     }
 }
