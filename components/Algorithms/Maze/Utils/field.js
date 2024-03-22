@@ -1,4 +1,4 @@
-import { sleep } from "../../../../utils/sleep";
+import { sleep } from "../../../../utils/helpers";
 
 // Проверить, не выходим ли за границы поля
 export function cellIsExists(row, column, count) {

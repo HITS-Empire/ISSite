@@ -24,6 +24,24 @@ export default function Field({
 
     // Событие клика на бокс
     const clickEvent = () => {
+        if (colonyEditorIsActive) {
+            if (colonyCell !== currentCell) {
+                colonyCell.type = 0;
+                currentCell.type = 2;
+
+                colonyCell.draw();
+                currentCell.draw();
+
+                setColonyCell(currentCell);
+            }
+
+            return setColonyEditorIsActive(false);
+        }
+
+        if (currentCell.type === 2) {
+            return setColonyEditorIsActive(true);
+        }
+
         currentCell.type = Number(!currentCell.type);
         currentCell.draw();
     };

@@ -41,7 +41,7 @@ export default function Maze() {
     useEffect(() => {
         setCount(10);
         setStatus();
-    }, [])
+    }, []);
 
     // Получить новое поле при изменении размера
     useEffect(() => {
