@@ -17,7 +17,11 @@ export function getField(count) {
                 row,
                 column,
                 type: 1,
-                move: -1
+                cost: 0,
+                previousCost: 0,
+                selfCost: 0,
+                neighbours: [],
+                previous: null
             });
         }
 
@@ -27,19 +31,26 @@ export function getField(count) {
     const startCell = field?.[0]?.[0];
     const endCell = field?.[count - 1]?.[count - 1];
 
-    if (startCell) startCell.type = 0;
-
     const toCheck = [];
 
-    if (cellIsExists(0, 2, count)) {
-        toCheck.push(field[0][2]);
+    const row = Math.floor(Math.random() * Math.floor(count / 2)) * 2 + 1;
+    const column = Math.floor(Math.random() * Math.floor(count / 2)) * 2 + 1;
+
+    if (row >= 2) {
+        toCheck.push(field[row - 2][column]);
     }
-    if (cellIsExists(2, 0, count)) {
-        toCheck.push(field[2][0]);
+    if (row + 2 < count) {
+        toCheck.push(field[row + 2][column]);
+    }
+    if (column >= 2) {
+        toCheck.push(field[row][column - 2]);
+    }
+    if (column + 2 < count) {
+        toCheck.push(field[row][column + 2]);
     }
 
     while (toCheck.length) {
-        const index = Math.floor(Math.random() * toCheck.length);
+        const index = 0;
         const cell = toCheck[index];
 
         cell.type = 0;
@@ -50,7 +61,7 @@ export function getField(count) {
         const { row, column } = cell;
         let barrierIsPlaced = false;
 
-        while (!barrierIsPlaced) {
+        while (directions.length && !barrierIsPlaced) {
             const directionIndex = Math.floor(Math.random() * directions.length);
             const direction = directions[directionIndex];
 
@@ -97,42 +108,14 @@ export function getField(count) {
         }
     }
 
-    for (let i = 0; i < 2; i++) {
-        const deadEnds = [];
-
-        for (let column = 0; column < count; column++) {
-            for (let row = 0; row < count; row++) {  
-                if (field[row][column] === 0) {
-                    const neighboursCount = (
-                        column >= 1 && field[row][column - 1].type === 0
-                    ) + (
-                        column + 1 < count && field[row][column + 1].type === 0
-                    ) + (
-                        column + 1 < count && field[row][column + 1].type === 0
-                    ) + (
-                        row + 1 < count && field[row + 1][column].type === 0
-                    );
-
-                    if (neighboursCount <= 1) {
-                        deadEnds.push(field[row][column]);
-                    }
-                }
-            }
-        }
-
-        for (const cell of deadEnds) {
-            cell.type = 1;
-        }
-    }  
-
     if (endCell) endCell.type = 3;
     if (startCell) startCell.type = 2;
 
     for (let i = 0; i < 3 && i < count - 1; i++) { 
         for (let j = 0; j < 3 && j < count - 1; j++) {
-            if (field[i][j] === 1) {
+            if (field[i][j].type === 1) {
                 field[i][j].type = 0;
-            } else if (field[j][i] === 1) {
+            } else if (field[j][i].type === 1) {
                 field[j][i].type = 0;
             } else {
                 break;
@@ -142,9 +125,9 @@ export function getField(count) {
 
     for (let i = count - 1; i >= 0 && i > count - 4; i--) { 
         for (let j = count - 1; j >= 0 && j > count - 4; j--) {
-            if (field[i][j] === 1) {
+            if (field[i][j].type === 1) {
                 field[i][j].type = 0;
-            } else if (field[j][i] === 1) {
+            } else if (field[j][i].type === 1) {
                 field[j][i].type = 0;
             } else { 
                 break;
@@ -215,6 +198,15 @@ export function constructPath({
     }
 }
 
+// Посчитать стоимость перехода
+export function findCost({
+    field,
+    row,
+    column
+}) {
+    field[row][column].cost = field[row][column].selfCost + field[row][column].previousCost;
+}
+
 // Найти путь до конца поля
 export async function findPathInField({
     count,
@@ -223,59 +215,35 @@ export async function findPathInField({
     endCell,
     setStatus
 }) {
-    startCell.move = 0;
-
-    const queue = [startCell];
-    let found = false;
-    let step = 0;
-
-    while (queue.length) {
-        const cell = queue.shift();
-
-        if (cell.move > step) {
-            if (found) {
-                constructPath({
-                    count,
-                    field,
-                    endCell
-                });
-
-                return setStatus("success");
+    let openSet = [];
+    let closedSet = [];
+    openSet.push(startCell);
+    
+    while (openSet.length) {
+        let current = openSet[0];
+        for (let i = 0;i < openSet.length;i++) {
+            if (openSet[i].cost < current.cost || openSet[i].cost === current.cost && openSet[i].previous < current.previous) {
+                current = openSet[i];
             }
-
-            step++;
-
-            await sleep(50);
         }
 
-        for (let i = 0; i < 4; i++) {
-            const { row, column } = getNextCell(i, cell);
+        openSet = openSet.filter(startCell => startCell !== current);
+        closedSet.push(current);
 
-            if (!cellIsExists(row, column, count)) continue;
-            if (field[row][column].type) continue;
-            if (field[row][column].move !== -1) continue;
-
-            field[row][column].move = cell.move + 1;
-
-            // Проверить, не нашли ли конец пути
-            for (let j = 0; j < 4; j++) {
-                const { row: nextRow, column: nextColumn } = getNextCell(j, field[row][column]);
-
-                if (!cellIsExists(nextRow, nextColumn, count)) continue;
-
-                if (field[nextRow][nextColumn] === endCell) {
-                    endCell.move = field[row][column].move + 1;
-                    found = true;
-                    break;
-                }
+        if (current == end) {
+            let path = [];
+            let temporary = current;
+            
+            while (temporary) {
+                path.push(temporary);
+                temporary = temporary.previous;
             }
+        }
 
-            field[row][column].type = 4;
-            field[row][column].draw();
-
-            queue.push(field[row][column]);
+        for (let neighbours of current.neighbours) {
+            if (!closedSet.includes(neighbours)) {
+                let tempCost = current.selfCost + 1;
+            }
         }
     }
-
-    setStatus("error");
 }
