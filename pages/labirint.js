@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import EmptyField from "../components/EmptyField";
 import {
     getField,
     findPathInField
 } from "../components/Algorithms/Maze/Utils/field";
 import Menu from "../components/Algorithms/Maze/Menu";
 import Field from "../components/Algorithms/Maze/Field";
-import Empty from "../components/Algorithms/Maze/Empty";
 
 export default function Maze() {
     // Поле и его размеры
@@ -78,7 +78,7 @@ export default function Maze() {
             />
 
             {count <= 1 ? (
-                <Empty />
+                <EmptyField />
             ) : (
                 <Field
                     count={count}

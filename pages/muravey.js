@@ -1,30 +1,44 @@
-import Canvas from "../components/Canvas";
-import { createCanvas } from "../utils/canvas";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import EmptyField from "../components/EmptyField";
 import Menu from "../components/Algorithms/Ant/Menu";
+import Field from "../components/Algorithms/Ant/Field";
 
 export default function Ant() {
-    const canvasRef = useRef();
+    // Поле и его размеры
+    const [count, setCount] = useState(0);
+    const [field, setField] = useState([]);
 
-    // Состояния для работы с Canvas
-    const [canvas, setCanvas] = useState();
-    const [ctx, setCtx] = useState();
+    // Ячейка колонии
+    const [colonyCell, setColonyCell] = useState();
 
-    // Создать Canvas
-    useEffect(() => {
-        createCanvas({
-            canvasRef,
-            setCanvas,
-            setCtx,
-            size: 1000
-        });
-    }, []);
+    // Состояние редактирования колонии
+    const [colonyEditorIsActive, setColonyEditorIsActive] = useState(false);
+
+    // Выбранная ячейка еды (для редактирования)
+    const [currentFoodCell, setCurrentFoodCell] = useState();
+
+    // Активен ли процесс имитации колонии
+    const [processIsActive, setProcessIsActive] = useState(false);
 
     return (
         <>
             <Menu />
 
-            <Canvas canvasRef={canvasRef} />
+            {count <= 1 ? (
+                <EmptyField />
+            ) : (
+                <Field
+                    count={count}
+                    field={field}
+                    colonyCell={colonyCell}
+                    setColonyCell={setColonyCell}
+                    colonyEditorIsActive={colonyEditorIsActive}
+                    setColonyEditorIsActive={setColonyEditorIsActive}
+                    currentFoodCell={currentFoodCell}
+                    setCurrentFoodCell={setCurrentFoodCell}
+                    processIsActive={processIsActive}
+                />
+            )}
         </>
     );
 }
