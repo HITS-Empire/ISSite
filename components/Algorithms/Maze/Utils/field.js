@@ -24,8 +24,8 @@ export function getField(count) {
         field.push(line);
     }
 
-    const startCell = field?.[0]?.[0];
-    const endCell = field?.[count - 1]?.[count - 1];
+    const startCell = field?.[1]?.[1];
+    const endCell = field?.[count - 2]?.[count - 2];
 
     if (startCell) startCell.type = 0;
 
@@ -53,7 +53,7 @@ export function getField(count) {
         while (!barrierIsPlaced) {
             const directionIndex = Math.floor(Math.random() * directions.length);
             const direction = directions[directionIndex];
-
+            if (directions.length == 0) break;
             switch (direction) {
                 case "NORTH":
                     if (column >= 2 && field[row][column - 2].type === 0) {
@@ -61,37 +61,24 @@ export function getField(count) {
                         barrierIsPlaced = true;
                     }
                     break;
-                case "SOUTH":
-                    if (column + 2 < count && field[row][column + 2].type === 0) {
-                        field[row][column + 1].type = 0;
-                        barrierIsPlaced = true;
-                    }
-                    break;
+
                 case "EAST":
                     if (row >= 2 && field[row - 2][column].type === 0) {
                         field[row - 1][column].type = 0;
                         barrierIsPlaced = true;
                     }
                     break;
-                case "WEST":
-                    if (row + 2 < count && field[row + 2][column].type === 0) {
-                        field[row + 1][column].type = 0;
-                        barrierIsPlaced = true;
-                    }
+
             }
 
             directions.splice(directionIndex, 1);
         }
 
-        if (column >= 2 && field[row][column - 2].type === 1) {
-            toCheck.push(field[row][column - 2]);
-        }
+
         if (column + 2 < count && field[row][column + 2].type === 1) {
             toCheck.push(field[row][column + 2]);
         }
-        if (row >= 2 && field[row - 2][column].type === 1) {
-            toCheck.push(field[row - 2][column]);
-        }
+
         if (row + 2 < count && field[row + 2][column].type === 1) {
             toCheck.push(field[row + 2][column]);
         }
@@ -121,7 +108,7 @@ export function getField(count) {
         }
 
         for (const cell of deadEnds) {
-            cell.type = 1;
+            cell.type = 0;
         }
     }  
 
@@ -130,9 +117,9 @@ export function getField(count) {
 
     for (let i = 0; i < 3 && i < count - 1; i++) { 
         for (let j = 0; j < 3 && j < count - 1; j++) {
-            if (field[i][j] === 1) {
+            if (field[i][j].type === 1) {
                 field[i][j].type = 0;
-            } else if (field[j][i] === 1) {
+            } else if (field[j][i].type === 1) {
                 field[j][i].type = 0;
             } else {
                 break;
@@ -140,16 +127,9 @@ export function getField(count) {
         }
     }
 
-    for (let i = count - 1; i >= 0 && i > count - 4; i--) { 
-        for (let j = count - 1; j >= 0 && j > count - 4; j--) {
-            if (field[i][j] === 1) {
-                field[i][j].type = 0;
-            } else if (field[j][i] === 1) {
-                field[j][i].type = 0;
-            } else { 
-                break;
-            }
-        }
+    for (let column = 0; column < count; column++) {
+        field[column][0].type = 1;
+        field[0][column].type = 1;
     }
 
     return {
@@ -223,6 +203,19 @@ export async function findPathInField({
     endCell,
     setStatus
 }) {
+
+    class Node {
+        constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.f = 0;
+        this.g = 0;
+        this.h = 0;
+        this.neighbors = [];
+        this.previous = null;
+        }
+    }
+    
     startCell.move = 0;
 
     const queue = [startCell];
