@@ -17,29 +17,42 @@ export function getField(count) {
                 row,
                 column,
                 type: 1,
-                move: -1
+                cost: 0,
+                previousCost: 0,
+                selfCost: 0,
+                neighbours: [],
+                previous: null
             });
         }
 
         field.push(line);
     }
 
-    const startCell = field?.[1]?.[1];
-    const endCell = field?.[count - 2]?.[count - 2];
+    const startCell = field?.[0]?.[0];
+    const endCell = field?.[count - 1]?.[count - 1];
 
     if (startCell) startCell.type = 0;
 
     const toCheck = [];
 
-    if (cellIsExists(0, 2, count)) {
-        toCheck.push(field[0][2]);
+    const row = Math.floor(Math.random() * Math.floor(count / 2)) * 2 + 1;
+    const column = Math.floor(Math.random() * Math.floor(count / 2)) * 2 + 1;
+
+    if (row >= 2) {
+        toCheck.push(field[row - 2][column]);
     }
-    if (cellIsExists(2, 0, count)) {
-        toCheck.push(field[2][0]);
+    if (row + 2 < count) {
+        toCheck.push(field[row + 2][column]);
+    }
+    if (column >= 2) {
+        toCheck.push(field[row][column - 2]);
+    }
+    if (column + 2 < count) {
+        toCheck.push(field[row][column + 2]);
     }
 
     while (toCheck.length) {
-        const index = Math.floor(Math.random() * toCheck.length);
+        const index = 0;
         const cell = toCheck[index];
 
         cell.type = 0;
@@ -50,7 +63,7 @@ export function getField(count) {
         const { row, column } = cell;
         let barrierIsPlaced = false;
 
-        while (!barrierIsPlaced) {
+        while (directions.length && !barrierIsPlaced) {
             const directionIndex = Math.floor(Math.random() * directions.length);
             const direction = directions[directionIndex];
             if (directions.length == 0) break;
@@ -108,7 +121,7 @@ export function getField(count) {
         }
 
         for (const cell of deadEnds) {
-            cell.type = 0;
+            cell.type = 1;
         }
     }  
 
@@ -127,9 +140,16 @@ export function getField(count) {
         }
     }
 
-    for (let column = 0; column < count; column++) {
-        field[column][0].type = 1;
-        field[0][column].type = 1;
+    for (let i = count - 1; i >= 0 && i > count - 4; i--) { 
+        for (let j = count - 1; j >= 0 && j > count - 4; j--) {
+            if (field[i][j] === 1) {
+                field[i][j].type = 0;
+            } else if (field[j][i] === 1) {
+                field[j][i].type = 0;
+            } else { 
+                break;
+            }
+        }
     }
 
     return {
@@ -195,6 +215,15 @@ export function constructPath({
     }
 }
 
+// Посчитать стоимость перехода
+export function findCost({
+    field,
+    row,
+    column
+}) {
+    field[row][column].cost = field[row][column].selfCost + field[row][column].previousCost;
+}
+
 // Найти путь до конца поля
 export async function findPathInField({
     count,
@@ -203,19 +232,6 @@ export async function findPathInField({
     endCell,
     setStatus
 }) {
-
-    class Node {
-        constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.f = 0;
-        this.g = 0;
-        this.h = 0;
-        this.neighbors = [];
-        this.previous = null;
-        }
-    }
-    
     startCell.move = 0;
 
     const queue = [startCell];
@@ -235,40 +251,25 @@ export async function findPathInField({
 
                 return setStatus("success");
             }
-
-            step++;
-
-            await sleep(50);
         }
 
-        for (let i = 0; i < 4; i++) {
-            const { row, column } = getNextCell(i, cell);
+        openSet = openSet.filter(startCell => startCell !== current);
+        closedSet.push(current);
 
-            if (!cellIsExists(row, column, count)) continue;
-            if (field[row][column].type) continue;
-            if (field[row][column].move !== -1) continue;
-
-            field[row][column].move = cell.move + 1;
-
-            // Проверить, не нашли ли конец пути
-            for (let j = 0; j < 4; j++) {
-                const { row: nextRow, column: nextColumn } = getNextCell(j, field[row][column]);
-
-                if (!cellIsExists(nextRow, nextColumn, count)) continue;
-
-                if (field[nextRow][nextColumn] === endCell) {
-                    endCell.move = field[row][column].move + 1;
-                    found = true;
-                    break;
-                }
+        if (current == end) {
+            let path = [];
+            let temporary = current;
+            
+            while (temporary) {
+                path.push(temporary);
+                temporary = temporary.previous;
             }
+        }
 
-            field[row][column].type = 4;
-            field[row][column].draw();
-
-            queue.push(field[row][column]);
+        for (let neighbours of current.neighbours) {
+            if (!closedSet.includes(neighbours)) {
+                let tempCost = current.selfCost + 1;
+            }
         }
     }
-
-    setStatus("error");
 }
