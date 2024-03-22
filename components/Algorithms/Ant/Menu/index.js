@@ -6,8 +6,12 @@ import MenuWrapper from "../../../MenuWrapper";
 export default function Menu({
     count,
     setCount,
+    ants,
+    setAnts,
     processIsActive,
     setProcessIsActive,
+    processIsPaused,
+    setProcessIsPaused,
     refreshField
 }) {
     // Запустить процесс нахождения пути
@@ -15,17 +19,33 @@ export default function Menu({
         setProcessIsActive(true);
     };
 
+    // Поставить процесс на паузу или убрать с паузы
+    const changeProcess = () => {
+        setProcessIsPaused(!processIsPaused);
+    };
+
     // Изменить размеры поля
     const changeCountEvent = (event) => {
         const value = event.target.value;
 
+        if (!/^\d*$/.test(value)) return;
+
         setCount(Math.min(Math.max(value, 0), 1000));
     };
+
+    // Изменить количество муравьёв
+    const changeAntsEvent = (event) => {
+        const value = event.target.value;
+
+        if (!/^\d*$/.test(value)) return;
+
+        setAnts(Math.min(Math.max(value, 0), 64));
+    }
 
     return (
         <MenuWrapper
             title="Муравьиный алгоритм"
-            description="Сейчас вы узрите, как работает муравьиный алгоритм."
+            description="Сейчас вы узрите муравьиную колонию, которая кипит жизнью."
         >
             <div className={style.inputContainer}>
                 <Input
@@ -54,6 +74,36 @@ export default function Menu({
                     disabled={count <= 1 || processIsActive}
                 >
                     Перезагрузить
+                </Button>
+            </div>
+
+            <div className={style.inputContainer}>
+                <Input
+                    type="text"
+                    label="Количество муравьёв"
+                    description="Введите количество муравьёв"
+                    maxLength={2}
+                    value={ants}
+                    disabled={processIsActive}
+                    onChange={changeAntsEvent}
+                />
+            </div>
+
+            <div className={style.buttonContainer}>
+                <Button
+                    type="primary"
+                    onClick={runProcess}
+                    disabled={count <= 1 || processIsActive}
+                >
+                    Положить еду
+                </Button>
+
+                <Button
+                    type="soft"
+                    onClick={changeProcess}
+                    disabled={!processIsActive}
+                >
+                    {processIsPaused ? "Возобновить" : "Остановить"}
                 </Button>
             </div>
         </MenuWrapper>

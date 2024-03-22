@@ -11,7 +11,8 @@ export default function Field({
     setColonyEditorIsActive,
     currentFoodCell,
     setCurrentFoodCell,
-    processIsActive
+    processIsActive,
+    processIsPaused
 }) {
     const canvasRef = useRef();
 

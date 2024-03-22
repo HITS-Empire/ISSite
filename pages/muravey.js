@@ -9,6 +9,9 @@ export default function Ant() {
     const [count, setCount] = useState(0);
     const [field, setField] = useState([]);
 
+    // Количество муравьёв
+    const [ants, setAnts] = useState(1);
+
     // Ячейка колонии
     const [colonyCell, setColonyCell] = useState();
 
@@ -18,8 +21,9 @@ export default function Ant() {
     // Выбранная ячейка еды (для редактирования)
     const [currentFoodCell, setCurrentFoodCell] = useState();
 
-    // Активен ли процесс имитации колонии
+    // Активен ли процесс имитации колонии (или он активен, но на паузе)
     const [processIsActive, setProcessIsActive] = useState(false);
+    const [processIsPaused, setProcessIsPaused] = useState(false);
 
     // Перезагрузить поле
     const refreshField = () => {
@@ -50,8 +54,12 @@ export default function Ant() {
             <Menu
                 count={count}
                 setCount={setCount}
+                ants={ants}
+                setAnts={setAnts}
                 processIsActive={processIsActive}
                 setProcessIsActive={setProcessIsActive}
+                processIsPaused={processIsPaused}
+                setProcessIsPaused={setProcessIsPaused}
                 refreshField={refreshField}
             />
 
@@ -68,6 +76,7 @@ export default function Ant() {
                     currentFoodCell={currentFoodCell}
                     setCurrentFoodCell={setCurrentFoodCell}
                     processIsActive={processIsActive}
+                    processIsPaused={processIsPaused}
                 />
             )}
         </>
