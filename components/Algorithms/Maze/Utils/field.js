@@ -17,7 +17,11 @@ export function getField(count) {
                 row,
                 column,
                 type: 1,
-                move: -1
+                cost: Infinity,
+                heuristic: 0,
+                previousCost: Infinity,
+                neighbours: [],
+                previous: null
             });
         }
 
@@ -31,15 +35,24 @@ export function getField(count) {
 
     const toCheck = [];
 
-    if (cellIsExists(0, 2, count)) {
-        toCheck.push(field[0][2]);
+    const row = Math.floor(Math.random() * Math.floor(count / 2)) * 2 + 1;
+    const column = Math.floor(Math.random() * Math.floor(count / 2)) * 2 + 1;
+
+    if (row >= 2) {
+        toCheck.push(field[row - 2][column]);
     }
-    if (cellIsExists(2, 0, count)) {
-        toCheck.push(field[2][0]);
+    if (row + 2 < count) {
+        toCheck.push(field[row + 2][column]);
+    }
+    if (column >= 2) {
+        toCheck.push(field[row][column - 2]);
+    }
+    if (column + 2 < count) {
+        toCheck.push(field[row][column + 2]);
     }
 
     while (toCheck.length) {
-        const index = Math.floor(Math.random() * toCheck.length);
+        const index = 0;
         const cell = toCheck[index];
 
         cell.type = 0;
@@ -50,89 +63,53 @@ export function getField(count) {
         const { row, column } = cell;
         let barrierIsPlaced = false;
 
-        while (!barrierIsPlaced) {
+        while (directions.length && !barrierIsPlaced) {
             const directionIndex = Math.floor(Math.random() * directions.length);
             const direction = directions[directionIndex];
-
+            
             switch (direction) {
                 case "NORTH":
-                    if (column >= 2 && field[row][column - 2].type === 0) {
+                    if (column >= 2 && field[row][column - 2].type === 1) {
                         field[row][column - 1].type = 0;
+                        toCheck.push(field[row][column - 2]);
                         barrierIsPlaced = true;
                     }
                     break;
                 case "SOUTH":
-                    if (column + 2 < count && field[row][column + 2].type === 0) {
+                    if (column + 2 < count && field[row][column + 2].type === 1) {
                         field[row][column + 1].type = 0;
+                        toCheck.push(field[row][column + 2]);
                         barrierIsPlaced = true;
                     }
                     break;
                 case "EAST":
-                    if (row >= 2 && field[row - 2][column].type === 0) {
+                    if (row >= 2 && field[row - 2][column].type === 1) {
                         field[row - 1][column].type = 0;
+                        toCheck.push(field[row - 2][column]);
+                        barrierIsPlaced = true;
+                    }
+                    
+                case "WEST":
+                    if (row + 2 < count && field[row + 2][column].type === 1) {
+                        field[row + 1][column].type = 0;
+                        toCheck.push(field[row + 2][column]);
                         barrierIsPlaced = true;
                     }
                     break;
-                case "WEST":
-                    if (row + 2 < count && field[row + 2][column].type === 0) {
-                        field[row + 1][column].type = 0;
-                        barrierIsPlaced = true;
-                    }
             }
 
             directions.splice(directionIndex, 1);
         }
-
-        if (column >= 2 && field[row][column - 2].type === 1) {
-            toCheck.push(field[row][column - 2]);
-        }
-        if (column + 2 < count && field[row][column + 2].type === 1) {
-            toCheck.push(field[row][column + 2]);
-        }
-        if (row >= 2 && field[row - 2][column].type === 1) {
-            toCheck.push(field[row - 2][column]);
-        }
-        if (row + 2 < count && field[row + 2][column].type === 1) {
-            toCheck.push(field[row + 2][column]);
-        }
     }
-
-    for (let i = 0; i < 2; i++) {
-        const deadEnds = [];
-
-        for (let column = 0; column < count; column++) {
-            for (let row = 0; row < count; row++) {  
-                if (field[row][column] === 0) {
-                    const neighboursCount = (
-                        column >= 1 && field[row][column - 1].type === 0
-                    ) + (
-                        column + 1 < count && field[row][column + 1].type === 0
-                    ) + (
-                        column + 1 < count && field[row][column + 1].type === 0
-                    ) + (
-                        row + 1 < count && field[row + 1][column].type === 0
-                    );
-
-                    if (neighboursCount <= 1) {
-                        deadEnds.push(field[row][column]);
-                    }
-                }
-            }
-        }
-
-        for (const cell of deadEnds) {
-            cell.type = 1;
-        }
-    }  
 
     if (endCell) endCell.type = 3;
     if (startCell) startCell.type = 2;
 
     for (let i = 0; i < 3 && i < count - 1; i++) { 
         for (let j = 0; j < 3 && j < count - 1; j++) {
-            if (field[i][j] === 1) {
+            if (field[i][j].type === 1) {
                 field[i][j].type = 0;
-            } else if (field[j][i] === 1) {
+            } else if (field[j][i].type === 1) {
                 field[j][i].type = 0;
             } else {
                 break;
@@ -142,9 +119,9 @@ export function getField(count) {
 
     for (let i = count - 1; i >= 0 && i > count - 4; i--) { 
         for (let j = count - 1; j >= 0 && j > count - 4; j--) {
-            if (field[i][j] === 1) {
+            if (field[i][j].type === 1) {
                 field[i][j].type = 0;
-            } else if (field[j][i] === 1) {
+            } else if (field[j][i].type === 1) {
                 field[j][i].type = 0;
             } else { 
                 break;
@@ -165,8 +142,12 @@ export function getExtendedField(field) {
         return line.map((cell, column) => ({
             row,
             column,
-            type: cell,
-            move: -1
+            type: 1,
+            cost: 0,
+            heuristic: 0,
+            previousCost: 0,
+            neighbours: [],
+            previous: null
         }));
     });
 }
@@ -190,31 +171,6 @@ export function getNextCell(i, { row, column }) {
     return { row, column };
 }
 
-// Построить путь
-export function constructPath({
-    count,
-    field,
-    endCell
-}) {
-    let cell = endCell;
-
-    while (cell.move > 1) {
-        for (let i = 0; i < 4; i++) {
-            const { row, column } = getNextCell(i, cell);
-
-            if (!cellIsExists(row, column, count)) continue;
-            if (field[row][column].type !== 4) continue;
-            if (field[row][column].move >= cell.move) continue;
-
-            field[row][column].type = 5;
-            cell = field[row][column];
-            cell.draw();
-
-            break;
-        }
-    }
-}
-
 // Найти путь до конца поля
 export async function findPathInField({
     count,
@@ -223,59 +179,95 @@ export async function findPathInField({
     endCell,
     setStatus
 }) {
-    startCell.move = 0;
+    let openSet = [];
+    let closedSet = [];
 
-    const queue = [startCell];
-    let found = false;
-    let step = 0;
-
-    while (queue.length) {
-        const cell = queue.shift();
-
-        if (cell.move > step) {
-            if (found) {
-                constructPath({
-                    count,
-                    field,
-                    endCell
-                });
-
-                return setStatus("success");
-            }
-
-            step++;
-
-            await sleep(50);
-        }
-
-        for (let i = 0; i < 4; i++) {
-            const { row, column } = getNextCell(i, cell);
-
-            if (!cellIsExists(row, column, count)) continue;
-            if (field[row][column].type) continue;
-            if (field[row][column].move !== -1) continue;
-
-            field[row][column].move = cell.move + 1;
-
-            // Проверить, не нашли ли конец пути
-            for (let j = 0; j < 4; j++) {
-                const { row: nextRow, column: nextColumn } = getNextCell(j, field[row][column]);
-
-                if (!cellIsExists(nextRow, nextColumn, count)) continue;
-
-                if (field[nextRow][nextColumn] === endCell) {
-                    endCell.move = field[row][column].move + 1;
-                    found = true;
-                    break;
+    for (let row = 0;row < count;row++) {
+        for (let column = 0;column < count;column++) {
+            for (let n = 0; n < 4; n++) {
+                if (cellIsExists(row + 1, column, count) && field[row + 1][column] !== 1) {
+                    field[row][column].neighbours.push(field[row + 1][column]);
+                }
+                if (cellIsExists(row - 1, column, count) && field[row - 1][column] !== 1) {
+                    field[row][column].neighbours.push(field[row - 1][column]);
+                }
+                if (cellIsExists(row, column + 1, count) && field[row][column + 1] !== 1) {
+                    field[row][column].neighbours.push(field[row][column + 1]);
+                }
+                if (cellIsExists(row, column - 1, count) && field[row][column - 1] !== 1) {
+                    field[row][column].neighbours.push(field[row][column - 1]);
                 }
             }
-
-            field[row][column].type = 4;
-            field[row][column].draw();
-
-            queue.push(field[row][column]);
         }
     }
 
+    openSet.push(startCell);
+
+    while (openSet.length) {
+        let current = openSet[0];
+
+        for (let i = 1;i < openSet.length;i++) {
+            if (openSet[i].cost < current.cost || (openSet[i].cost === current.cost && current.heuristic < current.heuristic)) {
+                    current = openSet[i];
+            }
+        }
+        
+        openSet.splice(openSet.indexOf(current), 1);
+        closedSet.push(current);
+
+        if (field[current.row][current.column].type !== 2 && field[current.row][current.column].type !== 3) {
+            field[current.row][current.column].type = 4;
+            field[current.row][current.column].draw();
+            if (count > 15) {
+                await sleep (20);
+            } else {
+                await sleep (50);
+            }
+        }
+        
+        if (current === endCell) {
+            let path = [];
+            let temporary = current;
+            
+            while (temporary) {
+                if (temporary === endCell) {
+                    temporary.type = 3;
+                    temporary.draw();
+                    temporary = temporary.previous;
+                } else if (temporary === startCell) {
+                    temporary.type = 2;
+                    temporary.draw();
+                    temporary = temporary.previous;
+                } else {
+                    temporary.type = 5;
+                    temporary.draw();
+                    temporary = temporary.previous;
+                }
+                
+            }
+            
+            return setStatus("success");
+        }
+
+        for (let neighbour of current.neighbours) {
+            if (!closedSet.includes(neighbour)) {
+                let tempCost = current.selfCost + 1;
+                
+                if (openSet.includes(neighbour)) {
+                    neighbour.selfCost = tempCost;
+                } else {
+                    neighbour.selfCost = tempCost;
+                    if (neighbour.type !== 1)   {
+                        openSet.push(neighbour);
+                    }
+                }
+
+                neighbour.heuristic = Math.abs(neighbour.column - endCell.column) + Math.abs(neighbour.row - endCell.row);
+                
+                neighbour.cost = neighbour.previousCost + neighbour.heuristic;
+                neighbour.previous = current;
+            }
+        }
+    }
     setStatus("error");
 }

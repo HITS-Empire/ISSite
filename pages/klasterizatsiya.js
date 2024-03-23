@@ -1,30 +1,25 @@
-import Canvas from "../components/Canvas";
-import { createCanvas } from "../utils/canvas";
 import { useRef, useState, useEffect } from "react";
 import Menu from "../components/Algorithms/Clustering/Menu";
+import Field from "../components/Algorithms/Clustering/Field";
 
 export default function Clustering() {
-    const canvasRef = useRef();
-
-    // Состояния для работы с Canvas
-    const [canvas, setCanvas] = useState();
-    const [ctx, setCtx] = useState();
-
-    // Создать Canvas
-    useEffect(() => {
-        createCanvas({
-            canvasRef,
-            setCanvas,
-            setCtx,
-            size: 1000
-        });
-    }, []);
+    // Статус поиска ("success" или "error")
+    const [status, setStatus] = useState();
+    
+    // Активен ли процесс кластеризации
+    const [processIsActive, setProcessIsActive] = useState(false);
 
     return (
         <>
-            <Menu />
+            <Menu
+                processIsActive={processIsActive}
+                setProcessIsActive={setProcessIsActive}
+                status={status}
+            />
 
-            <Canvas canvasRef={canvasRef} />
+            <Field
+                processIsActive={processIsActive}
+            />
         </>
     );
 }
