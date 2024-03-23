@@ -17,9 +17,9 @@ export function getField(count) {
                 row,
                 column,
                 type: 1,
-                cost: 0,
+                cost: Infinity,
                 heuristic: 0,
-                previousCost: 0,
+                previousCost: Infinity,
                 neighbours: [],
                 previous: null
             });
