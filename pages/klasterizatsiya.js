@@ -3,9 +3,6 @@ import Menu from "../components/Algorithms/Clustering/Menu";
 import Field from "../components/Algorithms/Clustering/Field";
 
 export default function Clustering() {
-    // Статус поиска ("success" или "error")
-    const [status, setStatus] = useState();
-    
     // Активен ли процесс кластеризации
     const [processIsActive, setProcessIsActive] = useState(false);
 
@@ -14,7 +11,6 @@ export default function Clustering() {
             <Menu
                 processIsActive={processIsActive}
                 setProcessIsActive={setProcessIsActive}
-                status={status}
             />
 
             <Field
