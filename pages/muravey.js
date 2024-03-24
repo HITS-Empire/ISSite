@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import {
     getAnts,
     getField,
+    runColony,
     getEmptyCell,
-    getCellsWithFood
+    getCellsWithFood,
 } from "../components/Algorithms/Ant/Utils/field";
 import EmptyField from "../components/EmptyField";
 import Menu from "../components/Algorithms/Ant/Menu";
@@ -41,10 +42,8 @@ export default function Ant() {
     const refreshField = () => {
         const { field, colonyCell } = getField(count);
 
-        console.log(colonyCell);
-
         setField(field);
-        setAnts(getAnts(colonyCell, population));
+        setAnts(getAnts(field, colonyCell, population));
         setColonyCell(colonyCell);
         setColonyEditorIsActive(false);
         setEmptyCell(getEmptyCell(field));
@@ -69,8 +68,24 @@ export default function Ant() {
     useEffect(() => {
         if (processIsActive) return;
 
-        setAnts(getAnts(colonyCell, population));
-    }, [colonyCell, population]);
+        setAnts(getAnts(field, colonyCell, population));
+    }, [field, colonyCell, population]);
+
+    // Управление колонией муравьёв
+    useEffect(() => {
+        if (!processIsActive || processIsPaused) return;
+
+        const interval = setInterval(runColony, 200, {
+            count,
+            field,
+            ants,
+            setAnts
+        });
+
+        return () => {
+            clearInterval(interval);
+        }
+    }, [processIsActive, processIsPaused]);
 
     return (
         <>
@@ -80,7 +95,6 @@ export default function Ant() {
                 field={field}
                 population={population}
                 setPopulation={setPopulation}
-                setColonyEditorIsActive={setColonyEditorIsActive}
                 emptyCell={emptyCell}
                 setEmptyCell={setEmptyCell}
                 cellsWithFood={cellsWithFood}

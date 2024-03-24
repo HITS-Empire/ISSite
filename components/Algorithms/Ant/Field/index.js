@@ -135,12 +135,12 @@ export default function Field({
 
     // Закрыть редакторы еды и колонии, когда процесс запустился
     useEffect(() => {
-        if (!processIsActive) return;
+        if (!processIsActive || processIsPaused) return;
 
         setColonyEditorIsActive(false);
         setFoodWindowIsOpen(false);
         setFoodCell();
-    }, [processIsActive]);
+    }, [processIsActive, processIsPaused]);
 
     const extra = (
         colonyEditorIsActive && (
@@ -158,7 +158,7 @@ export default function Field({
                 currentCell.food && foodCell !== currentCell
             )
         )
-    );
+    ) || currentCell && currentCell.type !== 2 && currentCell.ants;
 
     // Отдельные элементы типа Box для отображения еды на поле
     const boxesWithFood = cellsWithFood.map((cell) => (

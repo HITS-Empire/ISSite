@@ -10,7 +10,6 @@ export default function Menu({
     field,
     population,
     setPopulation,
-    setColonyEditorIsActive,
     emptyCell,
     setEmptyCell,
     cellsWithFood,

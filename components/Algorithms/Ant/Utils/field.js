@@ -1,4 +1,9 @@
-import { getRandomElement } from "../../../../utils/helpers";
+import { getRandomElement, sleep } from "../../../../utils/helpers";
+
+// Проверить, не выходим ли за границы поля
+export function cellIsExists(row, column, count) {
+    return 0 <= row && row < count && 0 <= column && column < count;
+}
 
 // Получить поле для муравьиной колонии
 export function getField(count) {
@@ -12,7 +17,8 @@ export function getField(count) {
                 row,
                 column,
                 type: Number(Math.random() < 0.2),
-                food: 0
+                food: 0,
+                ants: 0
             });
         }
 
@@ -40,8 +46,16 @@ export function getField(count) {
 }
 
 // Получить муравьёв для колонии
-export function getAnts(colonyCell, population) {
+export function getAnts(field, colonyCell, population) {
     const ants = [];
+
+    field.forEach((line) => line.forEach((cell) => {
+        cell.ants = 0;
+    }));
+
+    if (colonyCell) {
+        colonyCell.ants = population;
+    }
 
     for (let i = 0; i < population; i++) {
         ants.push({
@@ -78,4 +92,55 @@ export function getCellsWithFood(field) {
     }));
 
     return cells;
+}
+
+// Получить следующую итерацию
+export function getNextCell(i, { row, column }) {
+    switch (i) {
+        case 0:
+            row++;
+            break;
+        case 1:
+            row--;
+            break;
+        case 2:
+            column++;
+            break;
+        case 3:
+            column--;
+    }
+
+    return { row, column };
+}
+
+// Одна итерация муравьиной колонии
+export async function runColony({
+    count,
+    field,
+    ants,
+    setAnts
+}) {
+    ants.forEach((ant) => {
+        const neighboringCells = [];
+
+        for (let i = 0; i < 4; i++) {
+            const { row, column } = getNextCell(i, ant.cell);
+
+            if (!cellIsExists(row, column, count)) continue;
+
+            if (field[row][column].type !== 1) {
+                neighboringCells.push(field[row][column]);
+            }
+        }
+
+        if (neighboringCells.length) {
+            ant.cell.ants--;
+            ant.cell = getRandomElement(neighboringCells);
+            ant.cell.ants++;
+        }
+    });
+
+    setAnts([...ants]);
+
+    await sleep(200);
 }
