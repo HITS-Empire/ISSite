@@ -104,7 +104,9 @@ export default function FieldWrapper({
 
     return (
         <div className={fieldClassNames}>
-            <canvas ref={canvasRef} onMouseMove={moveMouseEvent} />
+            <div className={style.handler} onMouseMove={moveMouseEvent} />
+            <canvas ref={canvasRef} />
+
             <button
                 className={boxClassNames}
                 disabled={boxDisabled}

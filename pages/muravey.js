@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
+import {
+    getAnts,
+    getField,
+    getEmptyCell,
+    getCellsWithFood
+} from "../components/Algorithms/Ant/Utils/field";
 import EmptyField from "../components/EmptyField";
 import Menu from "../components/Algorithms/Ant/Menu";
 import Field from "../components/Algorithms/Ant/Field";
-import { getField } from "../components/Algorithms/Ant/Utils/field";
 
 export default function Ant() {
     // Поле и его размеры
     const [count, setCount] = useState(0);
     const [field, setField] = useState([]);
 
-    // Количество муравьёв
-    const [ants, setAnts] = useState(1);
+    // Муравьи и их количество
+    const [population, setPopulation] = useState(0);
+    const [ants, setAnts] = useState([]);
 
     // Ячейка колонии
     const [colonyCell, setColonyCell] = useState();
@@ -18,25 +24,39 @@ export default function Ant() {
     // Состояние редактирования колонии
     const [colonyEditorIsActive, setColonyEditorIsActive] = useState(false);
 
+    // Первая попавшаяся пустая ячейка
+    const [emptyCell, setEmptyCell] = useState();
+
     // Выбранная ячейка еды (для редактирования)
-    const [currentFoodCell, setCurrentFoodCell] = useState();
+    const [foodCell, setFoodCell] = useState();
+
+    // Все ячейки с едой (для отображения хитбоксов)
+    const [cellsWithFood, setCellsWithFood] = useState([]);
 
     // Активен ли процесс имитации колонии (или он активен, но на паузе)
     const [processIsActive, setProcessIsActive] = useState(false);
     const [processIsPaused, setProcessIsPaused] = useState(false);
 
-    // Перезагрузить поле
+    // Перезагрузить поле и муравьёв
     const refreshField = () => {
         const { field, colonyCell } = getField(count);
+        const ants = getAnts(colonyCell, population);
 
         setField(field);
+        setAnts(ants);
         setColonyCell(colonyCell);
+        setColonyEditorIsActive(false);
+        setEmptyCell(getEmptyCell(field));
+        setFoodCell();
+        setCellsWithFood(getCellsWithFood(field));
         setProcessIsActive(false);
+        setProcessIsPaused(false);
     };
 
-    // При заходе пользователя установить поле размером 32 x 32
+    // При заходе пользователя установить поле размером 16 x 16 и добавить 1 муравья
     useEffect(() => {
-        setCount(32);
+        setCount(16);
+        setPopulation(1);
     }, []);
 
     // Получить новое поле при изменении размера
@@ -44,18 +64,26 @@ export default function Ant() {
         refreshField();
     }, [count]);
 
-    // Распечатать поле в консоль после изменения
+    // Получить новый список муравьёв при изменении популяции
     useEffect(() => {
-        console.log(field);
-    }, [field]);
+        const ants = getAnts(colonyCell, population);
+
+        setAnts(ants);
+    }, [population]);
 
     return (
         <>
             <Menu
                 count={count}
                 setCount={setCount}
-                ants={ants}
-                setAnts={setAnts}
+                field={field}
+                population={population}
+                setPopulation={setPopulation}
+                setColonyEditorIsActive={setColonyEditorIsActive}
+                emptyCell={emptyCell}
+                setEmptyCell={setEmptyCell}
+                cellsWithFood={cellsWithFood}
+                setCellsWithFood={setCellsWithFood}
                 processIsActive={processIsActive}
                 setProcessIsActive={setProcessIsActive}
                 processIsPaused={processIsPaused}
@@ -73,8 +101,11 @@ export default function Ant() {
                     setColonyCell={setColonyCell}
                     colonyEditorIsActive={colonyEditorIsActive}
                     setColonyEditorIsActive={setColonyEditorIsActive}
-                    currentFoodCell={currentFoodCell}
-                    setCurrentFoodCell={setCurrentFoodCell}
+                    setEmptyCell={setEmptyCell}
+                    foodCell={foodCell}
+                    setFoodCell={setFoodCell}
+                    cellsWithFood={cellsWithFood}
+                    setCellsWithFood={setCellsWithFood}
                     processIsActive={processIsActive}
                     processIsPaused={processIsPaused}
                 />

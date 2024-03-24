@@ -2,12 +2,19 @@ import Input from "../../../Input";
 import Button from "../../../Button";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
+import { getEmptyCell } from "../Utils/field";
 
 export default function Menu({
     count,
     setCount,
-    ants,
-    setAnts,
+    field,
+    population,
+    setPopulation,
+    setColonyEditorIsActive,
+    emptyCell,
+    setEmptyCell,
+    cellsWithFood,
+    setCellsWithFood,
     processIsActive,
     setProcessIsActive,
     processIsPaused,
@@ -20,8 +27,16 @@ export default function Menu({
     };
 
     // Поставить процесс на паузу или убрать с паузы
-    const changeProcess = () => {
+    const changeProcessPause = () => {
         setProcessIsPaused(!processIsPaused);
+    };
+
+    // Добавить еду
+    const addFood = () => {
+        emptyCell.food = 1;
+
+        setCellsWithFood([...cellsWithFood, emptyCell]);
+        setEmptyCell(getEmptyCell(field));
     };
 
     // Изменить размеры поля
@@ -30,16 +45,16 @@ export default function Menu({
 
         if (!/^\d*$/.test(value)) return;
 
-        setCount(Math.min(Math.max(value, 0), 1000));
+        setCount(Math.min(Math.max(value, 0), 128));
     };
 
     // Изменить количество муравьёв
-    const changeAntsEvent = (event) => {
+    const changePopulationEvent = (event) => {
         const value = event.target.value;
 
         if (!/^\d*$/.test(value)) return;
 
-        setAnts(Math.min(Math.max(value, 0), 64));
+        setPopulation(Math.min(Math.max(value, 0), 64));
     }
 
     return (
@@ -52,7 +67,6 @@ export default function Menu({
                     type="text"
                     label="Размеры поля"
                     description="Введите размеры поля"
-                    maxLength={4}
                     value={count}
                     disabled={processIsActive}
                     onChange={changeCountEvent}
@@ -63,17 +77,17 @@ export default function Menu({
                 <Button
                     type="primary"
                     onClick={runProcess}
-                    disabled={count <= 1 || processIsActive}
+                    disabled={count <= 1 || population < 1 || processIsActive}
                 >
                     Запустить
                 </Button>
 
                 <Button
                     type="soft"
-                    onClick={refreshField}
-                    disabled={count <= 1 || processIsActive}
+                    onClick={changeProcessPause}
+                    disabled={!processIsActive}
                 >
-                    Перезагрузить
+                    {processIsPaused ? "Возобновить" : "Остановить"}
                 </Button>
             </div>
 
@@ -82,28 +96,27 @@ export default function Menu({
                     type="text"
                     label="Количество муравьёв"
                     description="Введите количество муравьёв"
-                    maxLength={2}
-                    value={ants}
+                    value={population}
                     disabled={processIsActive}
-                    onChange={changeAntsEvent}
+                    onChange={changePopulationEvent}
                 />
             </div>
 
             <div className={style.buttonContainer}>
                 <Button
                     type="primary"
-                    onClick={runProcess}
-                    disabled={count <= 1 || processIsActive}
+                    onClick={addFood}
+                    disabled={count <= 1 || processIsActive && !processIsPaused || !emptyCell}
                 >
                     Положить еду
                 </Button>
 
                 <Button
                     type="soft"
-                    onClick={changeProcess}
-                    disabled={!processIsActive}
+                    onClick={refreshField}
+                    disabled={count <= 1}
                 >
-                    {processIsPaused ? "Возобновить" : "Остановить"}
+                    Перезагрузить
                 </Button>
             </div>
         </MenuWrapper>

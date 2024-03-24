@@ -48,11 +48,6 @@ export default function Maze() {
         refreshField();
     }, [count]);
 
-    // Распечатать поле в консоль после изменения
-    useEffect(() => {
-        console.log(field);
-    }, [field]);
-
     // Начать процесс поиска пути
     useEffect(() => {
         if (!processIsActive) return;
