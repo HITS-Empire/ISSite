@@ -16,11 +16,14 @@ export function kMeans(points) {
         points.forEach(point => {
             let minDistance = Infinity;
             let closestCluster = null;
+            
             clusters.forEach((cluster, index) => {
-                const distance = Math.sqrt(Math.pow(point.x - cluster.center.x, 2) + Math.pow(point.y - cluster.center.y, 2));
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestCluster = index;
+                if (cluster.center.x !== undefined) {
+                    const distance = Math.sqrt(Math.pow(point.x - cluster.center.x, 2) + Math.pow(point.y - cluster.center.y, 2));
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestCluster = index;
+                    }
                 }
             });
             newClusters[closestCluster].points.push(point);

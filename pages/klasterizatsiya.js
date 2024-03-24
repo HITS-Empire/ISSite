@@ -13,9 +13,7 @@ export default function Clustering() {
                 setProcessIsActive={setProcessIsActive}
             />
 
-            <Field
-                processIsActive={processIsActive}
-            />
+            <Field/>
         </>
     );
 }

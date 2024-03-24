@@ -11,12 +11,4 @@ export default function Menu({
         setProcessIsActive(true);
     };
 
-    return (
-        <MenuWrapper
-            title="Алгоритм кластеризации"
-            description="Сейчас вы узрите, как работает алгоритм кластеризации."
-        >
-
-        </MenuWrapper>
-    );
 }
