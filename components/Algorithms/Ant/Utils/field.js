@@ -196,8 +196,8 @@ export function runColony({
 
         // Если муравей в тупике, то развернуть его
         if (availableCellsCount === 1) {
-            ant.position.x = Math.abs(ant.position.x - 1);
-            ant.position.y = Math.abs(ant.position.y - 1);
+            ant.position.x = 0.5;
+            ant.position.y = 0.5;
         }
 
         // С вероятностью 30% изменить взгляд муравья ("передумал")
