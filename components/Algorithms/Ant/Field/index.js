@@ -6,7 +6,6 @@ import { useRef, useState, useEffect } from "react";
 import { getEmptyCell, getCellsWithFood } from "../Utils/field";
 
 export default function Field({
-    id,
     count,
     field,
     ants,
@@ -159,7 +158,9 @@ export default function Field({
                 currentCell.food && foodCell !== currentCell
             )
         )
-    ) || currentCell && currentCell.type !== 2 && currentCell.ants;
+    ) || currentCell && (
+        !foodCell && !currentCell.food && currentCell.type !== 2
+    ) && currentCell.ants;
 
     // Отдельные элементы типа Box для отображения еды на поле
     const boxesWithFood = cellsWithFood.map((cell) => (
@@ -182,7 +183,6 @@ export default function Field({
     const boxesWithAnts = ants.map((ant, index) => (
         <div
             className={`${style.background} ${style.ant}`}
-            key={`${id}-${index}`}
             style={{
                 width: `calc(100% / ${count})`,
                 height: `calc(100% / ${count})`,
@@ -190,13 +190,14 @@ export default function Field({
                     `calc(100% * ${ant.cell.column / count}) 0 0 calc(100% * ${ant.cell.row / count})`
                 ) : 0,
                 zIndex: index + 3,
-                backgroundPosition: `${ant.leftIndent}% ${ant.topIndent}%`
+                backgroundPosition: `${ant.leftIndent}% ${ant.topIndent}%`,
+                transition: processIsActive && "margin 0.4s"
             }}
         />
     ));
 
     // Меню для редактирования ячейки с едой
-    const foodWindow = foodWindowIsOpen && (
+    const foodWindow = foodWindowIsOpen && foodCell && (
         <div className={style.shadow}>
             <div className={style.window}>
                 <div className={style.inputContainer}>
