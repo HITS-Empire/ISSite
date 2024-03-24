@@ -1,4 +1,4 @@
-export function WARD (points) {
+export function WARD(points) {
     // Количество кластеров
     const k = 4;
     

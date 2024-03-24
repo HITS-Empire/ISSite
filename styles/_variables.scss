@@ -23,6 +23,12 @@ $gradientWhite50: linear-gradient(
 	rgba(255, 255, 255, 0.13) 50%,
 	rgba(255, 255, 255, 0.1) 100%
 );
+$gradientWhite75: linear-gradient(
+	180deg,
+	rgba(255, 255, 255, 0.2) 0%,
+	rgba(255, 255, 255, 0.26) 50%,
+	rgba(255, 255, 255, 0.2) 100%
+);
 $gradientBlack50: linear-gradient(
 	180deg,
 	rgba(9, 9, 12, 0.1) 0%,
@@ -42,4 +48,3 @@ $gradientBlocked:
 	linear-gradient(0deg, rgba(9, 9, 12, 0.6) 0%, rgba(9, 9, 12, 0.6) 100%),
 	linear-gradient(90deg, #48078f 0%, #004fd6 100%);
 $gradientCircle: radial-gradient(circle, #808080, #D3D3D3);
-	//linear-gradient(45deg, #09034a, #0b0b64,#100f8a, #000594, #4b0082 );

@@ -11,7 +11,7 @@ export function createCanvas({
     canvas.height = size;
 
     const ctx = canvas.getContext("2d");
-    
+
     setCanvas(canvas);
     setCtx(ctx);
 }
