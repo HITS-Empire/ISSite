@@ -1,8 +1,14 @@
-.buttonContainer {
-    display: flex;
+.buttonList {
+    width: 100%;
     margin: 20px 0;
 
     button {
-        margin-right: 10px;
+        width: 90%;
+        margin-bottom: 10px;
     }
+}
+
+.buttonContainer {
+    display: flex;
+    margin: 10px 0;
 }

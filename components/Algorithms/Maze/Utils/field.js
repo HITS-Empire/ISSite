@@ -219,9 +219,9 @@ export async function findPathInField({
             field[current.row][current.column].type = 4;
             field[current.row][current.column].draw();
             if (count > 15) {
-                await sleep (20);
+                await sleep (10);
             } else {
-                await sleep (50);
+                await sleep (30);
             }
         }
         
