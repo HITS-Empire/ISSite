@@ -8,6 +8,7 @@ import { getEmptyCell, getCellsWithFood } from "../Utils/field";
 export default function Field({
     count,
     field,
+    ants,
     colonyCell,
     setColonyCell,
     colonyEditorIsActive,
@@ -162,7 +163,7 @@ export default function Field({
     // Отдельные элементы типа Box для отображения еды на поле
     const boxesWithFood = cellsWithFood.map((cell) => (
         <div
-            className={`${style.background} ${style.firstLayer} ${style.food}`}
+            className={`${style.background} ${style.food}`}
             style={{
                 width: `calc(100% / ${count})`,
                 height: `calc(100% / ${count})`,
@@ -174,6 +175,22 @@ export default function Field({
         >
             {cell.food}
         </div>
+    ));
+
+    // Отдельные элементы типа Box для отображения муравьёв
+    const boxesWithAnts = ants.map((ant, index) => (
+        <div
+            className={`${style.background} ${style.ant}`}
+            style={{
+                width: `calc(100% / ${count})`,
+                height: `calc(100% / ${count})`,
+                margin: ant.cell ? (
+                    `calc(100% * ${ant.cell.column / count}) 0 0 calc(100% * ${ant.cell.row / count})`
+                ) : 0,
+                zIndex: index + 3,
+                backgroundPosition: `${ant.leftIndent}% ${ant.topIndent}%`
+            }}
+        />
     ));
 
     // Меню для редактирования ячейки с едой
@@ -221,6 +238,7 @@ export default function Field({
             extraCells={boxesWithFood}
         >
             {...boxesWithFood}
+            {...boxesWithAnts}
             {foodWindow}
         </FieldWrapper>
     );

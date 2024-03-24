@@ -5,18 +5,12 @@
     font-weight: 500;
     justify-content: end;
     align-items: end;
+    z-index: 1;
     background: {
         color: transparent;
         position: center;
         repeat: no-repeat;
         size: 100% 100%;
-    }
-
-    &.firstLayer {
-        z-index: 1;
-    }
-    &.secondLayer {
-        z-index: 2;
     }
 }
 
@@ -28,11 +22,18 @@
     background-image: url("/apple.png");
 }
 
+.ant {
+    background: {
+        image: url("/spider.png");
+        size: 50% 50%;
+    }
+}
+
 .shadow {
     display: flex;
     width: 100%;
     height: 100%;
-    z-index: 5;
+    z-index: 72;
     background-color: rgba(0, 0, 0, 0.5);
 
     .window {

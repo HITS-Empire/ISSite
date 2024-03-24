@@ -95,6 +95,15 @@ export default function FieldWrapper({
         setCurrentCell(field[row][column]);
     };
 
+    // Стили для боксов
+    const boxStyles = {
+        width: `calc(100% / ${count})`,
+        height: `calc(100% / ${count})`,
+        margin: currentCell ? (
+            `calc(100% * ${currentCell.column / count}) 0 0 calc(100% * ${currentCell.row / count})`
+        ) : 0
+    };
+
     // Добавить начальную ячейку, когда поле загружено
     useEffect(() => {
         if (!field?.[0]?.[0]) return;
@@ -107,17 +116,15 @@ export default function FieldWrapper({
             <div className={style.handler} onMouseMove={moveMouseEvent} />
             <canvas ref={canvasRef} />
 
+            <div
+                className={`${boxClassNames} ${style.firstLayer}`}
+                style={boxStyles}
+            />
             <button
-                className={boxClassNames}
+                className={`${style.box} ${style.secondLayer}`}
                 disabled={boxDisabled}
                 onClick={clickEvent}
-                style={{
-                    width: `calc(100% / ${count})`,
-                    height: `calc(100% / ${count})`,
-                    margin: currentCell ? (
-                        `calc(100% * ${currentCell.column / count}) 0 0 calc(100% * ${currentCell.row / count})`
-                    ) : 0
-                }}
+                style={boxStyles}
             />
             {children}
         </div>

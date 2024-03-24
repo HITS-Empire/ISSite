@@ -40,10 +40,11 @@ export default function Ant() {
     // Перезагрузить поле и муравьёв
     const refreshField = () => {
         const { field, colonyCell } = getField(count);
-        const ants = getAnts(colonyCell, population);
+
+        console.log(colonyCell);
 
         setField(field);
-        setAnts(ants);
+        setAnts(getAnts(colonyCell, population));
         setColonyCell(colonyCell);
         setColonyEditorIsActive(false);
         setEmptyCell(getEmptyCell(field));
@@ -66,10 +67,10 @@ export default function Ant() {
 
     // Получить новый список муравьёв при изменении популяции
     useEffect(() => {
-        const ants = getAnts(colonyCell, population);
+        if (processIsActive) return;
 
-        setAnts(ants);
-    }, [population]);
+        setAnts(getAnts(colonyCell, population));
+    }, [colonyCell, population]);
 
     return (
         <>
@@ -97,6 +98,7 @@ export default function Ant() {
                 <Field
                     count={count}
                     field={field}
+                    ants={ants}
                     colonyCell={colonyCell}
                     setColonyCell={setColonyCell}
                     colonyEditorIsActive={colonyEditorIsActive}

@@ -41,7 +41,17 @@ export function getField(count) {
 
 // Получить муравьёв для колонии
 export function getAnts(colonyCell, population) {
-    return new Array(population).fill(colonyCell);
+    const ants = [];
+
+    for (let i = 0; i < population; i++) {
+        ants.push({
+            cell: colonyCell,
+            leftIndent: Math.random() * 100,
+            topIndent: Math.random() * 100
+        });
+    }
+
+    return ants;
 }
 
 // Получить первую попавшуюся пустую ячейку поля
