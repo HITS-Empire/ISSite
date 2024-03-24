@@ -6,6 +6,7 @@ import { useRef, useState, useEffect } from "react";
 import { getEmptyCell, getCellsWithFood } from "../Utils/field";
 
 export default function Field({
+    id,
     count,
     field,
     ants,
@@ -181,6 +182,7 @@ export default function Field({
     const boxesWithAnts = ants.map((ant, index) => (
         <div
             className={`${style.background} ${style.ant}`}
+            key={`${id}-${index}`}
             style={{
                 width: `calc(100% / ${count})`,
                 height: `calc(100% / ${count})`,

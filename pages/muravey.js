@@ -11,6 +11,9 @@ import Menu from "../components/Algorithms/Ant/Menu";
 import Field from "../components/Algorithms/Ant/Field";
 
 export default function Ant() {
+    // ID поля
+    const [id, setId] = useState();
+
     // Поле и его размеры
     const [count, setCount] = useState(0);
     const [field, setField] = useState([]);
@@ -42,6 +45,7 @@ export default function Ant() {
     const refreshField = () => {
         const { field, colonyCell } = getField(count);
 
+        setId(Math.random());
         setField(field);
         setAnts(getAnts(field, colonyCell, population));
         setColonyCell(colonyCell);
@@ -110,6 +114,7 @@ export default function Ant() {
                 <EmptyField />
             ) : (
                 <Field
+                    id={id}
                     count={count}
                     field={field}
                     ants={ants}
