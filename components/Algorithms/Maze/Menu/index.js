@@ -20,9 +20,9 @@ export default function Menu({
     const changeCountEvent = (event) => {
         const value = event.target.value;
 
-        if (/^(1000|\d{0,3})$/.test(value)) {
-            setCount(Math.max(value, 0));
-        }
+        if (!/^\d*$/.test(value)) return;
+
+        setCount(Math.min(Math.max(value, 0), 1000));
     };
 
     let statusDescription;

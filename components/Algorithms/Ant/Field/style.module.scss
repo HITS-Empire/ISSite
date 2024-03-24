@@ -1,0 +1,57 @@
+.background {
+    display: flex;
+    position: absolute;
+    color: $black;
+    font-weight: 500;
+    justify-content: end;
+    align-items: end;
+    z-index: 1;
+    background: {
+        color: transparent;
+        position: center;
+        repeat: no-repeat;
+        size: 100% 100%;
+    }
+}
+
+.colony {
+    background-image: url("/spawner.png");
+}
+
+.food {
+    background-image: url("/apple.png");
+}
+
+.ant {
+    background: {
+        image: url("/spider.png");
+        size: 50% 50%;
+    }
+}
+
+.shadow {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    z-index: 72;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .window {
+        margin: auto;
+        width: 80%;
+        padding: 20px;
+        border-radius: 16px;
+        background-color: $grayDark;
+
+        .inputContainer {
+            width: calc(100% - 40px);
+            margin-bottom: 20px;
+        }
+
+        .buttonContainer {
+            button {
+                margin-right: 10px;
+            }
+        }
+    }
+}

@@ -18,6 +18,7 @@ export default function Input({
                 maxLength={maxLength}
                 value={value}
                 disabled={disabled}
+                autoFocus={true}
                 onChange={onChange}
             />
         </div>
