@@ -84,6 +84,8 @@ export default function FieldWrapper({
 
     // Событие перемещения по полю
     const moveMouseEvent = (event) => {
+        if (!canvas) return;
+
         const { width: size } = canvas.getBoundingClientRect();
         const { offsetX, offsetY } = event.nativeEvent;
 
