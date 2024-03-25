@@ -93,6 +93,7 @@ export default function Menu({
             
             ctx.beginPath();
             ctx.strokeStyle = color;
+            ctx.lineWidth = 5;
             cluster.points.forEach(point => {
                 ctx.lineTo(point.x, point.y, color);
             });
