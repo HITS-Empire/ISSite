@@ -240,8 +240,8 @@ export default function Field({
             boxDisabled={disabled}
             extraCells={boxesWithFood}
         >
-            {...boxesWithFood}
-            {...boxesWithAnts}
+            {boxesWithFood}
+            {boxesWithAnts}
             {foodWindow}
         </FieldWrapper>
     );
