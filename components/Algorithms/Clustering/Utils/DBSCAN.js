@@ -1,6 +1,6 @@
-export function DBSCAN(points) {
-    const radius = 100;
-    const minAmount = 1;
+export function DBSCAN(points, radius, minAmount) {
+    //const radius = 100;
+    //const minAmount = 1;
 
     const clusters = [];
     const visited = new Set();

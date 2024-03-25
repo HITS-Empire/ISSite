@@ -2,6 +2,7 @@ import Canvas from "../components/Canvas";
 import { createCanvas } from "../utils/canvas";
 import { useRef, useState, useEffect } from "react";
 import Menu from "../components/Algorithms/NeuralNetwork/Menu";
+import PaintWindow from "../components/Algorithms/NeuralNetwork/PaintWindow";
 
 export default function NeuralNetwork() {
     const canvasRef = useRef();
@@ -22,9 +23,16 @@ export default function NeuralNetwork() {
 
     return (
         <>
-            <Menu />
+            <Menu 
+                canvas={canvas}
+                ctx={ctx}
+            />
 
-            <Canvas canvasRef={canvasRef} />
+            <PaintWindow
+                canvasRef={canvasRef}
+                canvas={canvas}
+                ctx={ctx}
+            />
         </>
     );
 }

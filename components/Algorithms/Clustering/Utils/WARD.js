@@ -1,7 +1,4 @@
-export function WARD(points) {
-    // Количество кластеров
-    const k = 4;
-    
+export function WARD(points, k) {
     // Найти центра кластера
     const findClusterCenter = (cluster) => {
         let centerX = 0;

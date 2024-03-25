@@ -1,7 +1,4 @@
-export function kMeans(points) {
-    // Количество кластеров
-    const k = 4;
-    
+export function kMeans(points, k) {
     // Создать стартовые кластеры
     let clusters = [];
     for (let i = 0; i < k && i < points.length; i++) {
