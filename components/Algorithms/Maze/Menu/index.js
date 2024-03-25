@@ -22,7 +22,7 @@ export default function Menu({
 
         if (!/^\d*$/.test(value)) return;
 
-        setCount(Math.min(Math.max(value, 0), 1000));
+        setCount(Math.min(Math.max(value, 0), 128));
     };
 
     let statusDescription;

@@ -1,14 +1,12 @@
-import MenuWrapper from "../../../MenuWrapper";
 import Button from "../../../Button";
-import style from "./style.module.scss"
+import style from "./style.module.scss";
+import MenuWrapper from "../../../MenuWrapper";
 
 export default function Menu({
     canvas,
     ctx
 }) {
-
     const refreshCanvas = () => {
-
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
@@ -22,6 +20,13 @@ export default function Menu({
             <div className={style.buttonContainer}>
                 <Button
                     type="primary"
+                    onClick={() => {}}
+                >
+                    Запустить
+                </Button>
+
+                <Button
+                    type="soft"
                     onClick={refreshCanvas}
                 >
                     Очистить

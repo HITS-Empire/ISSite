@@ -1,18 +1,20 @@
+import { useState } from "react";
 import Canvas from "../../../Canvas";
 
-export default function PaintWindow({
+export default function Field({
     canvasRef,
     canvas,
     ctx
 }) {
-    let processIsActive = false;
+    // Активно ли рисование
+    const [processIsActive, setProcessIsActive] = useState(false);
 
     const isPainting = () => {
-        processIsActive = true;
+        setProcessIsActive(true);
     }
 
     const endPainting = () => {
-        processIsActive = false;
+        setProcessIsActive(false);
         ctx.beginPath();
     }
 
@@ -26,10 +28,9 @@ export default function PaintWindow({
         const canvasX = x * (canvas.width / rect.width);
         const canvasY = y * (canvas.height / rect.height);
 
-
         ctx.lineWidth = 1;
-        ctx.liceCap = 'round';
-        ctx.strokeStyle = 'white';
+        ctx.liceCap = "round";
+        ctx.strokeStyle = "white";
 
         ctx.lineTo(canvasX, canvasY);
         ctx.stroke();
@@ -38,13 +39,11 @@ export default function PaintWindow({
     }
 
     return (
-        <>
-            <Canvas
-                canvasRef={canvasRef}
-                onMouseDown={isPainting}
-                onMouseMove={painting}
-                onMouseUp={endPainting}
-            />
-        </>   
+        <Canvas
+            canvasRef={canvasRef}
+            onMouseDown={isPainting}
+            onMouseMove={painting}
+            onMouseUp={endPainting}
+        />
     );
 }
