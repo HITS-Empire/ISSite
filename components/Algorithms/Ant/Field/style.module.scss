@@ -3,8 +3,8 @@
     position: absolute;
     color: $black;
     font-weight: 500;
-    justify-content: end;
-    align-items: end;
+    justify-content: flex-end;
+    align-items: flex-end;
     z-index: 1;
     background: {
         color: transparent;

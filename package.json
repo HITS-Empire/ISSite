@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "convert": "node neuro/convert28to50.js",
+    "neuro": "node neuro/createNeuroNetwork.js",
     "lint": "next lint"
   },
   "dependencies": {
@@ -13,6 +15,7 @@
     "path": "^0.12.7",
     "react": "^18",
     "react-dom": "^18",
-    "sass": "^1.72.0"
+    "sass": "^1.72.0",
+    "sharp": "^0.33.3"
   }
 }

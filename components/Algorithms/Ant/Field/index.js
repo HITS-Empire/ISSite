@@ -82,6 +82,19 @@ export default function Field({
         setEmptyCell(getEmptyCell(field));
     };
 
+    // Дополнительные инструкции для метода cell.draw()
+    const extraDraw = (cell, border, ceilBorder) => {
+        if (cell.type !== 0) return;
+
+        // Феромоны колонии
+        ctx.fillStyle = `rgba(0, 0, 255, ${0.4 * cell.pheromone.colony.amount})`;
+        ctx.fillRect(cell.x, cell.y, ceilBorder, ceilBorder);
+
+        // Феромоны еды
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.4 * cell.pheromone.food.amount})`;
+        ctx.fillRect(cell.x, cell.y, ceilBorder, ceilBorder);
+    };
+
     // Изменено количество еды в ячейке
     const changeFoodEvent = (event) => {
         const value = event.target.value;
@@ -163,9 +176,10 @@ export default function Field({
     ) && currentCell.ants;
 
     // Отдельные элементы типа Box для отображения еды на поле
-    const boxesWithFood = cellsWithFood.map((cell) => (
+    const boxesWithFood = cellsWithFood.map((cell, index) => (
         <div
             className={`${style.background} ${style.food}`}
+            key={index}
             style={{
                 width: `calc(100% / ${count})`,
                 height: `calc(100% / ${count})`,
@@ -183,6 +197,7 @@ export default function Field({
     const boxesWithAnts = ants.map((ant, index) => (
         <div
             className={`${style.background} ${style.ant}`}
+            key={index}
             style={{
                 width: `calc(100% / ${count})`,
                 height: `calc(100% / ${count})`,
@@ -233,6 +248,7 @@ export default function Field({
             ctx={ctx}
             setCtx={setCtx}
             images={["grass.png", "bedrock.png", "spawner.png"]}
+            extraDraw={extraDraw}
             boxClassName={extra}
             clickEvent={clickEvent}
             currentCell={currentCell}
@@ -240,8 +256,8 @@ export default function Field({
             boxDisabled={disabled}
             extraCells={boxesWithFood}
         >
-            {...boxesWithFood}
-            {...boxesWithAnts}
+            {boxesWithFood}
+            {boxesWithAnts}
             {foodWindow}
         </FieldWrapper>
     );

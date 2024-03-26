@@ -11,6 +11,7 @@ export default function FieldWrapper({
     ctx,
     setCtx,
     images: imagesSrc,
+    extraDraw,
     fieldClassName,
     boxClassName,
     clickEvent,
@@ -64,6 +65,7 @@ export default function FieldWrapper({
             cell.draw = () => {
                 ctx.clearRect(cell.x, cell.y, ceilBorder, ceilBorder);
                 ctx.drawImage(images[cell.type], cell.x, cell.y, ceilBorder, ceilBorder);
+                if (extraDraw) extraDraw(cell, border, ceilBorder);
             };
 
             cell.draw();
@@ -84,6 +86,8 @@ export default function FieldWrapper({
 
     // Событие перемещения по полю
     const moveMouseEvent = (event) => {
+        if (!canvas) return;
+
         const { width: size } = canvas.getBoundingClientRect();
         const { offsetX, offsetY } = event.nativeEvent;
 

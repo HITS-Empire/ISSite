@@ -26,7 +26,19 @@ export function getField(count) {
                 column,
                 type: Number(Math.random() < 0.2),
                 food: 0,
-                ants: 0
+                ants: 0,
+                pheromone: {
+                    colony: {
+                        previos: 0,
+                        amount: 0,
+                        history: []
+                    },
+                    food: {
+                        previos: 0,
+                        amount: 0,
+                        history: []
+                    }
+                }
             });
         }
 
@@ -170,14 +182,52 @@ export function getPositionOnSide(position, look) {
     })[0];
 }
 
+export function putPheromoneInCell(cell, type, value) {
+    const pheromone = cell.pheromone[type];
+    const previosAmount = pheromone.amount;
+
+    pheromone.history.push(value);
+    pheromone.amount = Math.min(Math.max(previosAmount + value, 0), 1);
+
+    if (cell.type === 0 && previosAmount.toFixed(1) !== pheromone.amount.toFixed(1)) {
+        cell.draw();
+    }
+}
+
 // Одна итерация муравьиной колонии
 export function runColony({
     count,
     field,
     ants,
-    setAnts
+    setAnts,
 }) {
+    // Феромоны улетучиваются на каждой итерации
+    field.forEach((line) => line.forEach((cell) => {
+        for (const type in cell.pheromone) {
+            const pheromone = cell.pheromone[type];
+
+            let newAmount = 0;
+
+            pheromone.history.forEach((_, index) => {
+                pheromone.history[index] -= 0.0001;
+
+                if (pheromone.history[index] > 0) {
+                    newAmount += pheromone.history[index];
+                }
+            });
+
+            pheromone.history = pheromone.history.filter((amount) => amount > 0);
+
+            const value = Math.min(Math.max(newAmount, 0), 1) - pheromone.amount;
+            putPheromoneInCell(cell, type, value);
+        }
+    }));
+
     ants.forEach((ant) => {
+        // Отложить феромон в ячейку
+        putPheromoneInCell(ant.cell, "colony", 0.05);
+        putPheromoneInCell(ant.cell, "food", 0.05);
+
         let availableCellsCount = 0;
 
         // Проверить, не замурован ли муравей
