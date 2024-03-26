@@ -172,7 +172,7 @@ export default function Field({
             )
         )
     ) || currentCell && (
-        !foodCell && !currentCell.food && currentCell.type !== 2
+        !colonyEditorIsActive && !foodCell && !currentCell.food && currentCell.type !== 2
     ) && currentCell.ants;
 
     // Отдельные элементы типа Box для отображения еды на поле
