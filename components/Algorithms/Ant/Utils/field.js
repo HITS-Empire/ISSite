@@ -184,14 +184,10 @@ export function getPositionOnSide(position, look) {
 
 export function putPheromoneInCell(cell, type, value) {
     const pheromone = cell.pheromone[type];
-    const previosAmount = pheromone.amount;
 
     pheromone.history.push(value);
-    pheromone.amount = Math.min(Math.max(previosAmount + value, 0), 1);
 
-    if (cell.type === 0 && previosAmount.toFixed(1) !== pheromone.amount.toFixed(1)) {
-        cell.draw();
-    }
+    pheromone.amount = Math.min(Math.max(pheromone.amount + value, 0), 1);
 }
 
 // Одна итерация муравьиной колонии
@@ -206,27 +202,27 @@ export function runColony({
         for (const type in cell.pheromone) {
             const pheromone = cell.pheromone[type];
 
-            let newAmount = 0;
+            let sumOfAmount = 0;
 
-            pheromone.history.forEach((_, index) => {
-                pheromone.history[index] -= 0.0001;
+            pheromone.history = pheromone.history
+                .map((amount) => {
+                    amount -= 0.0001;
 
-                if (pheromone.history[index] > 0) {
-                    newAmount += pheromone.history[index];
-                }
-            });
+                    if (amount > 0) {
+                        sumOfAmount += amount;
+                    }
 
-            pheromone.history = pheromone.history.filter((amount) => amount > 0);
+                    return amount;
+                })
+                .filter((amount) => amount > 0);
 
-            const value = Math.min(Math.max(newAmount, 0), 1) - pheromone.amount;
-            putPheromoneInCell(cell, type, value);
+            pheromone.amount = Math.min(Math.max(sumOfAmount, 0), 1);
         }
     }));
 
     ants.forEach((ant) => {
         // Отложить феромон в ячейку
-        putPheromoneInCell(ant.cell, "colony", 0.05);
-        putPheromoneInCell(ant.cell, "food", 0.05);
+        putPheromoneInCell(ant.cell, "colony", 0.01);
 
         let availableCellsCount = 0;
 
@@ -293,6 +289,23 @@ export function runColony({
 
         ant.position = nextStep.position;
     });
+
+    // Перерендерить феромоны на поле
+    field.forEach((line) => line.forEach((cell) => {
+        for (const type in cell.pheromone) {
+            const pheromone = cell.pheromone[type];
+
+            const ceilPrevios = Math.ceil(pheromone.previos * 100);
+            const ceilAmount = Math.ceil(pheromone.amount * 100);
+
+            // Перерисовать блок только тогда, когда значение феромона изменилось на 0.01
+            if (Math.abs(ceilAmount - ceilPrevios)) {
+                cell.draw();
+            }
+
+            pheromone.previos = pheromone.amount;
+        }
+    }));
 
     setAnts([...ants]);
 }
