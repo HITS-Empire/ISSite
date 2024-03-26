@@ -4,6 +4,7 @@ const sharp = require("sharp");
 const pathTo28 = "./neuro/images/28";
 const pathTo50 = "./neuro/images/50";
 
+// Сконвертировать файл в разрешение 50 x 50
 const convertFileTo50 = async (file) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -18,6 +19,7 @@ const convertFileTo50 = async (file) => {
     });
 };
 
+// Сконвертировать все файлы в разрешение 50 x 50
 const convertFilesTo50 = async () => {
     const files = fs.readdirSync(pathTo28);
 
