@@ -27,7 +27,7 @@ class NeuralNetwork {
 
     // Функция для прямого алгоритма    
     feedForward(inputs) {
-        inputs.forEach((input, index) => this.layers[0].neurons[index] = input ? 1 : 0);
+        inputs.forEach((input, index) => this.layers[0].neurons[index] = input ? 1 : -1);
         
         for (let i = 1; i < this.layers.length; i++) {
             let l = this.layers[i - 1];
@@ -181,16 +181,19 @@ const learning = async () => {
 
     for (let i = 0; i < imagesData.length; i++) {
         digits.push(parseInt(imagesData[i][0][10]));
+        imagesData[i] = imagesData[i].slice(1);
     }
 
     // Количество эпох обучения
-    const epochs = 1000;
+    const epochs = 600;
+
+    let count = 0;
 
     for (let i = 0; i < epochs; i++) {
         let correct = 0;
         
-        for (let j = 0; j < 100; j++) {
-            let index = Math.floor(Math.random() * imagesData.length);
+        for (let j = 0; j < 101; j++) {
+            let index = count + j;
 
             const startDigit = digits[index];
             const targets = new Array(10).fill(0);
@@ -213,6 +216,8 @@ const learning = async () => {
 
             NN.backpropagation(targets);
         }
+
+        count += 100;
 
         console.log(i);
         console.log(correct);
