@@ -1,11 +1,8 @@
 const fs = require("fs");
 const sharp = require("sharp");
 
-const path = "./neuro/images/50";
-const size = 50 * 50;
-
 // Получить массив чёрно-белых пикселей
-const getImageData = async (file) => {
+const getImageData = async (path, size, file) => {
     return new Promise(async (resolve, reject) => {
         try {
             const { data } = await sharp(path + "/" + file)
@@ -14,7 +11,7 @@ const getImageData = async (file) => {
 
             const pixels = [];
 
-            for (let i = 0; i < size; i += 3) {
+            for (let i = 0; i < size * size; i += 3) {
                 let value = 0;
                 for (let j = 0; j < 3; j++) {
                     value += data[i + j];
@@ -36,21 +33,28 @@ const getImageData = async (file) => {
 };
 
 // Получить матрицу картинок с пикселями
-const getImagesData = async () => {
+const getImagesData = async (size) => {
+    const path = "./neuro/images/" + size;
+
     const files = fs.readdirSync(path);
 
     const imagesData = await Promise.all(
-        files.map(getImageData)
+        files.map((file) => getImageData(path, size, file))
     );
 
     return imagesData;
 };
 
 // Записать матрицу картинок в JSON
-const writeImagesData = async () => {
-    const imagesData = await getImagesData();
+const writeImagesData = async (size) => {
+    const imagesData = await getImagesData(size);
 
-    fs.writeFileSync("./neuro/imagesData.json", JSON.stringify(imagesData));
+    if (!fs.existsSync("./neuro/data")) {
+        fs.mkdirSync("./neuro/data");
+    }
+
+    fs.writeFileSync(`./neuro/data/${size}.json`, JSON.stringify(imagesData));
 };
 
-writeImagesData();
+writeImagesData(28);
+writeImagesData(50);

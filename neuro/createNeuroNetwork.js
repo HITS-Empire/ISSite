@@ -130,7 +130,7 @@ class NeuralNetwork {
 
 // Создание нейросети и обучение её
 const learning = async () => {
-    const imagesData = require("./imagesData.json");
+    const imagesData = require("./data/50.json");
 
     const sigmoid = (x) => 1 / (1 + Math.exp(-x));
     const dsigmoid = (y) => y * (1 - y);
