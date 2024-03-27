@@ -1,3 +1,8 @@
+const fs = require("fs");
+
+// Путь для сохранения нейросети
+const path = "./public/neuro";
+
 // Слои нейронной сети
 class Layer {
     constructor(size, nextSize) {
@@ -27,12 +32,12 @@ class NeuralNetwork {
 
     // Функция для прямого алгоритма    
     feedForward(inputs) {
-        inputs.forEach((input, index) => this.layers[0].neurons[index] = input ? 1 : -1);
+        inputs.forEach((input, index) => this.layers[0].neurons[index] = input ? 1 : 0);
         
         for (let i = 1; i < this.layers.length; i++) {
             let l = this.layers[i - 1];
             let l1 = this.layers[i];
-            
+
             for (let j = 0; j < l1.size; j++) {
                 l1.neurons[j] = 0;
                 
@@ -101,105 +106,51 @@ class NeuralNetwork {
     }
 
     // Сохранить все веса нейронной сети в файл JSON
-    saveWeightsToFile(filename) {
-        const weightsToSave = this.layers.map(layer => layer.weights);
+    saveWeightsToFile(file) {
+        const weightsToSave = this.layers.map((layer) => layer.weights);
         const jsonWeights = JSON.stringify(weightsToSave);
 
-        fs.writeFileSync(filename, jsonWeights);
+        fs.writeFileSync(path + "/" + file, jsonWeights);
     }
 
-    saveNeuronsToFile(filename) {
-        const neuronsToSave = this.layers.map(layer => layer.neurons);
+    saveNeuronsToFile(file) {
+        const neuronsToSave = this.layers.map((layer) => layer.neurons);
         const jsonNeurons = JSON.stringify(neuronsToSave);
 
-        fs.writeFileSync(filename, jsonNeurons);
+        fs.writeFileSync(path + "/" + file, jsonNeurons);
     }
 
-    saveBiasesToFile(filename) {
-        const biasesToSave = this.layers.map(layer => layer.biases);
+    saveBiasesToFile(file) {
+        const biasesToSave = this.layers.map((layer) => layer.biases);
         const jsonBiases = JSON.stringify(biasesToSave);
 
-        fs.writeFileSync(filename, jsonBiases);
+        fs.writeFileSync(path + "/" + file, jsonBiases);
     }
 }
 
-const fs = require("fs");
-const sharp = require("sharp");
-
-const path = "./neuro/images/50";
-const size = 50 * 50;
-
-// Получить массив чёрно-белых пикселей
-const getImageData = async (file) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const { data } = await sharp(path + "/" + file)
-                .raw()
-                .toBuffer({ resolveWithObject: true });
-
-            const imageData = [];
-            imageData.push(file);
-            for (let i = 0; i < size; i += 3) {
-                let value = 0;
-                for (let j = 0; j < 3; j++) {
-                    value += data[i + j];
-                }
-                value /= 3;
-    
-                // True - белый, False - чёрный
-                imageData.push(value > 128);
-            }
-
-            resolve(imageData);
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-// Получить матрицу картинок с пикселями
-const getImagesData = async () => {
-    const files = fs.readdirSync(path);
-
-    const imagesData = await Promise.all(
-        files.map(getImageData)
-    );
-
-    return imagesData;
-};
-
 // Создание нейросети и обучение её
 const learning = async () => {
-    const imagesData = await getImagesData();
+    const imagesData = require("./imagesData.json");
 
-    const sigmoid = x => 1 / (1 + Math.exp(-x));
-    const dsigmoid = y => y * (1 - y);
+    const sigmoid = (x) => 1 / (1 + Math.exp(-x));
+    const dsigmoid = (y) => y * (1 - y);
 
-    const NN = new NeuralNetwork(0.001, sigmoid, dsigmoid, 2500, 512, 128, 32, 10);
+    const NN = new NeuralNetwork(0.01, sigmoid, dsigmoid, 2500, 1000, 200, 10);
 
-    const digits = [];
-
-    for (let i = 0; i < imagesData.length; i++) {
-        digits.push(parseInt(imagesData[i][0][10]));
-        imagesData[i] = imagesData[i].slice(1);
-    }
+    const digits = imagesData.map((imageData) => imageData.digit);
 
     // Количество эпох обучения
     const epochs = 600;
 
-    let count = 0;
-
     for (let i = 0; i < epochs; i++) {
         let correct = 0;
-        
-        for (let j = 0; j < 101; j++) {
-            let index = count + j;
 
-            const startDigit = digits[index];
+        for (let j = i * 100; j < i * 100 + 100; j++) {
+            const startDigit = digits[j];
             const targets = new Array(10).fill(0);
             targets[startDigit] = 1;
 
-            const output = NN.feedForward(imagesData[index]);
+            const output = NN.feedForward(imagesData[j].pixels);
 
             let endDigit = 0;
             let endDigitWeight = -1;
@@ -217,20 +168,21 @@ const learning = async () => {
             NN.backpropagation(targets);
         }
 
-        count += 100;
+        console.log(i, correct);
+    }
 
-        console.log(i);
-        console.log(correct);
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path);
     }
 
     // Сохранить веса
-    NN.saveWeightsToFile('./weights.json');
+    NN.saveWeightsToFile("weights.json");
 
     // Сохранить нейроны 
-    NN.saveNeuronsToFile('./neurons.json');
-    
+    NN.saveNeuronsToFile("neurons.json");
+
     // Сохранить биасы
-    NN.saveBiasesToFile('./biases.json');
+    NN.saveBiasesToFile("biases.json");
 };
 
 learning();
