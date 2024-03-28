@@ -206,7 +206,7 @@ export default function Field({
                 ) : 0,
                 zIndex: index + 3,
                 backgroundPosition: `${ant.leftIndent}% ${ant.topIndent}%`,
-                transition: processIsActive && "margin 0.4s"
+                transition: processIsActive && "margin 0.1s"
             }}
         />
     ));
