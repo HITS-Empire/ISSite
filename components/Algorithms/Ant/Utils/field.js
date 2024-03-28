@@ -1,4 +1,7 @@
-import { getRandomElement } from "../../../../utils/helpers";
+import {
+    getNearRandom,
+    getRandomElement
+} from "../../../../utils/helpers";
 
 // Стороны квадрата
 const sides = [
@@ -108,6 +111,7 @@ export function getAnts(field, colonyCell, population) {
                     colony: 0,
                     food: 0
                 },
+                intensity: 1,
                 memory: []
             }
         });
@@ -205,12 +209,37 @@ export function getPositionOnSide(position, look) {
     })[0];
 }
 
+// Положить феромон в ячейку
 export function putPheromoneInCell(cell, type, value) {
     const pheromone = cell.pheromone[type];
 
     pheromone.history.push(value);
 
     pheromone.amount = Math.min(Math.max(pheromone.amount + value, 0), 1);
+}
+
+// Получить значение феромона для "отложения"
+export function getNextPheromoneValue(behavior, type) {
+    let initial = 0.2; // Начальное значение
+    let step = Math.random() * 0.008; // Случайный шаг
+    let value;
+
+    if (type === "food") {
+        initial *= behavior.intensity;
+        step /= behavior.intensity;
+    }
+
+    if (!behavior.previosPheromone[type]) {
+        value = Math.random() * initial;
+    } else {
+        // Предыдущее значение, минус шаг испарения, минус случайная величина
+        value = Math.max(
+            behavior.previosPheromone[type] - step - 0.002,
+            0
+        );
+    }
+
+    return Math.min(value, behavior.pheromoneStorage[type]);
 }
 
 // Одна итерация муравьиной колонии
@@ -220,6 +249,8 @@ export function runColony({
     ants,
     setAnts,
 }) {
+    const factor = Math.pow(count, 8);
+
     // Феромоны улетучиваются на каждой итерации
     field.forEach((line) => line.forEach((cell) => {
         for (const type in cell.pheromone) {
@@ -229,7 +260,7 @@ export function runColony({
 
             pheromone.history = pheromone.history
                 .map((amount) => {
-                    amount -= 0.0003;
+                    amount -= 0.001;
 
                     if (amount > 0) {
                         sumOfAmount += amount;
@@ -253,29 +284,34 @@ export function runColony({
         if (ant.cell.type === 2) {
             ant.behavior.type = "findFood";
 
-            ant.behavior.pheromoneStorage.colony = Math.random() * 16;
+            ant.behavior.pheromoneStorage.colony = factor * getNearRandom();
             ant.behavior.pheromoneStorage.food = 0;
 
             ant.behavior.notFound.colony = 0;
             ant.behavior.notFound.food = 0;
-        } else if (ant.behavior.type === "chaos" && ant.cell.pheromone.colony.amount) {
-            ant.behavior.type = "goToColony";
+
+            ant.behavior.intensity = 1;
+        } else {
+            // Муравей наконец нашёл путь домой
+            if (ant.behavior.type === "chaos" && ant.cell.pheromone.colony.amount) {
+                ant.behavior.type = "goToColony";
+            }
+
+            // Муравей нашёл еду, нужно дать ему феромоны еды
+            if (ant.cell.food) {
+                ant.behavior.type = "goToColony";
+
+                ant.behavior.pheromoneStorage.colony = 0;
+                ant.behavior.previosPheromone.colony = 0;
+
+                ant.behavior.pheromoneStorage.food = ant.cell.food * factor * getNearRandom();
+                ant.behavior.intensity = 1 + ant.cell.food / 20;
+            }
         }
 
         // Положить нужные феромоны
         if (ant.behavior.pheromoneStorage.colony) {
-            let value;
-
-            if (!ant.behavior.previosPheromone.colony) {
-                value = Math.random() * 0.05;
-            } else {
-                // Предыдущее значение, минус шаг испарения, минус случайная величина
-                value = Math.max(
-                    ant.behavior.previosPheromone.colony - Math.random() * 0.005 - 0.0003,
-                    0
-                );
-            }
-            value = Math.min(value, ant.behavior.pheromoneStorage.colony);
+            const value = getNextPheromoneValue(ant.behavior, "colony");
 
             if (value) {
                 ant.behavior.pheromoneStorage.colony -= value;
@@ -290,6 +326,21 @@ export function runColony({
 
                 ant.behavior.pheromoneStorage.colony = 0;
                 ant.behavior.previosPheromone.colony = 0;
+            }
+        }
+        if (ant.behavior.pheromoneStorage.food) {
+            const value = getNextPheromoneValue(ant.behavior, "food");
+
+            if (value) {
+                ant.behavior.pheromoneStorage.food -= value;
+                ant.behavior.previosPheromone.food = value;
+
+                putPheromoneInCell(ant.cell, "food", value);
+            }
+
+            if (!value || !ant.behavior.pheromoneStorage.food) {
+                ant.behavior.pheromoneStorage.food = 0;
+                ant.behavior.previosPheromone.food = 0;
             }
         }
 
@@ -308,6 +359,17 @@ export function runColony({
 
         // Если муравей замурован, то ничего не делать
         if (!availableCells.length) return;
+
+        // Если муравей в тупике, то развернуть его
+        if (availableCells.length === 1) {
+            ant.position.x = 0.5;
+            ant.position.y = 0.5;
+        }
+
+        // С вероятностью 30% изменить взгляд муравья ("передумал")
+        if (Math.random < 0.3) {
+            ant.look = Math.random() * Math.PI * 2;
+        }
 
         // Следующий шаг (cell и position)
         let nextStep;
@@ -329,7 +391,7 @@ export function runColony({
                 }
     
                 // Случайный индекс, близкий к 0
-                const index = Math.floor((1 - Math.sin(Math.acos(Math.random()))) * attractiveCells.length);
+                const index = Math.floor((1 - getNearRandom()) * attractiveCells.length);
 
                 // Пойти в привлекательную ячейку
                 nextStep = {
@@ -343,17 +405,6 @@ export function runColony({
         }
 
         if (ant.behavior.type === "findFood" || ant.behavior.type === "chaos") {
-            // Если муравей в тупике, то развернуть его
-            if (availableCells.length === 1) {
-                ant.position.x = 0.5;
-                ant.position.y = 0.5;
-            }
-
-            // С вероятностью 30% изменить взгляд муравья ("передумал")
-            if (Math.random < 0.3) {
-                ant.look = Math.random() * Math.PI * 2;
-            }
-
             // Найти ячейку и позицию для следующего шага муравья
             while (!nextStep) {
                 let { x, y } = getPositionOnSide(ant.position, ant.look);

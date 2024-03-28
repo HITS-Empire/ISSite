@@ -1,3 +1,8 @@
+// Получить случайное число, близкое к 1
+export function getNearRandom() {
+    return Math.sin(Math.acos(Math.random()));
+}
+
 // Получить случайный элемент массива
 export function getRandomElement(array) {
     return array?.[Math.floor(Math.random() * array.length)];
