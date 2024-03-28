@@ -53,10 +53,10 @@ export default function Ant() {
         setProcessIsPaused(false);
     };
 
-    // При заходе пользователя установить поле размером 16 x 16 и добавить 1 муравья
+    // При заходе пользователя установить поле размером 16 x 16 и добавить 8 муравьёв
     useEffect(() => {
         setCount(16);
-        setPopulation(1);
+        setPopulation(8);
     }, []);
 
     // Получить новое поле при изменении размера
@@ -75,7 +75,7 @@ export default function Ant() {
     useEffect(() => {
         if (!processIsActive || processIsPaused) return;
 
-        const interval = setInterval(runColony, 20, {
+        const interval = setInterval(runColony, 50, {
             count,
             field,
             ants,
