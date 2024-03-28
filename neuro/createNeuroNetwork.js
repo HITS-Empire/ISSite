@@ -128,20 +128,8 @@ class NeuralNetwork {
     }
 }
 
-// Создание нейросети и обучение её
-const learning = async () => {
-    const imagesData = require("./data/50.json");
-
-    const sigmoid = (x) => 1 / (1 + Math.exp(-x));
-    const dsigmoid = (y) => y * (1 - y);
-
-    const NN = new NeuralNetwork(0.01, sigmoid, dsigmoid, 2500, 1000, 200, 10);
-
-    const digits = imagesData.map((imageData) => imageData.digit);
-
-    // Количество эпох обучения
-    const epochs = 600;
-
+// Обучить нейросеть по эпохам
+const goThroughEpochs = (NN, imagesData, digits, epochs) => {
     for (let i = 0; i < epochs; i++) {
         let correct = 0;
 
@@ -170,6 +158,23 @@ const learning = async () => {
 
         console.log(i, correct);
     }
+};
+
+// Создание нейросети и обучение её
+const learning = () => {
+    const sigmoid = (x) => 1 / (1 + Math.exp(-x));
+    const dsigmoid = (y) => y * (1 - y);
+
+    const NN = new NeuralNetwork(0.01, sigmoid, dsigmoid, 2500, 1000, 200, 10);
+
+    const imagesData = require("./data/50.json");
+
+    const digits = imagesData.map((imageData) => imageData.digit);
+
+    const epochs = 600; // Количество эпох обучения
+
+    goThroughEpochs(NN, imagesData, digits, epochs);
+    goThroughEpochs(NN, imagesData, digits, epochs);
 
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path);

@@ -3,6 +3,9 @@
 # картинки для нейросети
 /neuro/images
 
+# файлы нейросети
+/public/neuro*
+
 # dependencies
 /node_modules
 /.pnp
