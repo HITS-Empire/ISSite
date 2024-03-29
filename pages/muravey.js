@@ -75,7 +75,7 @@ export default function Ant() {
     useEffect(() => {
         if (!processIsActive || processIsPaused) return;
 
-        const interval = setInterval(runColony, 50, {
+        const interval = setInterval(runColony, 20, {
             count,
             field,
             ants,
