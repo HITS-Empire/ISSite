@@ -307,6 +307,13 @@ export function runColony({
                 ant.behavior.pheromoneStorage.food = ant.cell.food * factor * getNearRandom();
                 ant.behavior.intensity = 1 + ant.cell.food / 20;
             }
+
+            // Если муравей ищет еду и наткнулся на след от еды, то с шансом 50% последовать по нему
+            if (ant.behavior.type === "findFood" && ant.cell.pheromone.food.amount) {
+                if (Math.random() < 0.5) {
+                    ant.behavior.type = "goToFood";
+                }
+            }
         }
 
         // Положить нужные феромоны
@@ -401,6 +408,34 @@ export function runColony({
             } else {
                 // Не нашли колонию, а значит начинается хаос
                 ant.behavior.type = "chaos";
+            }
+        } else if (ant.behavior.type === "goToFood") {
+            // Отсортировать в порядке привлекательности
+            let attractiveCells = availableCells
+                .filter((cell) => cell.pheromone.food.amount)
+                .sort((firstCell, secondCell) => {
+                    return secondCell.pheromone.food.amount - firstCell.pheromone.food.amount;
+                });
+
+            if (attractiveCells.length) {
+                // Не ходить туда, где муравей был на прошлом ходе
+                if (attractiveCells.length > 1 && ant.behavior.memory.length === 2) {
+                    attractiveCells = attractiveCells.filter((cell) => (
+                        cell !== ant.behavior.memory[0]
+                    ));
+                }
+    
+                // Случайный индекс, близкий к 0
+                const index = Math.floor((1 - getNearRandom()) * attractiveCells.length);
+
+                // Пойти в привлекательную ячейку
+                nextStep = {
+                    cell: attractiveCells[index],
+                    position: { x: 0.5, y: 0.5 }
+                };
+            } else {
+                // Не нашли еду, а значит начать новый поиск еды
+                ant.behavior.type = "findFood";
             }
         }
 
