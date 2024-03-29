@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "convert": "node neuro/convert28to50.js",
-    "data": "node neuro/writeImagesData.js",
     "neuro": "node neuro/createNeuroNetwork.js",
     "lint": "next lint"
   },

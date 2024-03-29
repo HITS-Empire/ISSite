@@ -1,7 +1,54 @@
 const fs = require("fs");
+const sharp = require("sharp");
+
+// Получить массив чёрно-белых пикселей
+const getImageData = async (path, size, file) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { data } = await sharp(path + "/" + file)
+                .raw()
+                .toBuffer({ resolveWithObject: true });
+
+            const pixels = [];
+
+            for (let i = 0; i < size * size * 3; i += 3) {
+                let value = 0;
+                for (let j = 0; j < 3; j++) {
+                    value += data[i + j];
+                }
+                value /= 3;
+    
+                // True - белый, False - чёрный
+                pixels.push(value / 255);
+            }
+
+            resolve({
+                digit: Number(file[10]),
+                pixels
+            });
+        } catch (error) {
+            console.error("File: ", file);
+
+            reject(error);
+        }
+    });
+};
+
+// Получить матрицу картинок с пикселями
+const getImagesData = async (size) => {
+    const path = "./neuro/images/" + size;
+
+    const files = fs.readdirSync(path);
+
+    const imagesData = await Promise.all(
+        files.map((file) => getImageData(path, size, file))
+    );
+
+    return imagesData;
+};
 
 // Путь для сохранения нейросети
-const path = "./public/neuro";
+const path = "./neuro/out";
 
 // Слои нейронной сети
 class Layer {
@@ -32,8 +79,8 @@ class NeuralNetwork {
 
     // Функция для прямого алгоритма    
     feedForward(inputs) {
-        inputs.forEach((input, index) => this.layers[0].neurons[index] = input ? 1 : 0);
-        
+        this.layers[0].neurons = [...inputs];
+
         for (let i = 1; i < this.layers.length; i++) {
             let l = this.layers[i - 1];
             let l1 = this.layers[i];
@@ -56,7 +103,7 @@ class NeuralNetwork {
     // Обучение нейросети на основе алгоритма обратной ошибки
     backpropagation(targets) {
         let errors = new Array(this.layers[this.layers.length - 1].size);
-        
+
         for (let i = 0; i < this.layers[this.layers.length - 1].size; i++) {
             errors[i] = targets[i] - this.layers[this.layers.length - 1].neurons[i];
         }
@@ -65,10 +112,12 @@ class NeuralNetwork {
             let l = this.layers[k];
             let l1 = this.layers[k + 1];
 
+            let errorsNext = new Array(l.size).fill(0);
             let gradients = new Array(l1.size).fill(0);
             
             for (let i = 0; i < l1.size; i++) {
-                gradients[i] = errors[i] * this.derivative(this.layers[k + 1].neurons[i]) * this.learningRate;
+                gradients[i] = errors[i] * this.derivative(this.layers[k + 1].neurons[i]);
+                gradients[i] *= this.learningRate;
             }
             
             let deltas = new Array(l1.size).fill(0).map(() => new Array(l.size).fill(0));
@@ -78,17 +127,14 @@ class NeuralNetwork {
                     deltas[i][j] = gradients[i] * l.neurons[j];
                 }
             }
-            
-            let errorsNew = new Array(l.size).fill(0);
-            
             for (let i = 0; i < l.size; i++) {
                 for (let j = 0; j < l1.size; j++) {
-                    errorsNew[i] += l.weights[i][j] * errors[j];
+                    errorsNext[i] += l.weights[i][j] * errors[j];
                 }
             }
             
-            errors = errorsNew;
-            
+            errors = errorsNext;
+
             let weightsNew = new Array(l.weights.length).fill(0).map(() => new Array(l.weights[0].length).fill(0));
             
             for (let i = 0; i < l1.size; i++) {
@@ -96,7 +142,7 @@ class NeuralNetwork {
                     weightsNew[j][i] = l.weights[j][i] + deltas[i][j];
                 }
             }
-            
+
             l.weights = weightsNew;
             
             for (let i = 0; i < l1.size; i++) {
@@ -161,13 +207,13 @@ const goThroughEpochs = (NN, imagesData, digits, epochs) => {
 };
 
 // Создание нейросети и обучение её
-const learning = () => {
+const learning = async () => {
     const sigmoid = (x) => 1 / (1 + Math.exp(-x));
     const dsigmoid = (y) => y * (1 - y);
 
     const NN = new NeuralNetwork(0.01, sigmoid, dsigmoid, 2500, 1000, 200, 10);
 
-    const imagesData = require("./data/50.json");
+    const imagesData = await getImagesData(50);
 
     const digits = imagesData.map((imageData) => imageData.digit);
 
