@@ -28,7 +28,7 @@ export default function Field({
         const canvasX = x * (canvas.width / rect.width);
         const canvasY = y * (canvas.height / rect.height);
 
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.liceCap = "round";
         ctx.strokeStyle = "#bc88ff";
 
