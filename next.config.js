@@ -3,6 +3,7 @@
 const path = require('path');
 
 const nextConfig = {
+	compress: false,
     sassOptions: {
 		includePaths: [path.join(__dirname, "styles")],
 		prependData: `
