@@ -2,11 +2,14 @@ import { useState } from "react";
 import Button from "../../../Button";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
+import Input from "../../../Input";
 
 export default function Menu({
     canvas,
     ctx,
-    NN
+    NN,
+    correctDigit,
+    setCorrectDigit
 }) {
     const refreshCanvas = () => {
         setCondition(false);
@@ -15,6 +18,32 @@ export default function Menu({
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     }
+
+    // Получить правильную цифру
+    const getCorrectDigit = (event) => {
+        const value = event.target.value;
+
+        if (!/^\d*$/.test(value)) return;
+
+        setCorrectDigit(Math.min(Math.max(value, 0), 9));
+    }
+
+    // Изменить веса, если нейросеть не распознала цифру
+    const backpropagation = () => {
+        const targets = new Array(10).fill(0);
+        targets[correctDigit] = 1;
+
+        NN.backpropagation(targets);
+
+        // Сохранить веса
+        NN.saveWeightsToFile("weights.json");
+
+        // Сохранить нейроны 
+        NN.saveNeuronsToFile("neurons.json");
+
+        // Сохранить биасы
+        NN.saveBiasesToFile("biases.json");
+    } 
 
     const [condition, setCondition] = useState(false);
     const [digit, setDigit] = useState(0);
@@ -35,8 +64,6 @@ export default function Menu({
            value /= 3;
            pixels.push(value / 255);
         }
-
-        console.log(pixels);
         
         const output = NN.feedForward(pixels);
         
@@ -44,7 +71,7 @@ export default function Menu({
         let endDigitWeight = -1;
 
         for (let i = 0; i < 10; i++) {
-            if (output[i] > endDigitWeight) {
+            if (endDigitWeight < output[i]) {
                 endDigitWeight = output[i];
                 endDigit = i;
             }
@@ -75,12 +102,32 @@ export default function Menu({
                 </Button>
             </div>
 
-            {condition && (
-                <span className={style.status}>
-                    Вы ввели цифру: {digit}
-                </span>
-            )}
+            {condition &&  (
+                <>
+                    <span className={style.status}>
+                        Вы ввели цифру: {digit}
+                    </span>
 
+                    <div className={style.inputContainer}>
+                        <Input
+                            type="text"
+                            label="Введите правильную цифру"
+                            description="Введите правильную цифру"
+                            value={correctDigit}
+                            onChange={getCorrectDigit}
+                        />
+                    </div>
+
+                    <div className={style.buttonContainer}>
+                        <Button
+                            type="primary"
+                            onClick={backpropagation}
+                        >
+                            Изменить веса
+                        </Button>
+                    </div>
+                </>
+            )}
         </MenuWrapper>
     );
 }

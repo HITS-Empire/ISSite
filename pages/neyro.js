@@ -17,6 +17,9 @@ export default function Neuro() {
     const [canvas, setCanvas] = useState();
     const [ctx, setCtx] = useState();
 
+    // Правильная цифра, в случае если нейросеть не распознала цифру
+    const [correctDigit, setCorrectDigit] = useState();
+
     // Создать Canvas
     useEffect(() => {
         createCanvas({
@@ -33,6 +36,8 @@ export default function Neuro() {
                 canvas={canvas}
                 ctx={ctx}
                 NN={NN}
+                correctDigit={correctDigit}
+                setCorrectDigit={setCorrectDigit}
             />
 
             <Field
