@@ -25,14 +25,8 @@ export default function Menu({
 
         const pixels = [];
         
-        for (let i = 0; i < data.length; i += 4) {
-            let value = 0;
-            for (let j = 0; j < 3; j++) {
-                value += data[i];
-            }
-            value /= 3;
-
-            pixels.push(value / 255);
+        for (let i = 3; i < data.length; i += 4) {
+            pixels.push(data[i] / 255);
         }
 
         const output = NN.feedForward(pixels);

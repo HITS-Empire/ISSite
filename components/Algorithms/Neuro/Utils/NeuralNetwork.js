@@ -32,9 +32,8 @@ class NeuralNetwork {
 
     // Функция для прямого алгоритма    
     feedForward(inputs) {
-        inputs.forEach((input, index) => this.layers[0].neurons[index] = input ? 1 : 0);
-        
-        console.log(this.layers);
+        this.layers[0].neurons = [...inputs];
+
         for (let i = 1; i < this.layers.length; i++) {
             let l = this.layers[i - 1];
             let l1 = this.layers[i];
