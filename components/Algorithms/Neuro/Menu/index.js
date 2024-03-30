@@ -3,6 +3,9 @@ import Button from "../../../Button";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
 import Input from "../../../Input";
+import { 
+    backpropagation, feedForward, saveWeightsToFile, saveBiasesToFile, saveNeuronsToFile 
+} from "../Utils/NeuralNetwork";
 
 export default function Menu({
     canvas,
@@ -13,6 +16,7 @@ export default function Menu({
 }) {
     const refreshCanvas = () => {
         setCondition(false);
+        setCorrectDigit();
 
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -29,20 +33,20 @@ export default function Menu({
     }
 
     // Изменить веса, если нейросеть не распознала цифру
-    const backpropagation = () => {
+    const newBackpropagation = () => {
         const targets = new Array(10).fill(0);
         targets[correctDigit] = 1;
 
-        NN.backpropagation(targets);
+        NN = backpropagation(NN, targets);
 
         // Сохранить веса
-        NN.saveWeightsToFile("weights.json");
+        saveWeightsToFile(NN, "weights.json");
 
         // Сохранить нейроны 
-        NN.saveNeuronsToFile("neurons.json");
+        saveNeuronsToFile(NN, "neurons.json");
 
         // Сохранить биасы
-        NN.saveBiasesToFile("biases.json");
+        saveBiasesToFile(NN, "biases.json");
     } 
 
     const [condition, setCondition] = useState(false);
@@ -63,7 +67,7 @@ export default function Menu({
             pixels.push(value / 255);
         }
         
-        const output = NN.feedForward(pixels);
+        const output = feedForward(NN, pixels);
         
         let endDigit = 0;
         let endDigitWeight = -1;
@@ -119,7 +123,7 @@ export default function Menu({
                     <div className={style.buttonContainer}>
                         <Button
                             type="primary"
-                            onClick={backpropagation}
+                            onClick={newBackpropagation}
                         >
                             Изменить веса
                         </Button>
