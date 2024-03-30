@@ -26,9 +26,13 @@ export default function Menu({
         const pixels = [];
         
         for (let i = 0; i < data.length; i += 4) {
-            const value = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            let value = 0;
+            for (let j = 0; j < 3; j++) {
+                value += data[i];
+            }
+            value /= 3;
 
-            pixels.push(Number(value > 0));
+            pixels.push(value / 255);
         }
 
         const output = NN.feedForward(pixels);
