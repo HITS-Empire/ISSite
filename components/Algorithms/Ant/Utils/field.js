@@ -108,8 +108,8 @@ export function getAnts(field, colonyCell, population) {
                     colony: 0,
                     food: 0
                 },
-                intensity: 1,
-                memory: []
+                memory: [],
+                initialFoodPheromone: 0
             }
         });
     }
@@ -217,31 +217,76 @@ export function putPheromoneInCell(ant, type, value) {
     pheromone.amount = Math.min(Math.max(pheromone.amount + value, 0), 1);
 }
 
-// Получить значение феромона для "отложения"
-export function getNextPheromoneValue(count, behavior, type) {
-    let initial = 0.2 * (1 + count / 128); // Начальное значение
-    let step = Math.random() * 0.008; // Случайный шаг
+// Получить значение феромона для "отложения" и положить его
+export function getNextPheromoneValueAndPutIt(ant, initialPheromone, type) {
     let value;
 
-    if (type === "food") {
-        initial *= behavior.intensity;
-        step /= behavior.intensity;
-    }
-
-    if (!behavior.previosPheromone[type]) {
-        value = Math.random() * initial;
+    if (!ant.behavior.previosPheromone[type]) {
+        // Первый феромон
+        value = Math.min(
+            Math.random() * initialPheromone,
+            ant.behavior.pheromoneStorage[type]
+        );
     } else {
-        // Предыдущее значение, минус шаг испарения, минус случайная величина
+        const step = Math.random() * 0.001; // Случайный шаг
+
+        // Предыдущее значение, минус случайная величина, минус 2 шага испарения
         value = Math.max(
-            behavior.previosPheromone[type] - step - 0.001,
+            ant.behavior.previosPheromone[type] - step - 0.002,
             0
         );
     }
 
     if (value <= 0.002) value = 0;
 
-    return Math.min(value, behavior.pheromoneStorage[type]);
+    value = Math.min(value, ant.behavior.pheromoneStorage[type]);
+
+    if (value) {
+        ant.behavior.pheromoneStorage[type] -= value;
+        ant.behavior.previosPheromone[type] = value;
+
+        putPheromoneInCell(ant, type, value);
+    }
+
+    return value;
 }
+
+// Сходить в наиболее привлекательную клетку
+const goToAttractiveCell = (ant, availableCells, type) => {
+    // Отсортировать в порядке привлекательности
+    let attractiveCells = availableCells
+        .filter((cell) => {
+            return cell.pheromone[type].history.find((record) => (
+                ant.behavior.follow === record.ant
+            ));
+        })
+        .sort((firstCell, secondCell) => {
+            return (
+                secondCell.pheromone[type].history.find((record) => (
+                    ant.behavior.follow === record.ant
+                )).value
+            ) - (
+                firstCell.pheromone[type].history.find((record) => (
+                    ant.behavior.follow === record.ant
+                )).value
+            );
+        });
+
+    if (attractiveCells.length) {
+        // Не ходить туда, где муравей был на прошлом ходе
+        if (attractiveCells.length > 1 && ant.behavior.memory.length === 2) {
+            attractiveCells = attractiveCells.filter((cell) => (
+                cell !== ant.behavior.memory[0]
+            ));
+        }
+
+        // Пойти в привлекательную ячейку
+        return {
+            cell: attractiveCells[0],
+            position: { x: 0.5, y: 0.5 }
+        };
+    }
+};
 
 // Одна итерация муравьиной колонии
 export function runColony({
@@ -250,7 +295,14 @@ export function runColony({
     ants,
     setAnts,
 }) {
-    const factor = Math.pow(count, 8);
+    // Периметр поля
+    const perimeter = count * 4;
+
+    // Начальное значение феромона колонии
+    const initialColonyPheromone = 0.002 * perimeter;
+
+    // Максимальная сумма феромонов, нужная муравьям, чтобы перейти из угла в противоположный угол
+    const maxColonyPheromoneStorage = (initialColonyPheromone + 0.002) / 2 * perimeter;
 
     // Феромоны улетучиваются на каждой итерации
     field.forEach((line) => line.forEach((cell) => {
@@ -286,10 +338,10 @@ export function runColony({
             ant.behavior.type = "findFood";
             ant.behavior.follow = null;
 
-            ant.behavior.pheromoneStorage.colony = factor * getNearRandom();
+            ant.behavior.pheromoneStorage.colony = maxColonyPheromoneStorage * Math.random();
             ant.behavior.pheromoneStorage.food = 0;
 
-            ant.behavior.intensity = 1;
+            ant.behavior.initialFoodPheromone = 0;
         } else {
             // Муравей наконец нашёл путь домой
             if (ant.behavior.type === "chaos" && ant.cell.pheromone.colony.amount) {
@@ -305,13 +357,21 @@ export function runColony({
                 ant.behavior.pheromoneStorage.colony = 0;
                 ant.behavior.previosPheromone.colony = 0;
 
-                ant.behavior.pheromoneStorage.food = ant.cell.food * factor * getNearRandom();
-                ant.behavior.intensity = 1 + ant.cell.food / 20;
+                // Коэффициент еды
+                const foodAppeal = 1 + ant.cell.food / 64;
+
+                // Начальное значение феромона еды
+                ant.behavior.initialFoodPheromone = foodAppeal * 0.002 * perimeter;
+
+                // Максимальная сумма феромонов
+                const maxPheromoneFoodStorage = (ant.behavior.initialFoodPheromone + 0.002) / 2 * perimeter;
+
+                ant.behavior.pheromoneStorage.food = maxPheromoneFoodStorage * Math.random();
             }
 
             // Если муравей ищет еду и наткнулся на след от еды, то с каким-то шансом последовать по нему
             if (ant.behavior.type === "findFood" && ant.cell.pheromone.food.amount) {
-                if (Math.random() < ant.cell.pheromone.food.amount * 0.5) {
+                if (0.02 * Math.random() * perimeter < ant.cell.pheromone.food.amount) {
                     ant.behavior.type = "goToFood";
                     ant.behavior.follow = ant.cell.pheromone.food.history[0].ant
                 }
@@ -320,14 +380,7 @@ export function runColony({
 
         // Положить нужные феромоны
         if (ant.behavior.pheromoneStorage.colony) {
-            const value = getNextPheromoneValue(count, ant.behavior, "colony");
-
-            if (value) {
-                ant.behavior.pheromoneStorage.colony -= value;
-                ant.behavior.previosPheromone.colony = value;
-
-                putPheromoneInCell(ant, "colony", value);
-            }
+            const value = getNextPheromoneValueAndPutIt(ant, initialColonyPheromone, "colony");
 
             // "Силы" закончились, нужно вернуться домой
             if (!value || !ant.behavior.pheromoneStorage.colony) {
@@ -339,18 +392,13 @@ export function runColony({
             }
         }
         if (ant.behavior.pheromoneStorage.food) {
-            const value = getNextPheromoneValue(count, ant.behavior, "food");
-
-            if (value) {
-                ant.behavior.pheromoneStorage.food -= value;
-                ant.behavior.previosPheromone.food = value;
-
-                putPheromoneInCell(ant, "food", value);
-            }
+            const value = getNextPheromoneValueAndPutIt(ant, ant.behavior.initialFoodPheromone, "food");
 
             if (!value || !ant.behavior.pheromoneStorage.food) {
                 ant.behavior.pheromoneStorage.food = 0;
                 ant.behavior.previosPheromone.food = 0;
+
+                ant.behavior.initialFoodPheromone = 0;
             }
         }
 
@@ -385,78 +433,23 @@ export function runColony({
         let nextStep;
 
         if (ant.behavior.type === "goToColony") {
-            // Отсортировать в порядке привлекательности
-            let attractiveCells = availableCells
-                .filter((cell) => {
-                    return cell.pheromone.colony.history.find((record) => (
-                        ant.behavior.follow === record.ant
-                    ));
-                })
-                .sort((firstCell, secondCell) => {
-                    return (
-                        secondCell.pheromone.colony.history.find((record) => (
-                            ant.behavior.follow === record.ant
-                        )).value
-                    ) - (
-                        firstCell.pheromone.colony.history.find((record) => (
-                            ant.behavior.follow === record.ant
-                        )).value
-                    );
-                });
+            nextStep = goToAttractiveCell(ant, availableCells, "colony");
 
-            if (attractiveCells.length) {
-                // Не ходить туда, где муравей был на прошлом ходе
-                if (attractiveCells.length > 1 && ant.behavior.memory.length === 2) {
-                    attractiveCells = attractiveCells.filter((cell) => (
-                        cell !== ant.behavior.memory[0]
-                    ));
-                }
-
-                // Пойти в привлекательную ячейку
-                nextStep = {
-                    cell: attractiveCells[0],
-                    position: { x: 0.5, y: 0.5 }
-                };
-            } else {
-                // Не нашли колонию, а значит начинается хаос
+            // Не нашли колонию, а значит начинается хаос
+            if (!nextStep) {
                 ant.behavior.type = "chaos";
             }
         } else if (ant.behavior.type === "goToFood") {
-            // Отсортировать в порядке привлекательности
-            let attractiveCells = availableCells
-                .filter((cell) => {
-                    return cell.pheromone.food.history.find((record) => (
-                        ant.behavior.follow === record.ant
-                    ));
-                })
-                .sort((firstCell, secondCell) => {
-                    return (
-                        secondCell.pheromone.food.history.find((record) => (
-                            ant.behavior.follow === record.ant
-                        )).value
-                    ) - (
-                        firstCell.pheromone.food.history.find((record) => (
-                            ant.behavior.follow === record.ant
-                        )).value
-                    );
-                });
-
-            if (attractiveCells.length) {
-                // Не ходить туда, где муравей был на прошлом ходе
-                if (attractiveCells.length > 1 && ant.behavior.memory.length === 2) {
-                    attractiveCells = attractiveCells.filter((cell) => (
-                        cell !== ant.behavior.memory[0]
-                    ));
-                }
-
-                // Пойти в привлекательную ячейку
-                nextStep = {
-                    cell: attractiveCells[0],
-                    position: { x: 0.5, y: 0.5 }
-                };
-            } else {
-                // Не нашли еду, а значит начать новый поиск еды
+            // С шансом 5% сойти с пути
+            if (Math.random() < 0.05) {
                 ant.behavior.type = "findFood";
+            } else {
+                nextStep = goToAttractiveCell(ant, availableCells, "food");
+
+                // Не нашли еду, а значит начать новый поиск еды
+                if (!nextStep) {
+                    ant.behavior.type = "findFood";
+                }
             }
         }
 
