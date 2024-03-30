@@ -4,20 +4,31 @@ import Canvas from "../../../Canvas";
 export default function Field({
     canvasRef,
     canvas,
-    ctx
+    ctx,
+    setCondition,
+    setCorrectDigit,
+    setIsFixed
 }) {
     // Активно ли рисование
     const [processIsActive, setProcessIsActive] = useState(false);
 
     const isPainting = () => {
-        ctx.fillStyle = "#bc88ff";
-
+        setCondition(false);
+        setCorrectDigit(0);
+        setIsFixed(false);
         setProcessIsActive(true);
-    }
+    };
 
     const endPainting = () => {
         setProcessIsActive(false);
-    }
+    };
+
+    const drawCircle = (x, y, radius, opacity) => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+    };
 
     const painting = (e) => {
         if (!processIsActive) return;
@@ -29,10 +40,10 @@ export default function Field({
         const canvasX = x * (canvas.width / rect.width);
         const canvasY = y * (canvas.height / rect.height);
 
-        ctx.beginPath();
-        ctx.arc(canvasX, canvasY, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
+        drawCircle(canvasX, canvasY, 3, 0.01);
+        drawCircle(canvasX, canvasY, 2, 0.05);
+        drawCircle(canvasX, canvasY, 1, 0.5);
+    };
 
     return (
         <Canvas
