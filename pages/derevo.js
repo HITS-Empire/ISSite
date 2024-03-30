@@ -1,10 +1,14 @@
+import { useState } from "react";
+import Menu from "../components/Algorithms/DecisionTree/Menu";
+import Screen from "../components/Algorithms/DecisionTree/Screen";
 import {
     predict,
     getDecisionTree
 } from "../components/Algorithms/DecisionTree/Utils/decisionTree";
-import Component from "../components/Algorithms/DecisionTree/Component";
 
 export default function DecisionTree() {
+    const [maxDepth, setMaxDepth] = useState(128);
+
     const trainingSet = [
         { hairLength: 0, weight: 250, age: 36, sex: "male" },
         { hairLength: 10, weight: 150, age: 34, sex: "female" },
@@ -27,6 +31,13 @@ export default function DecisionTree() {
     console.log(result);
 
     return (
-        <Component />
+        <>
+            <Menu
+                maxDepth={maxDepth}
+                setMaxDepth={setMaxDepth}
+            />
+
+            <Screen />
+        </>
     );
 }

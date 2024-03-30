@@ -1,0 +1,11 @@
+.screen {
+    display: flex;
+    margin-right: auto;
+    flex-flow: row wrap;
+    height: 90%;
+    aspect-ratio: 1.4 / 1;
+    position: relative;
+    border-radius: 12px;
+    background: $gradientWhite50;
+    overflow: hidden;
+}
