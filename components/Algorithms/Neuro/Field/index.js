@@ -10,7 +10,7 @@ export default function Field({
     const [processIsActive, setProcessIsActive] = useState(false);
 
     const isPainting = () => {
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "#bc88ff";
 
         setProcessIsActive(true);
     }
@@ -30,7 +30,7 @@ export default function Field({
         const canvasY = y * (canvas.height / rect.height);
 
         ctx.beginPath();
-        ctx.arc(canvasX, canvasY, 1, 0, Math.PI * 2);
+        ctx.arc(canvasX, canvasY, 1.5, 0, Math.PI * 2);
         ctx.fill();
     }
 
