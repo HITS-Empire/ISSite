@@ -10,8 +10,6 @@ export default function Field({
     const [processIsActive, setProcessIsActive] = useState(false);
 
     const isPainting = () => {
-        ctx.fillStyle = "#bc88ff";
-
         setProcessIsActive(true);
     }
 
@@ -28,9 +26,15 @@ export default function Field({
 
         const canvasX = x * (canvas.width / rect.width);
         const canvasY = y * (canvas.height / rect.height);
-
+        
+        ctx.fillStyle = "rgb(188, 136, 255, 0.07)"
         ctx.beginPath();
-        ctx.arc(canvasX, canvasY, 1.5, 0, Math.PI * 2);
+        ctx.arc(canvasX, canvasY, 3.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "rgb(188, 136, 255, 1)";
+        ctx.beginPath();
+        ctx.arc(canvasX, canvasY, 1.0, 0, Math.PI * 2);
         ctx.fill();
     }
 

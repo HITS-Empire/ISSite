@@ -24,11 +24,20 @@ export default function Menu({
         const data = image.data;
 
         const pixels = [];
-        
-        for (let i = 3; i < data.length; i += 4) {
-            pixels.push(data[i] / 255);
+        for (let i = 0; i < data.length; i += 4) {
+            let value = 0;
+            const alpha = data[i + 3];
+
+            for (let j = 0; j < 3; j++) {
+                value += data[i + j] * (alpha / 255);
+           }
+
+           value /= 3;
+           pixels.push(value / 255);
         }
 
+        console.log(pixels);
+        
         const output = NN.feedForward(pixels);
         
         let endDigit = 0;
