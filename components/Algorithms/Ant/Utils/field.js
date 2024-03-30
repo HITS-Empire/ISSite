@@ -295,14 +295,18 @@ export function runColony({
     ants,
     setAnts,
 }) {
-    // Периметр поля
+    // Периметр и полупериметр поля
     const perimeter = count * 4;
+    const semiperimeter = count * 2;
 
     // Начальное значение феромона колонии
     const initialColonyPheromone = 0.002 * perimeter;
 
     // Максимальная сумма феромонов, нужная муравьям, чтобы перейти из угла в противоположный угол
     const maxColonyPheromoneStorage = (initialColonyPheromone + 0.002) / 2 * perimeter;
+
+    // Коэффициент выравнивания еды с размером поля
+    const foodAligningCoefficient = 1 + 256 - semiperimeter;
 
     // Феромоны улетучиваются на каждой итерации
     field.forEach((line) => line.forEach((cell) => {
@@ -338,7 +342,7 @@ export function runColony({
             ant.behavior.type = "findFood";
             ant.behavior.follow = null;
 
-            ant.behavior.pheromoneStorage.colony = maxColonyPheromoneStorage * Math.random();
+            ant.behavior.pheromoneStorage.colony = maxColonyPheromoneStorage * getNearRandom();
             ant.behavior.pheromoneStorage.food = 0;
 
             ant.behavior.initialFoodPheromone = 0;
@@ -361,17 +365,18 @@ export function runColony({
                 const foodAppeal = 1 + ant.cell.food / 64;
 
                 // Начальное значение феромона еды
-                ant.behavior.initialFoodPheromone = foodAppeal * 0.002 * perimeter;
+                ant.behavior.initialFoodPheromone = foodAppeal * 0.002 * semiperimeter;
 
                 // Максимальная сумма феромонов
-                const maxPheromoneFoodStorage = (ant.behavior.initialFoodPheromone + 0.002) / 2 * perimeter;
+                const maxPheromoneFoodStorage = (ant.behavior.initialFoodPheromone + 0.002) / 2 * semiperimeter;
 
-                ant.behavior.pheromoneStorage.food = maxPheromoneFoodStorage * Math.random();
+                ant.behavior.pheromoneStorage.food = maxPheromoneFoodStorage * getNearRandom();
             }
 
             // Если муравей ищет еду и наткнулся на след от еды, то с каким-то шансом последовать по нему
             if (ant.behavior.type === "findFood" && ant.cell.pheromone.food.amount) {
-                if (0.02 * Math.random() * perimeter < ant.cell.pheromone.food.amount) {
+                // Коэффициент выравнивания еды с размером поля
+                if (Math.random() < foodAligningCoefficient * ant.cell.pheromone.food.amount) {
                     ant.behavior.type = "goToFood";
                     ant.behavior.follow = ant.cell.pheromone.food.history[0].ant
                 }
