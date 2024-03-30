@@ -10,12 +10,13 @@ export default function Field({
     const [processIsActive, setProcessIsActive] = useState(false);
 
     const isPainting = () => {
+        ctx.fillStyle = "white";
+
         setProcessIsActive(true);
     }
 
     const endPainting = () => {
         setProcessIsActive(false);
-        ctx.beginPath();
     }
 
     const painting = (e) => {
@@ -28,14 +29,9 @@ export default function Field({
         const canvasX = x * (canvas.width / rect.width);
         const canvasY = y * (canvas.height / rect.height);
 
-        ctx.lineWidth = 2;
-        ctx.liceCap = "round";
-        ctx.strokeStyle = "#bc88ff";
-
-        ctx.lineTo(canvasX, canvasY);
-        ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(canvasX, canvasY);
+        ctx.arc(canvasX, canvasY, 1, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     return (
@@ -44,6 +40,7 @@ export default function Field({
             onMouseDown={isPainting}
             onMouseMove={painting}
             onMouseUp={endPainting}
+            onMouseOut={endPainting}
         />
     );
 }
