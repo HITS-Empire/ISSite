@@ -17,8 +17,7 @@ const getImageData = async (path, size, file) => {
                     value += data[i + j];
                 }
                 value /= 3;
-    
-                // True - белый, False - чёрный
+
                 pixels.push(value / 255);
             }
 
@@ -67,13 +66,16 @@ class NeuralNetwork {
         this.activation = activation;
         this.derivative = derivative;
         this.layers = [];
+
+        const newWeights = require("./out/weights.json");
+        const newBiases = require("./out/biases.json");
         
         sizes.forEach((size, i) => {
             let nextSize = i < sizes.length - 1 ? sizes[i + 1] : 0;
             this.layers.push(new Layer(size, nextSize));
-            
-            this.layers[i].biases = this.layers[i].biases.map(() => Math.random() * 2.0 - 1.0);
-            this.layers[i].weights = this.layers[i].weights.map(() => new Array(nextSize).fill(0).map(() => Math.random() * 2.0 - 1.0));
+
+            this.layers[i].weights = newWeights[i];
+            this.layers[i].biases = newBiases[i];
         });
     }
 
