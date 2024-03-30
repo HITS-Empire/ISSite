@@ -9,7 +9,10 @@
 
 .status {
     font-size: 20px;
-    color: $success;
+
+    &.success {
+        color: $success;
+    }
 }
 
 .inputContainer {

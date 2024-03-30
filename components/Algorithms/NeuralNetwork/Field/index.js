@@ -4,12 +4,18 @@ import Canvas from "../../../Canvas";
 export default function Field({
     canvasRef,
     canvas,
-    ctx
+    ctx,
+    setCondition,
+    setCorrectDigit,
+    setIsFixed
 }) {
     // Активно ли рисование
     const [processIsActive, setProcessIsActive] = useState(false);
 
     const isPainting = () => {
+        setCondition(false);
+        setCorrectDigit(0);
+        setIsFixed(false);
         setProcessIsActive(true);
     };
 
