@@ -9,6 +9,23 @@
     z-index: 0;
 }
 
+label {
+	&.button {
+		display: flex;
+		align-items: center;
+		height: 28px;
+		cursor: pointer;
+
+		&[active="false"] {
+			cursor: default;
+		}
+	}
+}
+
+.input {
+	display: none;
+}
+
 .primary {
     color: $white;
 
@@ -50,7 +67,7 @@
         }
     }
 
-	&:disabled {
+	&[active="false"], &:disabled {
         &::before, &::after {
 			opacity: 0;
 		}
@@ -101,7 +118,7 @@
         }
     }
 
-	&:disabled {
+	&[active="false"], &:disabled {
         &::before, &::after {
 			opacity: 0;
 		}

@@ -1,0 +1,123 @@
+.screenContainer {
+    display: flex;
+    margin-right: auto;
+    flex-flow: row wrap;
+    height: 90%;
+    aspect-ratio: 1.4 / 1;
+    position: relative;
+    border-radius: 12px;
+    background: $gradientWhite50;
+}
+
+.screen {
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+    margin: 4px;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+    &::-webkit-scrollbar-thumb {
+        border-radius: 12px;
+        background: $gradientWhite50;
+        cursor: pointer;
+    }
+    &::-webkit-scrollbar-corner {
+        display: none;
+    }
+
+    ul {
+        padding: 20px 0 0;
+        position: relative;
+        display: flex;
+
+        ul {
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 50%;
+                border-left: 1px solid $lightPurple;
+                width: 0;
+                height: 20px;
+            }
+        }
+    }
+
+    li {
+        white-space: nowrap;
+        float: left;
+        text-align: center;
+        list-style-type: none;
+        position: relative;
+        padding: 20px 5px 0 5px;
+
+        &.category {
+            margin: auto;
+
+            span {
+                background: $gradientWhite50;
+            }
+        }
+
+        &::before, &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 50%;
+            border-top: 1px solid $purple;
+            width: 50%;
+            height: 20px;
+        }
+        &::after {
+            right: auto;
+            left: 50%;
+            border-left: 1px solid $purple;
+        }
+
+        span {
+            background: $gradientWhite75;
+            padding: 7px 10px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+            border-radius: 5px;
+
+            &.no {
+                background-color: $error;
+            }
+            &.yes {
+                background-color: $success;
+            }
+        }
+
+        &:first-child {
+            &::before {
+                border: 0 none;
+            }
+            &::after {
+                border-radius: 5px 0 0 0;
+            }
+        }
+
+        &:last-child {
+            &::before {
+                border-right: 1px solid $purple;
+                border-radius: 0 5px 0 0;
+            }
+            &::after {
+                border: 0 none;
+            }
+        }
+
+        &:only-child {
+            padding-top: 0;
+
+            &::after, &::before {
+                display: none;
+            }
+        }
+    }
+}
