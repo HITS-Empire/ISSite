@@ -35,7 +35,11 @@ export default function DecisionTree() {
         }
 
         setDecisionTree(
-            getDecisionTree({ trainingSet, requiredAttribute })
+            getDecisionTree({
+                trainingSet,
+                requiredAttribute,
+                maxDepth
+            })
         );
     }, [trainingSet]);
 
@@ -60,7 +64,9 @@ export default function DecisionTree() {
                 setPrediction={setPrediction}
             />
 
-            <Screen />
+            <Screen
+                decisionTree={decisionTree}
+            />
         </>
     );
 }

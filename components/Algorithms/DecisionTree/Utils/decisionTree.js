@@ -1,7 +1,7 @@
 // Доступные предикаты
 const predicates = {
-    "==": (a, b) => a == b,
-    ">=": (a, b) => a >= b
+    "=": (a, b) => a == b,
+    ">": (a, b) => a > b
 };
 
 // Предсказать событие
@@ -122,7 +122,7 @@ export function getDecisionTree({
             if (attribute === requiredAttribute) continue;
 
             const pivot = field[attribute];
-            const predicateName = typeof pivot === "number" ? ">=" : "==";
+            const predicateName = typeof pivot === "number" ? ">" : "=";
             const attributePredicatePivot = attribute + predicateName + pivot;
 
             if (alreadyChecked[attributePredicatePivot]) continue;

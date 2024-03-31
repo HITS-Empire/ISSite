@@ -81,6 +81,8 @@ export function convertCSVtoJSON(content) {
     const array = [];
 
     for (let i = 1; i < lines.length; i++) {
+        if (!lines[i]) continue;
+
         const values = splitCSVLine(lines[i]);
         const row = {};
 
