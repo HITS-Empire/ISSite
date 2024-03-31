@@ -2,11 +2,55 @@ import Input from "../../../Input";
 import Button from "../../../Button";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
+import { readFile } from "../../../../utils/helpers";
+import { convertCSVtoJSON } from "../../../../utils/helpers";
 
 export default function Menu({
     maxDepth,
-    setMaxDepth
+    setMaxDepth,
+    trainingSet,
+    setTrainingSet,
+    setFieldForPrediction,
+    prediction,
+    setPrediction
 }) {
+    // Добавить новую обучающую выборку
+    const addTrainingSet = async (event) => {
+        const file = event.target.files[0];
+        event.target.value = null;
+
+        try {
+            const content = await readFile(file);
+            const array = convertCSVtoJSON(content);
+
+            setTrainingSet(array);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // Добавить данные для предсказания
+    const addFieldForPrediction = async (event) => {
+        const file = event.target.files[0];
+        event.target.value = null;
+
+        try {
+            const content = await readFile(file);
+            const array = convertCSVtoJSON(content);
+
+            setFieldForPrediction(array[0]);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // Очистить дерево решений
+    const clearDecisionTree = () => {
+        setTrainingSet();
+        setFieldForPrediction();
+        setPrediction();
+    };
+
     // Изменить максимальную глубину дерева
     const changeMaxDepthEvent = (event) => {
         const value = event.target.value;
@@ -28,7 +72,7 @@ export default function Menu({
                     label="Максимальная глубина дерева"
                     description="Введите максимальную глубину дерева"
                     value={maxDepth}
-                    disabled={false}
+                    disabled={trainingSet}
                     onChange={changeMaxDepthEvent}
                 />
             </div>
@@ -36,30 +80,45 @@ export default function Menu({
             <div className={style.buttonContainer}>
                 <Button
                     type="primary"
-                    onClick={() => {}}
-                    disabled={false}
+                    onChange={addTrainingSet}
+                    disabled={trainingSet}
+                    input={{
+                        id: "addTrainingSet",
+                        type: "file",
+                        accept: ".csv"
+                    }}
                 >
                     Добавить выборку
                 </Button>
 
                 <Button
                     type="soft"
-                    onClick={() => {}}
-                    disabled={false}
+                    onChange={addFieldForPrediction}
+                    disabled={!trainingSet}
+                    input={{
+                        id: "addFieldForPrediction",
+                        type: "file",
+                        accept: ".csv"
+                    }}
                 >
-                    Предсказать
+                    Предсказать событие
                 </Button>
             </div>
 
             <div className={style.buttonContainer}>
                 <Button
                     type="soft"
-                    onClick={() => {}}
-                    disabled={false}
+                    onClick={clearDecisionTree}
                 >
-                    Перезагрузить
+                    Очистить
                 </Button>
             </div>
+
+            {prediction && (
+                <span className={style.status}>
+                    Результат: {prediction}
+                </span>
+            )}
         </MenuWrapper>
     );
 }

@@ -5,9 +5,14 @@
 
 .buttonContainer {
     display: flex;
-    margin: 20px 0 10px;
+    margin: 20px 0;
 
-    button {
+    button, label {
         margin-right: 10px;
     }
+}
+
+.status {
+    font-size: 20px;
+    color: $success;
 }
