@@ -67,6 +67,9 @@ export default function Menu({
         clustersWARD.forEach((cluster) => {
             const color = randomColor();
 
+            cluster.points.sort(( first, second) => first.x - second.x);
+            cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
+
             ctx.globalAlpha = 0;
             ctx.beginPath();
             ctx.strokeStyle = color;
@@ -83,7 +86,10 @@ export default function Menu({
 
         clustersDBSCAN.forEach((cluster) => {
             const color = randomColor();
-            
+
+            cluster.points.sort(( first, second) => first.x - second.x);
+            cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
+
             ctx.beginPath();
             ctx.strokeStyle = color;
             ctx.lineWidth = 5;
