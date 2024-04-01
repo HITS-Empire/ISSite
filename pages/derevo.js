@@ -19,12 +19,32 @@ export default function DecisionTree() {
     // Дерево решений
     const [decisionTree, setDecisionTree] = useState();
 
+    // Запущен ли процесс поиска решения
+    const [processIsActive, setProcessIsActive] = useState(false);
+
     // Результат предсказания
     const [prediction, setPrediction] = useState();
 
+    // Пройденные узлы (для очистки)
+    const [passedNodes, setPassedNodes] = useState([]);
+
+    // Отступы для перемещения
+    const [marginTop, setMarginTop] = useState(0);
+    const [marginLeft, setMarginLeft] = useState(0);
+
+    // Сохранённые отступы
+    const [savedMarginTop, setSavedMarginTop] = useState(0);
+    const [savedMarginLeft, setSavedMarginLeft] = useState(0);
+
     // Перезагрузить дерево решений при изменении выборки
     useEffect(() => {
-        if (!trainingSet) return setDecisionTree();
+        if (!trainingSet) {
+            setDecisionTree();
+            setPrediction();
+            setPassedNodes([]);
+
+            return;
+        }
 
         let requiredAttribute;
 
@@ -43,14 +63,52 @@ export default function DecisionTree() {
         );
     }, [trainingSet]);
 
+    // Сбросить состояния поля при перезагрузке дерева
+    useEffect(() => {
+        if (decisionTree) return;
+
+        setMarginLeft(0);
+        setMarginTop(0);
+        setSavedMarginLeft(0);
+        setSavedMarginTop(0);
+    }, [decisionTree]);
+
     // Сделать предсказание
     useEffect(() => {
         if (!fieldForPrediction) return;
 
-        setPrediction(
-            predict(decisionTree, fieldForPrediction)
-        );
+        setProcessIsActive(true);
+
+        // Убрать выделение у предыдущего предсказания
+        passedNodes.forEach((decisionNode) => {
+            if (decisionNode.category) {
+                decisionNode.categoryHighlighted = false;
+            } else {
+                decisionNode.questionHighlighted = false;
+                decisionNode.yesHighlighted = false;
+                decisionNode.noHighlighted = false;
+            }
+        });
+
+        predict(decisionTree, fieldForPrediction, {
+            setDecisionTree,
+            setProcessIsActive,
+            setPrediction,
+            setPassedNodes,
+            marginTop,
+            setMarginTop,
+            marginLeft,
+            setMarginLeft
+        });
     }, [fieldForPrediction]);
+
+    // Сохранить отступы после завершения процесса
+    useEffect(() => {
+        if (processIsActive) return;
+
+        setSavedMarginTop(marginTop);
+        setSavedMarginLeft(marginLeft);
+    }, [processIsActive]);
 
     return (
         <>
@@ -60,12 +118,22 @@ export default function DecisionTree() {
                 trainingSet={trainingSet}
                 setTrainingSet={setTrainingSet}
                 setFieldForPrediction={setFieldForPrediction}
+                processIsActive={processIsActive}
                 prediction={prediction}
                 setPrediction={setPrediction}
             />
 
             <Screen
                 decisionTree={decisionTree}
+                processIsActive={processIsActive}
+                marginTop={marginTop}
+                setMarginTop={setMarginTop}
+                marginLeft={marginLeft}
+                setMarginLeft={setMarginLeft}
+                savedMarginTop={savedMarginTop}
+                setSavedMarginTop={setSavedMarginTop}
+                savedMarginLeft={savedMarginLeft}
+                setSavedMarginLeft={setSavedMarginLeft}
             />
         </>
     );

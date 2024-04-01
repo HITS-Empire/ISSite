@@ -1,3 +1,5 @@
+import { sleep } from "../../../../utils/helpers";
+
 // Доступные предикаты
 const predicates = {
     "=": (a, b) => a == b,
@@ -5,25 +7,65 @@ const predicates = {
 };
 
 // Предсказать событие
-export function predict(decisionTree, field) {
-    let attribute, value, predicate, pivot;
+export async function predict(decisionTree, field, {
+    setDecisionTree,
+    setProcessIsActive,
+    setPrediction,
+    setPassedNodes,
+    marginTop,
+    setMarginTop,
+    marginLeft,
+    setMarginLeft
+}) {
+    let decisionNode = decisionTree;
+    const passedNodes = [];
+
+    const parentElement = document.getElementById("tree");
+    const {
+        x: parentX,
+        y: parentY,
+        width: parentWidth,
+        height: parentHeight
+    } = parentElement.getBoundingClientRect();
 
     while (true) {
-        if (decisionTree.category) {
-            return decisionTree.category;
+        const childElement = document.getElementById(decisionNode.id);
+        const { x, y, width, height } = childElement.getBoundingClientRect();
+
+        marginTop = marginTop + parentY - y + (parentHeight - height) / 2;
+        marginLeft = marginLeft + parentX - x + (parentWidth - width) / 2;
+
+        setMarginTop(marginTop);
+        setMarginLeft(marginLeft);
+
+        passedNodes.push(decisionNode);
+
+        if (decisionNode.category) {
+            decisionNode.categoryHighlighted = true;
+
+            setDecisionTree({ ...decisionTree });
+            await sleep(400);
+
+            setProcessIsActive(false);
+            setPrediction(decisionNode.category);
+            setPassedNodes(passedNodes);
+
+            return;
         }
 
-        attribute = decisionTree.attribute;
-        value = field[attribute];
+        const { predicate, pivot } = decisionNode;
+        decisionNode.questionHighlighted = true;
 
-        predicate = decisionTree.predicate;
-        pivot = decisionTree.pivot;
-
-        if (predicate(value, pivot)) {
-            decisionTree = decisionTree.match;
+        if (predicate(field[decisionNode.attribute], pivot)) {
+            decisionNode.yesHighlighted = true;
+            decisionNode = decisionNode.match;
         } else {
-            decisionTree = decisionTree.notMatch;
+            decisionNode.noHighlighted = true;
+            decisionNode = decisionNode.notMatch;
         }
+
+        setDecisionTree({ ...decisionTree });
+        await sleep(400);
     }
 }
 
@@ -93,14 +135,17 @@ export function getSplit(set, attribute, predicate, pivot) {
 export function getDecisionTree({
     trainingSet,
     requiredAttribute,
-    maxDepth = 128
+    maxDepth = 128,
+    currentNode = { id: 0 }
 }) {
     const minItemsCount = 1;
     const entropyThrehold = 0.01;
 
     if (maxDepth === 0 || trainingSet.length <= minItemsCount) {
         return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute)
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
         };
     }
 
@@ -108,7 +153,9 @@ export function getDecisionTree({
 
     if (initialEntropy <= entropyThrehold) {
         return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute)
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
         };
     }
 
@@ -154,7 +201,9 @@ export function getDecisionTree({
 
     if (!bestSplit.gain) {
         return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute)
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
         };
     }
 
@@ -164,12 +213,14 @@ export function getDecisionTree({
     const matchSubTree = getDecisionTree({
         trainingSet: bestSplit.match,
         requiredAttribute,
-        maxDepth
+        maxDepth,
+        currentNode
     });
     const notMatchSubTree = getDecisionTree({
         trainingSet: bestSplit.notMatch,
         requiredAttribute,
-        maxDepth
+        maxDepth,
+        currentNode
     });
 
     return {
@@ -180,6 +231,10 @@ export function getDecisionTree({
         match: matchSubTree,
         notMatch: notMatchSubTree,
         matchedCount: bestSplit.match.length,
-        notMatchedCount: bestSplit.notMatch.length
+        notMatchedCount: bestSplit.notMatch.length,
+        questionHighlighted: false,
+        yesHighlighted: false,
+        noHighlighted: false,
+        id: `node-${currentNode.id++}`
     };
 }
