@@ -54,6 +54,10 @@ export default function Menu({
         return `rgb(${red}, ${green}, ${blue})`;
     }
     
+    const distance = (first, second) => {
+        return Math.sqrt(Math.pow(first.x - second.x, 2) + Math.pow(first.y - second.y, 2));
+    }
+
     // Раскрашивание кластеров
     const drawClusters = () => {
         const clustersKMeans = kMeans(points, clusters);
@@ -67,8 +71,24 @@ export default function Menu({
         clustersWARD.forEach((cluster) => {
             const color = randomColor();
 
-            cluster.points.sort(( first, second) => first.x - second.x);
-            cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
+            cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
+            for (let i = 0; i < cluster.points.length - 1; i++) {
+                let minDistance = 100000000;
+                let indexMinDistance = -1;
+                
+                for (let j = i + 1; j < cluster.points.length; j++) {
+                    if (distance(cluster.points[i], cluster.points[j]) < minDistance) {
+                        minDistance = distance(cluster.points[i], cluster.points[j]);
+                        indexMinDistance = j;
+                    }
+                }
+                
+                if (indexMinDistance !== -1) {
+                    const temp = cluster.points[i + 1];
+                    cluster.points[i + 1] = cluster.points[indexMinDistance];
+                    cluster.points[indexMinDistance] = temp; 
+                }
+            }
 
             ctx.globalAlpha = 0;
             ctx.beginPath();
@@ -87,8 +107,46 @@ export default function Menu({
         clustersDBSCAN.forEach((cluster) => {
             const color = randomColor();
 
-            cluster.points.sort(( first, second) => first.x - second.x);
-            cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
+            //cluster.points.sort(( first, second) => first.x - second.x);
+            //cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
+
+            //cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
+            /*
+            cluster.points.sort((a, b) => {
+                let sumDistancesA = 0;
+                let sumDistancesB = 0;
+
+                for (let i = 0; i < cluster.points.length; i++) {
+                    if (cluster.points[i] !== a) {
+                        sumDistancesA += distance(a, cluster.points[i]);
+                    }
+                    if (cluster.points[i] !== b) {
+                        sumDistancesB += distance(b, cluster.points[i]);
+                    }
+                }
+
+                return sumDistancesA - sumDistancesB;
+            });
+            */
+
+            for (let i = 0; i < cluster.points.length - 1; i++) {
+                let minDistance = 100000000;
+                let indexMinDistance = -1;
+                
+                for (let j = i + 1; j < cluster.points.length; j++) {
+                    if (distance(cluster.points[i], cluster.points[j]) < minDistance) {
+                        minDistance = distance(cluster.points[i], cluster.points[j]);
+                        indexMinDistance = j;
+                    }
+                }
+                
+                if (indexMinDistance !== -1) {
+                    const temp = cluster.points[i + 1];
+                    cluster.points[i + 1] = cluster.points[indexMinDistance];
+                    cluster.points[indexMinDistance] = temp; 
+                }
+            }
+            //cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
 
             ctx.beginPath();
             ctx.strokeStyle = color;
