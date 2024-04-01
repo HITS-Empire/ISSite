@@ -1,22 +1,33 @@
+import {
+    feedForward,
+    backpropagation,
+    saveBiasesToFile,
+    saveWeightsToFile,
+    saveNeuronsToFile 
+} from "../Utils/neuralNetwork";
 import { useState } from "react";
+import Input from "../../../Input";
 import Button from "../../../Button";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
-import Input from "../../../Input";
-import { 
-    backpropagation, feedForward, saveWeightsToFile, saveBiasesToFile, saveNeuronsToFile 
-} from "../Utils/NeuralNetwork";
 
 export default function Menu({
+    NN,
     canvas,
     ctx,
-    NN,
+    condition,
+    setCondition,
     correctDigit,
-    setCorrectDigit
+    setCorrectDigit,
+    isFixed,
+    setIsFixed
 }) {
+    const [digit, setDigit] = useState(0);
+
     const refreshCanvas = () => {
         setCondition(false);
-        setCorrectDigit();
+        setCorrectDigit(0);
+        setIsFixed(false);
 
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -29,30 +40,28 @@ export default function Menu({
 
         if (!/^\d*$/.test(value)) return;
 
-        setCorrectDigit(Math.min(Math.max(value, 0), 9));
+        setCorrectDigit(Number(value));
     }
 
     // Изменить веса, если нейросеть не распознала цифру
     const newBackpropagation = () => {
+        setIsFixed(true);
+
         const targets = new Array(10).fill(0);
         targets[correctDigit] = 1;
 
-        NN = backpropagation(NN, targets);
+        backpropagation(NN, targets);
 
-        // Сохранить веса
+        return; // Не сохранять, пока не исправлена запись в файл
+
         saveWeightsToFile(NN, "weights.json");
-
-        // Сохранить нейроны 
         saveNeuronsToFile(NN, "neurons.json");
-
-        // Сохранить биасы
         saveBiasesToFile(NN, "biases.json");
-    } 
-
-    const [condition, setCondition] = useState(false);
-    const [digit, setDigit] = useState(0);
+    }
 
     const getDigit = () => {
+        setIsFixed(false);
+
         let image = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = image.data;
 
@@ -81,6 +90,7 @@ export default function Menu({
 
         setCondition(true);
         setDigit(endDigit);
+        setCorrectDigit(endDigit);
     };
 
     return (
@@ -93,7 +103,7 @@ export default function Menu({
                     type="primary"
                     onClick={getDigit}
                 >
-                    Запустить
+                    Распознать
                 </Button>
 
                 <Button
@@ -104,31 +114,39 @@ export default function Menu({
                 </Button>
             </div>
 
-            {condition &&  (
-                <>
-                    <span className={style.status}>
-                        Вы ввели цифру: {digit}
-                    </span>
+            <span className={`${style.status} ${condition ? style.success : ""}`}>
+                {condition ? (
+                    `Вы нарисовали цифру: ${digit}`
+                ) : (
+                    "Нарисуйте Вашу цифру!"
+                )}
+            </span>
 
-                    <div className={style.inputContainer}>
-                        <Input
-                            type="text"
-                            label="Введите правильную цифру"
-                            description="Введите правильную цифру"
-                            value={correctDigit}
-                            onChange={getCorrectDigit}
-                        />
-                    </div>
+            <div className={style.inputContainer}>
+                <Input
+                    type="text"
+                    label="Правильная цифра"
+                    description="Введите правильную цифру"
+                    value={correctDigit}
+                    onChange={getCorrectDigit}
+                    disabled={!condition || isFixed}
+                />
+            </div>
 
-                    <div className={style.buttonContainer}>
-                        <Button
-                            type="primary"
-                            onClick={newBackpropagation}
-                        >
-                            Изменить веса
-                        </Button>
-                    </div>
-                </>
+            <div className={style.buttonContainer}>
+                <Button
+                    type="primary"
+                    onClick={newBackpropagation}
+                    disabled={!condition || isFixed}
+                >
+                    Исправить
+                </Button>
+            </div>
+
+            {isFixed && (
+                <span className={`${style.status} ${style.success}`}>
+                    Спасибо, Ваше мнение учтено!
+                </span>
             )}
         </MenuWrapper>
     );

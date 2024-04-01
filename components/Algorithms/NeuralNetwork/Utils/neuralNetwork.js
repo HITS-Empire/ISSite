@@ -1,4 +1,37 @@
+// На будущее: решить проблему с fs...
+const fs = null;
+
+// Функции для нахождения производных
+const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 const dsigmoid = (y) => y * (1 - y);
+
+// Получить нейросеть
+export function getNeuralNetwork(learningRate, ...sizes) {
+    const weights = require("/neuro/out/weights.json");
+    const biases = require("/neuro/out/biases.json");
+
+    const layers = sizes.map((size, i) => {
+        const nextLayerSize = i < sizes.length - 1 ? sizes[i + 1] : 0;
+
+        return {
+            size,
+            neurons: new Array(size).fill(0),
+            biases: new Array(size).fill(0),
+            weights: new Array(size).fill(0).map(() => new Array(nextLayerSize).fill(0))
+        };
+    });
+
+    layers.forEach((layer, index) => {
+        layer.weights = weights[index];
+        layer.biases = biases[index];
+    });
+
+    return {
+        learningRate,
+        layers
+    };
+}
+
 // Обучение нейросети на основе алгоритма обратной ошибки
 export function backpropagation(NN, targets) {
     let errors = new Array(NN.layers[NN.layers.length - 1].size);
@@ -49,12 +82,9 @@ export function backpropagation(NN, targets) {
         }
         NN.layers[k] = l;
     }
-
-    return NN;
 }
 
-const sigmoid = (x) => 1 / (1 + Math.exp(-x));
-// Функция для прямого алгоритма    
+// Прямой просмотр нейронов
 export function feedForward(NN, inputs) {
     NN.layers[0].neurons = [...inputs];
 
@@ -80,7 +110,7 @@ export function feedForward(NN, inputs) {
 // Путь для сохранения нейросети
 const path = "./neuro/out";
 
-// Сохранить все веса нейронной сети в файл JSON
+// Сохранить все веса сети в файл JSON
 export function saveWeightsToFile(NN, file) {
     const weightsToSave = NN.layers.map((layer) => layer.weights);
     const jsonWeights = JSON.stringify(weightsToSave);
@@ -88,6 +118,7 @@ export function saveWeightsToFile(NN, file) {
     fs.writeFileSync(path + "/" + file, jsonWeights);
 }
 
+// Сохранить все нейроны сети в файл JSON
 export function saveNeuronsToFile(NN, file) {
     const neuronsToSave = NN.layers.map((layer) => layer.neurons);
     const jsonNeurons = JSON.stringify(neuronsToSave);
@@ -95,6 +126,7 @@ export function saveNeuronsToFile(NN, file) {
     fs.writeFileSync(path + "/" + file, jsonNeurons);
 }
 
+// Сохранить все биасы сети в файл JSON
 export function saveBiasesToFile(NN, file) {
     const biasesToSave = NN.layers.map((layer) => layer.biases);
     const jsonBiases = JSON.stringify(biasesToSave);

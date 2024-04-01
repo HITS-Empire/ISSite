@@ -1,58 +1,34 @@
 import { createCanvas } from "../utils/canvas";
 import { useRef, useState, useEffect } from "react";
-import Menu from "../components/Algorithms/Neuro/Menu";
-import Field from "../components/Algorithms/Neuro/Field";
+import Menu from "../components/Algorithms/NeuralNetwork/Menu";
+import Field from "../components/Algorithms/NeuralNetwork/Field";
+import {
+    getNeuralNetwork
+} from "../components/Algorithms/NeuralNetwork/Utils/neuralNetwork";
 
-// Создать слои нейронной сети
-function createLayer(size, nextLayerSize) {
+// Создать нейросеть на этапе билда приложения
+export const getStaticProps = () => {
+    const NN = getNeuralNetwork(0.01, 2500, 1000, 200, 10);
+
     return {
-        size: size,
-        neurons: new Array(size).fill(0),
-        biases: new Array(size).fill(0),
-        weights: new Array(size).fill(0).map(() => new Array(nextLayerSize).fill(0))
+        props: { NN }
     };
 }
 
-// Создать нейронную сеть
-function createNeuralNetwork(learningRate, ...sizes) {
-    const layers = sizes.map((size, i) => {
-        let nextLayerSize = i < sizes.length - 1 ? sizes[i + 1] : 0;
-        return createLayer(size, nextLayerSize);
-    });
-
-    return {
-        learningRate: learningRate,
-        layers: layers
-    };
-}
-
-export async function getStaticProps() {
-    const newWeights = require("/neuro/out/weights.json");
-    const newBiases = require("/neuro/out/biases.json");
-
-    let NN = createNeuralNetwork(0.01, 2500, 1000, 200, 10);
-
-    NN.layers.forEach((layer, index) => {
-        layer.weights = newWeights[index];
-        layer.biases = newBiases[index];
-    });
-
-    return {
-        props: {
-            NN,
-        },
-    };
-}   
-
-export default function Neuro({NN}) {
+export default function NeuralNetwork({ NN }) {
     const canvasRef = useRef();
 
     // Состояния для работы с Canvas
     const [canvas, setCanvas] = useState();
     const [ctx, setCtx] = useState();
 
+    const [condition, setCondition] = useState(false);
+
     // Правильная цифра, в случае если нейросеть не распознала цифру
-    const [correctDigit, setCorrectDigit] = useState();
+    const [correctDigit, setCorrectDigit] = useState(0);
+
+    // Исправлена нейросеть или нет
+    const [isFixed, setIsFixed] = useState(false);
 
     // Создать Canvas
     useEffect(() => {
@@ -66,18 +42,25 @@ export default function Neuro({NN}) {
 
     return (
         <>
-            <Menu 
+            <Menu
+                NN={NN}
                 canvas={canvas}
                 ctx={ctx}
-                NN={NN}
+                condition={condition}
+                setCondition={setCondition}
                 correctDigit={correctDigit}
                 setCorrectDigit={setCorrectDigit}
+                isFixed={isFixed}
+                setIsFixed={setIsFixed}
             />
 
             <Field
                 canvasRef={canvasRef}
                 canvas={canvas}
                 ctx={ctx}
+                setCondition={setCondition}
+                setCorrectDigit={setCorrectDigit}
+                setIsFixed={setIsFixed}
             />
         </>
     );
