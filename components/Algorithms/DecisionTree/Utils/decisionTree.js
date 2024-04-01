@@ -1,3 +1,5 @@
+import { sleep } from "../../../../utils/helpers";
+
 // Доступные предикаты
 const predicates = {
     "=": (a, b) => a == b,
@@ -5,23 +7,33 @@ const predicates = {
 };
 
 // Предсказать событие
-export function predict(decisionNode, field) {
+export async function predict(decisionTree, field, {
+    setDecisionTree,
+    setProcessIsActive,
+    setPrediction,
+    setPassedNodes
+}) {
+    let decisionNode = decisionTree;
     const passedNodes = [];
 
     while (true) {
+        // Задержка в 100мс перед переходом на новый узел
+        await sleep(100);
+
         passedNodes.push(decisionNode);
 
         if (decisionNode.category) {
             decisionNode.categoryHighlighted = true;
 
-            return {
-                prediction: decisionNode.category,
-                passedNodes
-            };
+            setProcessIsActive(false);
+            setPrediction(decisionNode.category);
+            setPassedNodes(passedNodes);
+
+            setDecisionTree({ ...decisionTree });
+            return;
         }
 
         const { predicate, pivot } = decisionNode;
-
         decisionNode.questionHighlighted = true;
 
         if (predicate(field[decisionNode.attribute], pivot)) {
@@ -31,6 +43,8 @@ export function predict(decisionNode, field) {
             decisionNode.noHighlighted = true;
             decisionNode = decisionNode.notMatch;
         }
+
+        setDecisionTree({ ...decisionTree });
     }
 }
 

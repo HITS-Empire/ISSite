@@ -19,6 +19,9 @@ export default function DecisionTree() {
     // Дерево решений
     const [decisionTree, setDecisionTree] = useState();
 
+    // Запущен ли процесс поиска решения
+    const [processIsActive, setProcessIsActive] = useState(false);
+
     // Результат предсказания
     const [prediction, setPrediction] = useState();
 
@@ -56,6 +59,8 @@ export default function DecisionTree() {
     useEffect(() => {
         if (!fieldForPrediction) return;
 
+        setProcessIsActive(true);
+
         // Убрать выделение у предыдущего предсказания
         passedNodes.forEach((decisionNode) => {
             if (decisionNode.category) {
@@ -67,13 +72,12 @@ export default function DecisionTree() {
             }
         });
 
-        const {
-            prediction: newPrediction,
-            passedNodes: newPassedNodes
-        } = predict(decisionTree, fieldForPrediction);
-
-        setPrediction(newPrediction);
-        setPassedNodes(newPassedNodes);
+        predict(decisionTree, fieldForPrediction, {
+            setDecisionTree,
+            setProcessIsActive,
+            setPrediction,
+            setPassedNodes
+        });
     }, [fieldForPrediction]);
 
     return (
@@ -84,6 +88,7 @@ export default function DecisionTree() {
                 trainingSet={trainingSet}
                 setTrainingSet={setTrainingSet}
                 setFieldForPrediction={setFieldForPrediction}
+                processIsActive={processIsActive}
                 prediction={prediction}
                 setPrediction={setPrediction}
             />

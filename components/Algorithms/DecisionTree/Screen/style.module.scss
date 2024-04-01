@@ -78,6 +78,7 @@
                 font-weight: 500;
                 display: inline-block;
                 border-radius: 5px;
+                transition: box-shadow 0.2s ease;
                 z-index: 0;
     
                 &.no {

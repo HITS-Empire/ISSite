@@ -11,6 +11,7 @@ export default function Menu({
     trainingSet,
     setTrainingSet,
     setFieldForPrediction,
+    processIsActive,
     prediction,
     setPrediction
 }) {
@@ -94,7 +95,7 @@ export default function Menu({
                 <Button
                     type="soft"
                     onChange={addFieldForPrediction}
-                    disabled={!trainingSet}
+                    disabled={!trainingSet || processIsActive}
                     input={{
                         id: "addFieldForPrediction",
                         type: "file",
@@ -109,6 +110,7 @@ export default function Menu({
                 <Button
                     type="soft"
                     onClick={clearDecisionTree}
+                    disabled={processIsActive}
                 >
                     Очистить
                 </Button>
