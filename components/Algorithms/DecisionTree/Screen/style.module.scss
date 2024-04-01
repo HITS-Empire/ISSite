@@ -18,6 +18,10 @@
         height: 100%;
         z-index: 1;
         cursor: pointer;
+
+        &[active="false"] {
+            pointer-events: none;
+        }
     }
 
     .tree {

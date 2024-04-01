@@ -11,25 +11,45 @@ export async function predict(decisionTree, field, {
     setDecisionTree,
     setProcessIsActive,
     setPrediction,
-    setPassedNodes
+    setPassedNodes,
+    marginTop,
+    setMarginTop,
+    marginLeft,
+    setMarginLeft
 }) {
     let decisionNode = decisionTree;
     const passedNodes = [];
 
+    const parentElement = document.getElementById("tree");
+    const {
+        x: parentX,
+        y: parentY,
+        width: parentWidth,
+        height: parentHeight
+    } = parentElement.getBoundingClientRect();
+
     while (true) {
-        // Задержка в 100мс перед переходом на новый узел
-        await sleep(100);
+        const childElement = document.getElementById(decisionNode.id);
+        const { x, y, width, height } = childElement.getBoundingClientRect();
+
+        marginTop = marginTop + parentY - y + (parentHeight - height) / 2;
+        marginLeft = marginLeft + parentX - x + (parentWidth - width) / 2;
+
+        setMarginTop(marginTop);
+        setMarginLeft(marginLeft);
 
         passedNodes.push(decisionNode);
 
         if (decisionNode.category) {
             decisionNode.categoryHighlighted = true;
 
+            setDecisionTree({ ...decisionTree });
+            await sleep(400);
+
             setProcessIsActive(false);
             setPrediction(decisionNode.category);
             setPassedNodes(passedNodes);
 
-            setDecisionTree({ ...decisionTree });
             return;
         }
 
@@ -45,6 +65,7 @@ export async function predict(decisionTree, field, {
         }
 
         setDecisionTree({ ...decisionTree });
+        await sleep(400);
     }
 }
 
@@ -114,7 +135,8 @@ export function getSplit(set, attribute, predicate, pivot) {
 export function getDecisionTree({
     trainingSet,
     requiredAttribute,
-    maxDepth = 128
+    maxDepth = 128,
+    currentNode = { id: 0 }
 }) {
     const minItemsCount = 1;
     const entropyThrehold = 0.01;
@@ -122,7 +144,8 @@ export function getDecisionTree({
     if (maxDepth === 0 || trainingSet.length <= minItemsCount) {
         return {
             category: getMostFrequentValue(trainingSet, requiredAttribute),
-            categoryHighlighted: false
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
         };
     }
 
@@ -131,7 +154,8 @@ export function getDecisionTree({
     if (initialEntropy <= entropyThrehold) {
         return {
             category: getMostFrequentValue(trainingSet, requiredAttribute),
-            categoryHighlighted: false
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
         };
     }
 
@@ -178,7 +202,8 @@ export function getDecisionTree({
     if (!bestSplit.gain) {
         return {
             category: getMostFrequentValue(trainingSet, requiredAttribute),
-            categoryHighlighted: false
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
         };
     }
 
@@ -188,12 +213,14 @@ export function getDecisionTree({
     const matchSubTree = getDecisionTree({
         trainingSet: bestSplit.match,
         requiredAttribute,
-        maxDepth
+        maxDepth,
+        currentNode
     });
     const notMatchSubTree = getDecisionTree({
         trainingSet: bestSplit.notMatch,
         requiredAttribute,
-        maxDepth
+        maxDepth,
+        currentNode
     });
 
     return {
@@ -207,6 +234,7 @@ export function getDecisionTree({
         notMatchedCount: bestSplit.notMatch.length,
         questionHighlighted: false,
         yesHighlighted: false,
-        noHighlighted: false
+        noHighlighted: false,
+        id: `node-${currentNode.id++}`
     };
 }

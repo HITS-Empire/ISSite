@@ -28,6 +28,14 @@ export default function DecisionTree() {
     // Пройденные узлы (для очистки)
     const [passedNodes, setPassedNodes] = useState([]);
 
+    // Отступы для перемещения
+    const [marginTop, setMarginTop] = useState(0);
+    const [marginLeft, setMarginLeft] = useState(0);
+
+    // Сохранённые отступы
+    const [savedMarginTop, setSavedMarginTop] = useState(0);
+    const [savedMarginLeft, setSavedMarginLeft] = useState(0);
+
     // Перезагрузить дерево решений при изменении выборки
     useEffect(() => {
         if (!trainingSet) {
@@ -55,6 +63,16 @@ export default function DecisionTree() {
         );
     }, [trainingSet]);
 
+    // Сбросить состояния поля при перезагрузке дерева
+    useEffect(() => {
+        if (decisionTree) return;
+
+        setMarginLeft(0);
+        setMarginTop(0);
+        setSavedMarginLeft(0);
+        setSavedMarginTop(0);
+    }, [decisionTree]);
+
     // Сделать предсказание
     useEffect(() => {
         if (!fieldForPrediction) return;
@@ -76,9 +94,21 @@ export default function DecisionTree() {
             setDecisionTree,
             setProcessIsActive,
             setPrediction,
-            setPassedNodes
+            setPassedNodes,
+            marginTop,
+            setMarginTop,
+            marginLeft,
+            setMarginLeft
         });
     }, [fieldForPrediction]);
+
+    // Сохранить отступы после завершения процесса
+    useEffect(() => {
+        if (processIsActive) return;
+
+        setSavedMarginTop(marginTop);
+        setSavedMarginLeft(marginLeft);
+    }, [processIsActive]);
 
     return (
         <>
@@ -95,6 +125,15 @@ export default function DecisionTree() {
 
             <Screen
                 decisionTree={decisionTree}
+                processIsActive={processIsActive}
+                marginTop={marginTop}
+                setMarginTop={setMarginTop}
+                marginLeft={marginLeft}
+                setMarginLeft={setMarginLeft}
+                savedMarginTop={savedMarginTop}
+                setSavedMarginTop={setSavedMarginTop}
+                savedMarginLeft={savedMarginLeft}
+                setSavedMarginLeft={setSavedMarginLeft}
             />
         </>
     );

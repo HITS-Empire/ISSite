@@ -1,19 +1,20 @@
+import { useState } from "react";
 import style from "./style.module.scss";
-import { useState, useEffect } from "react";
 
 export default function Screen({
-    decisionTree
+    decisionTree,
+    processIsActive,
+    marginTop,
+    setMarginTop,
+    marginLeft,
+    setMarginLeft,
+    savedMarginTop,
+    setSavedMarginTop,
+    savedMarginLeft,
+    setSavedMarginLeft
 }) {
     // Стартовая точка перемещения
     const [moveScreenStartPoint, setMoveScreenStartPoint] = useState();
-
-    // Отступы для перемещения
-    const [marginTop, setMarginTop] = useState(0);
-    const [marginLeft, setMarginLeft] = useState(0);
-
-    // Сохранённые отступы
-    const [savedMarginTop, setSavedMarginTop] = useState(0);
-    const [savedMarginLeft, setSavedMarginLeft] = useState(0);
 
     // Начать перемещение экрана
     const moveScreenStart = (event) => {
@@ -44,6 +45,7 @@ export default function Screen({
         if (decisionNode.category) {
             const categoryComponent = (
                 <span
+                    id={decisionNode.id}
                     className={decisionNode.categoryHighlighted ? style.highlighted : ""}
                 >
                     {decisionNode.category}
@@ -61,6 +63,7 @@ export default function Screen({
 
         const questionComponent = (
             <span
+                id={decisionNode.id}
                 className={decisionNode.questionHighlighted ? style.highlighted : ""}
             >
                 {decisionNode.attribute} {decisionNode.predicateName} {decisionNode.pivot}
@@ -102,32 +105,24 @@ export default function Screen({
         );
     };
 
-    // Сбросить состояния поля при перезагрузке дерева
-    useEffect(() => {
-        if (decisionTree) return;
-
-        setMarginLeft(0);
-        setMarginTop(0);
-        setSavedMarginLeft(0);
-        setSavedMarginTop(0);
-    }, [decisionTree]);
-
     // Визуализация дерева решений
     const decisionTreeComponent = decisionTree && getDecisionTreeComponent(decisionTree);
 
     return (
-        <div className={style.screen}>
+        <div id="tree" className={style.screen}>
             <div
                 className={style.handler}
                 onMouseDown={moveScreenStart}
                 onMouseUp={moveScreenEnd}
                 onMouseOut={moveScreenEnd}
                 onMouseMove={moveScreen}
+                active={!processIsActive ? "true" : "false"}
             />
             <div
                 className={style.tree}
                 style={{
-                    margin: `${marginTop}px 0 0 ${marginLeft}px`
+                    margin: `${marginTop}px 0 0 ${marginLeft}px`,
+                    transition: processIsActive && "margin 0.4s"
                 }}
             >
                 {decisionTreeComponent}
