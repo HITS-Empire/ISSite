@@ -22,9 +22,18 @@ export default function DecisionTree() {
     // Результат предсказания
     const [prediction, setPrediction] = useState();
 
+    // Пройденные узлы (для очистки)
+    const [passedNodes, setPassedNodes] = useState([]);
+
     // Перезагрузить дерево решений при изменении выборки
     useEffect(() => {
-        if (!trainingSet) return setDecisionTree();
+        if (!trainingSet) {
+            setDecisionTree();
+            setPrediction();
+            setPassedNodes([]);
+
+            return;
+        }
 
         let requiredAttribute;
 
@@ -47,9 +56,24 @@ export default function DecisionTree() {
     useEffect(() => {
         if (!fieldForPrediction) return;
 
-        setPrediction(
-            predict(decisionTree, fieldForPrediction)
-        );
+        // Убрать выделение у предыдущего предсказания
+        passedNodes.forEach((decisionNode) => {
+            if (decisionNode.category) {
+                decisionNode.categoryHighlighted = false;
+            } else {
+                decisionNode.questionHighlighted = false;
+                decisionNode.yesHighlighted = false;
+                decisionNode.noHighlighted = false;
+            }
+        });
+
+        const {
+            prediction: newPrediction,
+            passedNodes: newPassedNodes
+        } = predict(decisionTree, fieldForPrediction);
+
+        setPrediction(newPrediction);
+        setPassedNodes(newPassedNodes);
     }, [fieldForPrediction]);
 
     return (

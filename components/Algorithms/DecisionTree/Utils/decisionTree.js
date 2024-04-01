@@ -5,24 +5,31 @@ const predicates = {
 };
 
 // Предсказать событие
-export function predict(decisionTree, field) {
-    let attribute, value, predicate, pivot;
+export function predict(decisionNode, field) {
+    const passedNodes = [];
 
     while (true) {
-        if (decisionTree.category) {
-            return decisionTree.category;
+        passedNodes.push(decisionNode);
+
+        if (decisionNode.category) {
+            decisionNode.categoryHighlighted = true;
+
+            return {
+                prediction: decisionNode.category,
+                passedNodes
+            };
         }
 
-        attribute = decisionTree.attribute;
-        value = field[attribute];
+        const { predicate, pivot } = decisionNode;
 
-        predicate = decisionTree.predicate;
-        pivot = decisionTree.pivot;
+        decisionNode.questionHighlighted = true;
 
-        if (predicate(value, pivot)) {
-            decisionTree = decisionTree.match;
+        if (predicate(field[decisionNode.attribute], pivot)) {
+            decisionNode.yesHighlighted = true;
+            decisionNode = decisionNode.match;
         } else {
-            decisionTree = decisionTree.notMatch;
+            decisionNode.noHighlighted = true;
+            decisionNode = decisionNode.notMatch;
         }
     }
 }
@@ -100,7 +107,8 @@ export function getDecisionTree({
 
     if (maxDepth === 0 || trainingSet.length <= minItemsCount) {
         return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute)
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false
         };
     }
 
@@ -108,7 +116,8 @@ export function getDecisionTree({
 
     if (initialEntropy <= entropyThrehold) {
         return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute)
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false
         };
     }
 
@@ -154,7 +163,8 @@ export function getDecisionTree({
 
     if (!bestSplit.gain) {
         return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute)
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false
         };
     }
 
@@ -180,6 +190,9 @@ export function getDecisionTree({
         match: matchSubTree,
         notMatch: notMatchSubTree,
         matchedCount: bestSplit.match.length,
-        notMatchedCount: bestSplit.notMatch.length
+        notMatchedCount: bestSplit.notMatch.length,
+        questionHighlighted: false,
+        yesHighlighted: false,
+        noHighlighted: false
     };
 }

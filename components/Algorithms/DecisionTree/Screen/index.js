@@ -42,32 +42,58 @@ export default function Screen({
     // Рекурсивное преобразование дерева в HTML-граф
     const getDecisionTreeComponent = (decisionNode) => {
         if (decisionNode.category) {
+            const categoryComponent = (
+                <span
+                    className={decisionNode.categoryHighlighted ? style.highlighted : ""}
+                >
+                    {decisionNode.category}
+                </span>
+            );
+
             return (
                 <ul>
                     <li className={style.category}>
-                        <span>{decisionNode.category}</span>
+                        {categoryComponent}
                     </li>
                 </ul>
             );
         }
 
+        const questionComponent = (
+            <span
+                className={decisionNode.questionHighlighted ? style.highlighted : ""}
+            >
+                {decisionNode.attribute} {decisionNode.predicateName} {decisionNode.pivot}
+            </span>
+        );
+
+        const noComponent = (
+            <span
+                className={`${style.no} ${decisionNode.noHighlighted ? style.highlighted : ""}`}
+            >
+                Нет ({decisionNode.notMatchedCount})
+            </span>
+        );
+
+        const yesComponent = (
+            <span
+                className={`${style.yes} ${decisionNode.yesHighlighted ? style.highlighted : ""}`}
+            >
+                Да ({decisionNode.matchedCount})
+            </span>
+        );
+
         return (
             <ul>
                 <li>
-                    <span>
-                        {decisionNode.attribute} {decisionNode.predicateName} {decisionNode.pivot}
-                    </span>
+                    {questionComponent}
                     <ul>
                         <li>
-                            <span className={style.no}>
-                                Нет ({decisionNode.notMatchedCount})
-                            </span>
+                            {noComponent}
                             {getDecisionTreeComponent(decisionNode.notMatch)}
                         </li>
                         <li>
-                            <span className={style.yes}>
-                                Да ({decisionNode.matchedCount})
-                            </span>
+                            {yesComponent}
                             {getDecisionTreeComponent(decisionNode.match)}
                         </li>
                     </ul>

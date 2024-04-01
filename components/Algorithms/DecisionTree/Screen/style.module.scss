@@ -71,18 +71,24 @@
             }
     
             span {
+                position: relative;
                 background: $gradientWhite75;
                 padding: 7px 10px;
                 font-size: 14px;
                 font-weight: 500;
                 display: inline-block;
                 border-radius: 5px;
+                z-index: 0;
     
                 &.no {
                     background-color: $error;
                 }
                 &.yes {
                     background-color: $success;
+                }
+
+                &.highlighted {
+                    box-shadow: 0 0 20px 2px $purple;
                 }
             }
     
