@@ -46,12 +46,20 @@ export default function Menu({
     };
 
     // Функция для определения цвета 
-    const randomColor = () => {
-        const red = Math.floor(Math.random() * 128) + 128; // Генерация красного цвета от 128 до 255
-        const green = Math.floor(Math.random() * 128) + 128; // Генерация зеленого цвета от 128 до 255
-        const blue = Math.floor(Math.random() * 128) + 128; // Генерация синего цвета от 128 до 255
+    const randomColor = (alpha) => {
+        let colors = [
+            Math.floor(Math.random() * 128) + 128, // Генерация красного цвета от 128 до 255
+            Math.floor(Math.random() * 128) + 128, // Генерация зеленого цвета от 128 до 255
+            Math.floor(Math.random() * 128) + 128 // Генерация синего цвета от 128 до 255
+        ];
 
-        return `rgb(${red}, ${green}, ${blue})`;
+        if (alpha) {
+            colors.push(alpha);
+        }
+
+        colors = colors.join(", ");
+
+        return alpha ? `rgba(${colors})` : `rgb(${colors})`;
     }
     
     const distance = (first, second) => {
@@ -69,43 +77,63 @@ export default function Menu({
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         clustersWARD.forEach((cluster) => {
-            const color = randomColor();
+            const color = randomColor(0.5);
+            ctx.fillStyle = color;
 
-            cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
-            for (let i = 0; i < cluster.points.length - 1; i++) {
-                let minDistance = 100000000;
-                let indexMinDistance = -1;
-                
-                for (let j = i + 1; j < cluster.points.length; j++) {
-                    if (distance(cluster.points[i], cluster.points[j]) < minDistance) {
-                        minDistance = distance(cluster.points[i], cluster.points[j]);
-                        indexMinDistance = j;
+            // Сортировка по Y (первый элемент - самая максимальная координата по Y)
+            const points = Array
+                .from(new Set(cluster.points))
+                .sort((firstPoint, secondPoint) => {
+                    return secondPoint.y - firstPoint.y;
+                });
+
+            let startPoint = points[0];
+            let currentPoint = startPoint;
+            let currentLook = 0;
+
+            let isStart = true;
+
+            ctx.beginPath();
+            ctx.moveTo(startPoint.x, startPoint.y);
+
+            // Рисование по внешнему контуру
+            while (isStart || startPoint !== currentPoint) {
+                let nextPoint;
+                let nextLook;
+
+                let minDeltaLook = Math.PI * 2;
+            
+                points.forEach((point) => {
+                    if (point === currentPoint) return;
+
+                    const look = Math.atan((point.y - currentPoint.y) / (currentPoint.x - point.x));
+                    const deltaLook = (Math.PI * 2 + look - currentLook) % (Math.PI * 2);
+
+                    if (deltaLook !== 0 && deltaLook < minDeltaLook) {
+                        nextPoint = point;
+                        nextLook = look;
+
+                        minDeltaLook = deltaLook;
                     }
-                }
-                
-                if (indexMinDistance !== -1) {
-                    const temp = cluster.points[i + 1];
-                    cluster.points[i + 1] = cluster.points[indexMinDistance];
-                    cluster.points[indexMinDistance] = temp; 
-                }
+                });
+
+                if (!nextPoint) break;
+
+                currentPoint = nextPoint;
+                currentLook = nextLook;
+
+                ctx.lineTo(currentPoint.x, currentPoint.y);
+                isStart = false;
             }
 
-            ctx.globalAlpha = 0;
-            ctx.beginPath();
-            ctx.strokeStyle = color;
-            cluster.points.forEach((point) => {
-                ctx.lineTo(point.x, point.y, color);
-            });
-            
-            ctx.globalAlpha = 0.5;
-            ctx.closePath();
-            ctx.fillStyle = color;
             ctx.fill();
-            ctx.globalAlpha = 1;
+            ctx.closePath();
         });
 
         clustersDBSCAN.forEach((cluster) => {
             const color = randomColor();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 5;
 
             //cluster.points.sort(( first, second) => first.x - second.x);
             //cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
@@ -146,17 +174,18 @@ export default function Menu({
                     cluster.points[indexMinDistance] = temp; 
                 }
             }
-            //cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
 
-            ctx.beginPath();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 5;
+            let previosPoint = cluster.points[cluster.points.length - 1];
+
             cluster.points.forEach((point) => {
-                ctx.lineTo(point.x, point.y, color);
-            });
+                ctx.beginPath();
+                ctx.moveTo(previosPoint.x, previosPoint.y);
+                ctx.lineTo(point.x, point.y);
+                ctx.stroke();
+                ctx.closePath();
 
-            ctx.closePath();
-            ctx.stroke();
+                previosPoint = point;
+            });
         });
 
         clustersKMeans.forEach((cluster) => {
