@@ -5,14 +5,27 @@ export function cellIsExists(row, column, count) {
     return 0 <= row && row < count && 0 <= column && column < count;
 }
 
+// Стереть барьеры вокруг ячейки
+export function clearBorders(cell, count, field) {
+    const { row, column } = cell;
+
+    for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+            if (cellIsExists(row + i, column + j, count) && field[row + i][column + j].type === 1) {
+                field[row + i][column + j].type = 0;
+            }
+        }
+    }
+}
+
 // Получить поле размером N x N
 export function getField(count) {
-    if (count <= 1) {
-         return { field: [], startCell: null, endCell: null };
-    }
-    
     const field = [];
-    
+
+    if (count <= 1) {
+        return { field, startCell: null, endCell: null };
+    }
+
     for (let row = 0; row < count; row++) {
         const line = [];
 
@@ -35,18 +48,11 @@ export function getField(count) {
     const isEven = (n) => {
         return n % 2 === 0;
     }
-    
-    function getRandomElementOfArray(array) {
-		const index = Math.floor(Math.random() * array.length);
-		return array[index];
-	}
 
     const setCell = (row, column, value) => {
-        if (column < 0 || column >= count || row < 0 || row >= count) {
-            return;
+        if (cellIsExists(row, column, count)) {
+            field[row][column].type = value;
         }
-
-        field[row][column].type = value;
     }
 
     const isEnd = () => {
@@ -57,51 +63,52 @@ export function getField(count) {
                 }
             }
         }
+
         return true;
     }
 
     const clearCellWithTracktors = () => {
         for (const tractor of tractors) {
             const directions = [];
-        
+
             if (tractor.x > 0) {
-                directions.push('WEST');
+                directions.push("WEST");
             }
             if (tractor.x < count - 2) {
-                directions.push('EAST');
+                directions.push("EAST");
             }
             if (tractor.y > 0) {
-                directions.push('NORTH');
+                directions.push("NORTH");
             }
             if (tractor.y < count - 2) {
-                directions.push('SOUTH');
+                directions.push("SOUTH");
             }
-            
-            const direction = getRandomElementOfArray(directions);
+    
+            const direction = getRandomElement(directions);
 
             switch (direction) {
-                case 'WEST':
+                case "WEST":
                     if (field[tractor.x - 2][tractor.y].type === 1) {
                         setCell(tractor.x - 2, tractor.y, 0);
                         setCell(tractor.x - 1, tractor.y, 0);
                     }
                     tractor.x -= 2;
                     break;
-                case 'EAST':
+                case "EAST":
                     if (field[tractor.x + 2][tractor.y].type === 1) {
                         setCell(tractor.x + 2, tractor.y, 0);
                         setCell(tractor.x + 1, tractor.y, 0);
                     }
                     tractor.x += 2;
                     break;
-                case 'NORTH':
+                case "NORTH":
                     if (field[tractor.x][tractor.y - 2].type === 1) {
                         setCell(tractor.x, tractor.y - 2, 0);
                         setCell(tractor.x, tractor.y - 1, 0);
                     }
                     tractor.y -= 2;
                     break;
-                case 'SOUTH':
+                case "SOUTH":
                     if (field[tractor.x][tractor.y + 2].type === 1) {
                         setCell(tractor.x, tractor.y + 2, 0);
                         setCell(tractor.x, tractor.y + 1, 0);
@@ -111,15 +118,15 @@ export function getField(count) {
             }
         }
     }
-    
-    const startX = getRandomElementOfArray(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
-    const startY = getRandomElementOfArray(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
-    
+
+    const startX = getRandomElement(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
+    const startY = getRandomElement(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
+
     const numberOfTractors = 500;
     var tractors = [];
 
     for (let i = 0; i < numberOfTractors; i++) {
-        tractors.push({x: startX, y: startY});
+        tractors.push({ x: startX, y: startY });
     }
 
     setCell(startX, startY, 0);
@@ -134,17 +141,8 @@ export function getField(count) {
     if (startCell) startCell.type = 2;
     if (endCell) endCell.type = 3;
 
-    for (let i = count - 1; i >= 0 && i > count - 4; i--) { 
-        for (let j = count - 1; j >= 0 && j > count - 4; j--) {
-            if (field[i][j].type === 1) {
-                field[i][j].type = 0;
-            } else if (field[j][i].type === 1) {
-                field[j][i].type = 0;
-            } else { 
-                break;
-            }
-        }
-    }
+    clearBorders(startCell, count, field);
+    clearBorders(endCell, count, field);
 
     return {
         field,
@@ -225,23 +223,20 @@ export async function findPathInField({
 
         for (let i = 1;i < openSet.length;i++) {
             if (openSet[i].cost < current.cost || (openSet[i].cost === current.cost && current.heuristic < current.heuristic)) {
-                    current = openSet[i];
+                current = openSet[i];
             }
         }
-        
+
         openSet.splice(openSet.indexOf(current), 1);
         closedSet.push(current);
 
         if (field[current.row][current.column].type !== 2 && field[current.row][current.column].type !== 3) {
             field[current.row][current.column].type = 4;
             field[current.row][current.column].draw();
-            if (count > 15) {
-                await sleep (10);
-            } else {
-                await sleep (30);
-            }
+
+            await sleep(100 / count);
         }
-        
+
         if (current === endCell) {
             let path = [];
             let temporary = current;
@@ -260,16 +255,15 @@ export async function findPathInField({
                     temporary.draw();
                     temporary = temporary.previous;
                 }
-                
             }
-            
+
             return setStatus("success");
         }
 
         for (let neighbour of current.neighbours) {
             if (!closedSet.includes(neighbour)) {
                 let tempCost = current.selfCost + 1;
-                
+
                 if (openSet.includes(neighbour)) {
                     neighbour.selfCost = tempCost;
                 } else {
