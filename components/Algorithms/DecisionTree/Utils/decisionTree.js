@@ -1,0 +1,240 @@
+import { sleep } from "../../../../utils/helpers";
+
+// Доступные предикаты
+const predicates = {
+    "=": (a, b) => a == b,
+    ">": (a, b) => a > b
+};
+
+// Предсказать событие
+export async function predict(decisionTree, field, {
+    setDecisionTree,
+    setProcessIsActive,
+    setPrediction,
+    setPassedNodes,
+    marginTop,
+    setMarginTop,
+    marginLeft,
+    setMarginLeft
+}) {
+    let decisionNode = decisionTree;
+    const passedNodes = [];
+
+    const parentElement = document.getElementById("tree");
+    const {
+        x: parentX,
+        y: parentY,
+        width: parentWidth,
+        height: parentHeight
+    } = parentElement.getBoundingClientRect();
+
+    while (true) {
+        const childElement = document.getElementById(decisionNode.id);
+        const { x, y, width, height } = childElement.getBoundingClientRect();
+
+        marginTop = marginTop + parentY - y + (parentHeight - height) / 2;
+        marginLeft = marginLeft + parentX - x + (parentWidth - width) / 2;
+
+        setMarginTop(marginTop);
+        setMarginLeft(marginLeft);
+
+        passedNodes.push(decisionNode);
+
+        if (decisionNode.category) {
+            decisionNode.categoryHighlighted = true;
+
+            setDecisionTree({ ...decisionTree });
+            await sleep(400);
+
+            setProcessIsActive(false);
+            setPrediction(decisionNode.category);
+            setPassedNodes(passedNodes);
+
+            return;
+        }
+
+        const { predicate, pivot } = decisionNode;
+        decisionNode.questionHighlighted = true;
+
+        if (predicate(field[decisionNode.attribute], pivot)) {
+            decisionNode.yesHighlighted = true;
+            decisionNode = decisionNode.match;
+        } else {
+            decisionNode.noHighlighted = true;
+            decisionNode = decisionNode.notMatch;
+        }
+
+        setDecisionTree({ ...decisionTree });
+        await sleep(400);
+    }
+}
+
+// Получить количество уникальных значений
+export function getCountOfUniqueValues(set, attribute) {
+    const counter = {};
+
+    for (let i = set.length - 1; i >= 0; i--) {
+        counter[set[i][attribute]] = 0;
+    }
+
+    for (let i = set.length - 1; i >= 0; i--) {
+        counter[set[i][attribute]]++;
+    }
+
+    return counter;
+}
+
+// Получить наиболее частое совпадение
+export function getMostFrequentValue(set, attribute) {
+    const counter = getCountOfUniqueValues(set, attribute);
+
+    let mostFrequentValue, mostFrequentCount = 0;
+
+    for (const value in counter) {
+        if (counter[value] > mostFrequentCount) {
+            mostFrequentCount = counter[value];
+            mostFrequentValue = value;
+        }
+    };
+
+    return mostFrequentValue;
+}
+
+// Получить значение энтропии
+export function getEntropy(set, attribute) {
+    const counter = getCountOfUniqueValues(set, attribute);
+
+    let p, entropy = 0;
+    for (const i in counter) {
+        p = counter[i] / set.length;
+        entropy += -p * Math.log(p);
+    }
+
+    return entropy;
+}
+
+// Получить разделение дерева
+export function getSplit(set, attribute, predicate, pivot) {
+    const match = [], notMatch = [];
+      
+    for (var i = set.length - 1; i >= 0; i--) {
+        const field = set[i];
+        const attributeValue = field[attribute];
+
+        if (predicate(attributeValue, pivot)) {
+            match.push(field);
+        } else {
+            notMatch.push(field);
+        }
+    };
+
+    return { match, notMatch };
+}
+
+// Получить дерево решений на основе выборки
+export function getDecisionTree({
+    trainingSet,
+    requiredAttribute,
+    maxDepth = 128,
+    currentNode = { id: 0 }
+}) {
+    const minItemsCount = 1;
+    const entropyThrehold = 0.01;
+
+    if (maxDepth === 0 || trainingSet.length <= minItemsCount) {
+        return {
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
+        };
+    }
+
+    let initialEntropy = getEntropy(trainingSet, requiredAttribute);
+
+    if (initialEntropy <= entropyThrehold) {
+        return {
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
+        };
+    }
+
+    const alreadyChecked = {};
+    let bestSplit = { gain: 0 };
+
+    for (let i = trainingSet.length - 1; i >= 0; i--) {
+        const field = trainingSet[i];
+
+        for (let attribute in field) {
+            if (attribute === requiredAttribute) continue;
+
+            const pivot = field[attribute];
+            const predicateName = typeof pivot === "number" ? ">" : "=";
+            const attributePredicatePivot = attribute + predicateName + pivot;
+
+            if (alreadyChecked[attributePredicatePivot]) continue;
+
+            alreadyChecked[attributePredicatePivot] = true;
+
+            const predicate = predicates[predicateName];
+            const currentSplit = getSplit(trainingSet, attribute, predicate, pivot);
+
+            const matchEntropy = getEntropy(currentSplit.match, requiredAttribute);
+            const notMatchEntropy = getEntropy(currentSplit.notMatch, requiredAttribute);
+
+            let newEntropy = 0;
+            newEntropy += matchEntropy * currentSplit.match.length;
+            newEntropy += notMatchEntropy * currentSplit.notMatch.length;
+            newEntropy /= trainingSet.length;
+
+            const currentGain = initialEntropy - newEntropy;
+            if (currentGain > bestSplit.gain) {
+                bestSplit = currentSplit;
+                bestSplit.predicateName = predicateName;
+                bestSplit.predicate = predicate;
+                bestSplit.attribute = attribute;
+                bestSplit.pivot = pivot;
+                bestSplit.gain = currentGain;
+            }
+        }
+    }
+
+    if (!bestSplit.gain) {
+        return {
+            category: getMostFrequentValue(trainingSet, requiredAttribute),
+            categoryHighlighted: false,
+            id: `node-${currentNode.id++}`
+        };
+    }
+
+    maxDepth--;
+
+    // Рекурсивно заполняем деревья-потомки
+    const matchSubTree = getDecisionTree({
+        trainingSet: bestSplit.match,
+        requiredAttribute,
+        maxDepth,
+        currentNode
+    });
+    const notMatchSubTree = getDecisionTree({
+        trainingSet: bestSplit.notMatch,
+        requiredAttribute,
+        maxDepth,
+        currentNode
+    });
+
+    return {
+        attribute: bestSplit.attribute,
+        predicate: bestSplit.predicate,
+        predicateName: bestSplit.predicateName,
+        pivot: bestSplit.pivot,
+        match: matchSubTree,
+        notMatch: notMatchSubTree,
+        matchedCount: bestSplit.match.length,
+        notMatchedCount: bestSplit.notMatch.length,
+        questionHighlighted: false,
+        yesHighlighted: false,
+        noHighlighted: false,
+        id: `node-${currentNode.id++}`
+    };
+}
