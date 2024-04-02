@@ -1,7 +1,7 @@
 import { sleep } from "../../../../utils/helpers";
 
-// Доступные предикаты
-const predicates = {
+// Доступные условия
+const conditions = {
     "=": (a, b) => a == b,
     ">": (a, b) => a > b
 };
@@ -40,28 +40,28 @@ export async function predict(decisionTree, field, {
 
         passedNodes.push(decisionNode);
 
-        if (decisionNode.category) {
-            decisionNode.categoryHighlighted = true;
+        if (decisionNode.prediction) {
+            decisionNode.predictionHighlighted = true;
 
             setDecisionTree({ ...decisionTree });
             await sleep(400);
 
             setProcessIsActive(false);
-            setPrediction(decisionNode.category);
+            setPrediction(decisionNode.prediction);
             setPassedNodes(passedNodes);
 
             return;
         }
 
-        const { predicate, pivot } = decisionNode;
+        const { condition, value } = decisionNode;
         decisionNode.questionHighlighted = true;
 
-        if (predicate(field[decisionNode.attribute], pivot)) {
+        if (conditions[condition](field[decisionNode.attribute], value)) {
             decisionNode.yesHighlighted = true;
-            decisionNode = decisionNode.match;
+            decisionNode = decisionNode.yesNodes;
         } else {
             decisionNode.noHighlighted = true;
-            decisionNode = decisionNode.notMatch;
+            decisionNode = decisionNode.noNodes;
         }
 
         setDecisionTree({ ...decisionTree });
@@ -69,8 +69,8 @@ export async function predict(decisionTree, field, {
     }
 }
 
-// Получить количество уникальных значений
-export function getCountOfUniqueValues(set, attribute) {
+// Получить счётчик уникальных значений
+export function getCounterOfUniqueValues(set, attribute) {
     const counter = {};
 
     for (let i = set.length - 1; i >= 0; i--) {
@@ -86,7 +86,7 @@ export function getCountOfUniqueValues(set, attribute) {
 
 // Получить наиболее частое совпадение
 export function getMostFrequentValue(set, attribute) {
-    const counter = getCountOfUniqueValues(set, attribute);
+    const counter = getCounterOfUniqueValues(set, attribute);
 
     let mostFrequentValue, mostFrequentCount = 0;
 
@@ -102,33 +102,42 @@ export function getMostFrequentValue(set, attribute) {
 
 // Получить значение энтропии
 export function getEntropy(set, attribute) {
-    const counter = getCountOfUniqueValues(set, attribute);
+    const counter = getCounterOfUniqueValues(set, attribute);
 
-    let p, entropy = 0;
+    let k, entropy = 0;
     for (const i in counter) {
-        p = counter[i] / set.length;
-        entropy += -p * Math.log(p);
+        k = counter[i] / set.length;
+        entropy += -k * Math.log(k);
     }
 
     return entropy;
 }
 
 // Получить разделение дерева
-export function getSplit(set, attribute, predicate, pivot) {
-    const match = [], notMatch = [];
+export function getSplit(set, attribute, condition, value) {
+    const noNodes = [], yesNodes = [];
       
     for (var i = set.length - 1; i >= 0; i--) {
         const field = set[i];
         const attributeValue = field[attribute];
 
-        if (predicate(attributeValue, pivot)) {
-            match.push(field);
+        if (conditions[condition](attributeValue, value)) {
+            yesNodes.push(field);
         } else {
-            notMatch.push(field);
+            noNodes.push(field);
         }
     };
 
-    return { match, notMatch };
+    return { noNodes, yesNodes };
+}
+
+// Получить узел с решением
+export function getPredictionNode(trainingSet, requiredAttribute, currentNode) {
+    return {
+        prediction: getMostFrequentValue(trainingSet, requiredAttribute),
+        predictionHighlighted: false,
+        id: `node-${currentNode.id++}`
+    };
 }
 
 // Получить дерево решений на основе выборки
@@ -138,86 +147,74 @@ export function getDecisionTree({
     maxDepth = 128,
     currentNode = { id: 0 }
 }) {
-    const minItemsCount = 1;
-    const entropyThrehold = 0.01;
+    const minEntropy = 0.01;
 
-    if (maxDepth === 0 || trainingSet.length <= minItemsCount) {
-        return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute),
-            categoryHighlighted: false,
-            id: `node-${currentNode.id++}`
-        };
+    if (maxDepth === 0 || trainingSet.length <= 1) {
+        return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
 
     let initialEntropy = getEntropy(trainingSet, requiredAttribute);
 
-    if (initialEntropy <= entropyThrehold) {
-        return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute),
-            categoryHighlighted: false,
-            id: `node-${currentNode.id++}`
-        };
+    if (initialEntropy <= minEntropy) {
+        return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
 
     const alreadyChecked = {};
-    let bestSplit = { gain: 0 };
+    let bestSplit = { profit: 0 };
 
-    for (let i = trainingSet.length - 1; i >= 0; i--) {
-        const field = trainingSet[i];
-
-        for (let attribute in field) {
+    for (const field of trainingSet) {
+        for (const attribute in field) {
             if (attribute === requiredAttribute) continue;
 
-            const pivot = field[attribute];
-            const predicateName = typeof pivot === "number" ? ">" : "=";
-            const attributePredicatePivot = attribute + predicateName + pivot;
+            const value = field[attribute];
+            const condition = typeof value === "number" ? ">" : "=";
+            const expression = `${attribute} ${condition} ${value}`;
 
-            if (alreadyChecked[attributePredicatePivot]) continue;
+            if (alreadyChecked[expression]) continue;
+            alreadyChecked[expression] = true;
 
-            alreadyChecked[attributePredicatePivot] = true;
+            const currentSplit = getSplit(trainingSet, attribute, condition, value);
 
-            const predicate = predicates[predicateName];
-            const currentSplit = getSplit(trainingSet, attribute, predicate, pivot);
+            const yesNodesEntropy = getEntropy(currentSplit.yesNodes, requiredAttribute);
+            const noNodesEntropy = getEntropy(currentSplit.noNodes, requiredAttribute);
 
-            const matchEntropy = getEntropy(currentSplit.match, requiredAttribute);
-            const notMatchEntropy = getEntropy(currentSplit.notMatch, requiredAttribute);
+            const newEntropy = (
+                (
+                    yesNodesEntropy * currentSplit.yesNodes.length
+                ) + (
+                    noNodesEntropy * currentSplit.noNodes.length
+                )
+            ) / trainingSet.length;
 
-            let newEntropy = 0;
-            newEntropy += matchEntropy * currentSplit.match.length;
-            newEntropy += notMatchEntropy * currentSplit.notMatch.length;
-            newEntropy /= trainingSet.length;
-
-            const currentGain = initialEntropy - newEntropy;
-            if (currentGain > bestSplit.gain) {
-                bestSplit = currentSplit;
-                bestSplit.predicateName = predicateName;
-                bestSplit.predicate = predicate;
-                bestSplit.attribute = attribute;
-                bestSplit.pivot = pivot;
-                bestSplit.gain = currentGain;
+            const profit = initialEntropy - newEntropy;
+            if (profit > bestSplit.profit) {
+                bestSplit = {
+                    ...currentSplit,
+                    attribute,
+                    condition,
+                    value,
+                    expression,
+                    profit
+                };
             }
         }
     }
 
-    if (!bestSplit.gain) {
-        return {
-            category: getMostFrequentValue(trainingSet, requiredAttribute),
-            categoryHighlighted: false,
-            id: `node-${currentNode.id++}`
-        };
+    if (!bestSplit.profit) {
+        return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
 
     maxDepth--;
 
     // Рекурсивно заполняем деревья-потомки
-    const matchSubTree = getDecisionTree({
-        trainingSet: bestSplit.match,
+    const noNodes = getDecisionTree({
+        trainingSet: bestSplit.noNodes,
         requiredAttribute,
         maxDepth,
         currentNode
     });
-    const notMatchSubTree = getDecisionTree({
-        trainingSet: bestSplit.notMatch,
+    const yesNodes = getDecisionTree({
+        trainingSet: bestSplit.yesNodes,
         requiredAttribute,
         maxDepth,
         currentNode
@@ -225,16 +222,16 @@ export function getDecisionTree({
 
     return {
         attribute: bestSplit.attribute,
-        predicate: bestSplit.predicate,
-        predicateName: bestSplit.predicateName,
-        pivot: bestSplit.pivot,
-        match: matchSubTree,
-        notMatch: notMatchSubTree,
-        matchedCount: bestSplit.match.length,
-        notMatchedCount: bestSplit.notMatch.length,
+        condition: bestSplit.condition,
+        value: bestSplit.value,
+        expression: bestSplit.expression,
+        noNodes,
+        yesNodes,
+        noNodesCount: bestSplit.noNodes.length,
+        yesNodesCount: bestSplit.yesNodes.length,
         questionHighlighted: false,
-        yesHighlighted: false,
         noHighlighted: false,
+        yesHighlighted: false,
         id: `node-${currentNode.id++}`
     };
 }

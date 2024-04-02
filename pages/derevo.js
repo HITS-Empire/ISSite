@@ -77,12 +77,13 @@ export default function DecisionTree() {
     useEffect(() => {
         if (!fieldForPrediction) return;
 
+        setPrediction();
         setProcessIsActive(true);
 
         // Убрать выделение у предыдущего предсказания
         passedNodes.forEach((decisionNode) => {
-            if (decisionNode.category) {
-                decisionNode.categoryHighlighted = false;
+            if (decisionNode.prediction) {
+                decisionNode.predictionHighlighted = false;
             } else {
                 decisionNode.questionHighlighted = false;
                 decisionNode.yesHighlighted = false;
