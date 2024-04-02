@@ -58,6 +58,50 @@ export default function Menu({
         return Math.sqrt(Math.pow(first.x - second.x, 2) + Math.pow(first.y - second.y, 2));
     }
 
+    // Проход по внешнему контуру фигуры
+    const passAlongOuterContour = (points, action) => {
+        const PI2 = Math.PI * 2;
+
+        let startPoint = points[0];
+        let currentPoint = startPoint;
+        let currentLook = 0;
+        let isEnd = false;
+
+        while (true) {
+            let nextPoint;
+            let nextLook;
+
+            let minDeltaLook = PI2;
+        
+            points.forEach((point) => {
+                if (point === currentPoint) return;
+
+                const look = Math.atan((point.y - currentPoint.y) / (currentPoint.x - point.x));
+                const deltaLook = (PI2 + look - currentLook) % PI2;
+
+                if (deltaLook !== 0 && deltaLook < minDeltaLook) {
+                    nextPoint = point;
+                    nextLook = look;
+
+                    minDeltaLook = deltaLook;
+                }
+            });
+
+            if (!nextPoint) break;
+
+            currentPoint = nextPoint;
+            currentLook = nextLook;
+
+            action(currentPoint);
+
+            if (startPoint === currentPoint) {
+                isEnd = true;
+            } else if (isEnd) {
+                break;
+            }
+        };
+    };
+
     // Раскрашивание кластеров
     const drawClusters = () => {
         const clustersKMeans = kMeans(points, clusters);
@@ -68,59 +112,49 @@ export default function Menu({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        clustersWARD.forEach((cluster) => {
-            const color = randomColor(0);
-            ctx.fillStyle = color;
+        ctx.lineCap = "round";
 
-            // Сортировка по Y (первый элемент - самая максимальная координата по Y)
-            const points = Array
-                .from(new Set(cluster.points))
-                .sort((firstPoint, secondPoint) => {
-                    return secondPoint.y - firstPoint.y;
+        clustersWARD
+            .sort((firstCluster, secondCluster) => {
+                return secondCluster.points.length - firstCluster.points.length;
+            })
+            .forEach((cluster) => {
+                const color = randomColor(32);
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 30;
+
+                // Сортировка по Y (первый элемент - самая максимальная координата по Y)
+                const points = Array
+                    .from(new Set(cluster.points))
+                    .sort((firstPoint, secondPoint) => {
+                        return secondPoint.y - firstPoint.y;
+                    });
+
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+
+                // Залить внутренность
+                passAlongOuterContour(points, (point) => {
+                    ctx.lineTo(point.x, point.y);
                 });
 
-            let startPoint = points[0];
-            let currentPoint = startPoint;
-            let currentLook = 0;
+                ctx.fill();
+                ctx.closePath();
 
-            let isStart = true;
+                let previosPoint = points[points.length - 1];
 
-            ctx.beginPath();
-            ctx.moveTo(startPoint.x, startPoint.y);
+                // Добавить плавные края
+                passAlongOuterContour(points, (point) => {
+                    ctx.beginPath();
+                    ctx.moveTo(previosPoint.x, previosPoint.y);
+                    ctx.lineTo(point.x, point.y);
+                    ctx.stroke();
+                    ctx.closePath();
 
-            // Рисование по внешнему контуру
-            while (isStart || startPoint !== currentPoint) {
-                let nextPoint;
-                let nextLook;
-
-                let minDeltaLook = Math.PI * 2;
-            
-                points.forEach((point) => {
-                    if (point === currentPoint) return;
-
-                    const look = Math.atan((point.y - currentPoint.y) / (currentPoint.x - point.x));
-                    const deltaLook = (Math.PI * 2 + look - currentLook) % (Math.PI * 2);
-
-                    if (deltaLook !== 0 && deltaLook < minDeltaLook) {
-                        nextPoint = point;
-                        nextLook = look;
-
-                        minDeltaLook = deltaLook;
-                    }
+                    previosPoint = point;
                 });
-
-                if (!nextPoint) break;
-
-                currentPoint = nextPoint;
-                currentLook = nextLook;
-
-                ctx.lineTo(currentPoint.x, currentPoint.y);
-                isStart = false;
-            }
-
-            ctx.fill();
-            ctx.closePath();
-        });
+            });
 
         clustersDBSCAN.forEach((cluster) => {
             const color = randomColor();
