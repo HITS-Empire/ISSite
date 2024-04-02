@@ -46,20 +46,12 @@ export default function Menu({
     };
 
     // Функция для определения цвета 
-    const randomColor = (alpha) => {
-        let colors = [
-            Math.floor(Math.random() * 128) + 128, // Генерация красного цвета от 128 до 255
-            Math.floor(Math.random() * 128) + 128, // Генерация зеленого цвета от 128 до 255
-            Math.floor(Math.random() * 128) + 128 // Генерация синего цвета от 128 до 255
-        ];
+    const randomColor = (addition = 128) => {
+        const red = Math.floor(Math.random() * 128) + addition; // Генерация красного цвета от 128 до 255
+        const green = Math.floor(Math.random() * 128) + addition; // Генерация зеленого цвета от 128 до 255
+        const blue = Math.floor(Math.random() * 128) + addition; // Генерация синего цвета от 128 до 255
 
-        if (alpha) {
-            colors.push(alpha);
-        }
-
-        colors = colors.join(", ");
-
-        return alpha ? `rgba(${colors})` : `rgb(${colors})`;
+        return `rgb(${red}, ${green}, ${blue})`;
     }
     
     const distance = (first, second) => {
@@ -77,7 +69,7 @@ export default function Menu({
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         clustersWARD.forEach((cluster) => {
-            const color = randomColor(0.5);
+            const color = randomColor(0);
             ctx.fillStyle = color;
 
             // Сортировка по Y (первый элемент - самая максимальная координата по Y)
