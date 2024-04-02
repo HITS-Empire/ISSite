@@ -286,6 +286,10 @@ export default function Menu({
                     Перезагрузить
                 </Button>
             </div>
+
+            <p className={style.additionally}>
+                Области - WARD, линии - DBSCAN, точки - kMeans
+            </p>
         </MenuWrapper>
     );
 }
