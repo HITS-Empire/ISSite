@@ -42,20 +42,20 @@ export default function Screen({
 
     // Рекурсивное преобразование дерева в HTML-граф
     const getDecisionTreeComponent = (decisionNode) => {
-        if (decisionNode.category) {
-            const categoryComponent = (
+        if (decisionNode.prediction) {
+            const predictionComponent = (
                 <span
                     id={decisionNode.id}
-                    className={decisionNode.categoryHighlighted ? style.highlighted : ""}
+                    className={decisionNode.predictionHighlighted ? style.highlighted : ""}
                 >
-                    {decisionNode.category}
+                    {decisionNode.prediction}
                 </span>
             );
 
             return (
                 <ul>
-                    <li className={style.category}>
-                        {categoryComponent}
+                    <li className={style.prediction}>
+                        {predictionComponent}
                     </li>
                 </ul>
             );
@@ -66,7 +66,7 @@ export default function Screen({
                 id={decisionNode.id}
                 className={decisionNode.questionHighlighted ? style.highlighted : ""}
             >
-                {decisionNode.attribute} {decisionNode.predicateName} {decisionNode.pivot}
+                {decisionNode.expression}
             </span>
         );
 
@@ -74,7 +74,7 @@ export default function Screen({
             <span
                 className={`${style.no} ${decisionNode.noHighlighted ? style.highlighted : ""}`}
             >
-                Нет ({decisionNode.notMatchedCount})
+                Нет ({decisionNode.noNodesCount})
             </span>
         );
 
@@ -82,7 +82,7 @@ export default function Screen({
             <span
                 className={`${style.yes} ${decisionNode.yesHighlighted ? style.highlighted : ""}`}
             >
-                Да ({decisionNode.matchedCount})
+                Да ({decisionNode.yesNodesCount})
             </span>
         );
 
@@ -93,11 +93,11 @@ export default function Screen({
                     <ul>
                         <li>
                             {noComponent}
-                            {getDecisionTreeComponent(decisionNode.notMatch)}
+                            {getDecisionTreeComponent(decisionNode.noNodes)}
                         </li>
                         <li>
                             {yesComponent}
-                            {getDecisionTreeComponent(decisionNode.match)}
+                            {getDecisionTreeComponent(decisionNode.yesNodes)}
                         </li>
                     </ul>
                 </li>
