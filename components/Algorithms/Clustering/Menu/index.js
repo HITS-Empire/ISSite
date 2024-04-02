@@ -46,10 +46,10 @@ export default function Menu({
     };
 
     // Функция для определения цвета 
-    const randomColor = () => {
-        const red = Math.floor(Math.random() * 128) + 128; // Генерация красного цвета от 128 до 255
-        const green = Math.floor(Math.random() * 128) + 128; // Генерация зеленого цвета от 128 до 255
-        const blue = Math.floor(Math.random() * 128) + 128; // Генерация синего цвета от 128 до 255
+    const randomColor = (addition = 128) => {
+        const red = Math.floor(Math.random() * 128) + addition; // Генерация красного цвета от 128 до 255
+        const green = Math.floor(Math.random() * 128) + addition; // Генерация зеленого цвета от 128 до 255
+        const blue = Math.floor(Math.random() * 128) + addition; // Генерация синего цвета от 128 до 255
 
         return `rgb(${red}, ${green}, ${blue})`;
     }
@@ -57,6 +57,50 @@ export default function Menu({
     const distance = (first, second) => {
         return Math.sqrt(Math.pow(first.x - second.x, 2) + Math.pow(first.y - second.y, 2));
     }
+
+    // Проход по внешнему контуру фигуры
+    const passAlongOuterContour = (points, action) => {
+        const PI2 = Math.PI * 2;
+
+        let startPoint = points[0];
+        let currentPoint = startPoint;
+        let currentLook = 0;
+        let isEnd = false;
+
+        while (true) {
+            let nextPoint;
+            let nextLook;
+
+            let minDeltaLook = PI2;
+        
+            points.forEach((point) => {
+                if (point === currentPoint) return;
+
+                const look = Math.atan((point.y - currentPoint.y) / (currentPoint.x - point.x));
+                const deltaLook = (PI2 + look - currentLook) % PI2;
+
+                if (deltaLook !== 0 && deltaLook < minDeltaLook) {
+                    nextPoint = point;
+                    nextLook = look;
+
+                    minDeltaLook = deltaLook;
+                }
+            });
+
+            if (!nextPoint) break;
+
+            currentPoint = nextPoint;
+            currentLook = nextLook;
+
+            action(currentPoint);
+
+            if (startPoint === currentPoint) {
+                isEnd = true;
+            } else if (isEnd) {
+                break;
+            }
+        };
+    };
 
     // Раскрашивание кластеров
     const drawClusters = () => {
@@ -68,44 +112,54 @@ export default function Menu({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        clustersWARD.forEach((cluster) => {
-            const color = randomColor();
+        ctx.lineCap = "round";
 
-            cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
-            for (let i = 0; i < cluster.points.length - 1; i++) {
-                let minDistance = 100000000;
-                let indexMinDistance = -1;
-                
-                for (let j = i + 1; j < cluster.points.length; j++) {
-                    if (distance(cluster.points[i], cluster.points[j]) < minDistance) {
-                        minDistance = distance(cluster.points[i], cluster.points[j]);
-                        indexMinDistance = j;
-                    }
-                }
-                
-                if (indexMinDistance !== -1) {
-                    const temp = cluster.points[i + 1];
-                    cluster.points[i + 1] = cluster.points[indexMinDistance];
-                    cluster.points[indexMinDistance] = temp; 
-                }
-            }
+        clustersWARD
+            .sort((firstCluster, secondCluster) => {
+                return secondCluster.points.length - firstCluster.points.length;
+            })
+            .forEach((cluster) => {
+                const color = randomColor(32);
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 30;
 
-            ctx.globalAlpha = 0;
-            ctx.beginPath();
-            ctx.strokeStyle = color;
-            cluster.points.forEach((point) => {
-                ctx.lineTo(point.x, point.y, color);
+                // Сортировка по Y (первый элемент - самая максимальная координата по Y)
+                const points = Array
+                    .from(new Set(cluster.points))
+                    .sort((firstPoint, secondPoint) => {
+                        return secondPoint.y - firstPoint.y;
+                    });
+
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+
+                // Залить внутренность
+                passAlongOuterContour(points, (point) => {
+                    ctx.lineTo(point.x, point.y);
+                });
+
+                ctx.fill();
+                ctx.closePath();
+
+                let previosPoint = points[points.length - 1];
+
+                // Добавить плавные края
+                passAlongOuterContour(points, (point) => {
+                    ctx.beginPath();
+                    ctx.moveTo(previosPoint.x, previosPoint.y);
+                    ctx.lineTo(point.x, point.y);
+                    ctx.stroke();
+                    ctx.closePath();
+
+                    previosPoint = point;
+                });
             });
-            
-            ctx.globalAlpha = 0.5;
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        });
 
         clustersDBSCAN.forEach((cluster) => {
             const color = randomColor();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 5;
 
             //cluster.points.sort(( first, second) => first.x - second.x);
             //cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
@@ -146,17 +200,18 @@ export default function Menu({
                     cluster.points[indexMinDistance] = temp; 
                 }
             }
-            //cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
 
-            ctx.beginPath();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 5;
+            let previosPoint = cluster.points[cluster.points.length - 1];
+
             cluster.points.forEach((point) => {
-                ctx.lineTo(point.x, point.y, color);
-            });
+                ctx.beginPath();
+                ctx.moveTo(previosPoint.x, previosPoint.y);
+                ctx.lineTo(point.x, point.y);
+                ctx.stroke();
+                ctx.closePath();
 
-            ctx.closePath();
-            ctx.stroke();
+                previosPoint = point;
+            });
         });
 
         clustersKMeans.forEach((cluster) => {
@@ -231,6 +286,10 @@ export default function Menu({
                     Перезагрузить
                 </Button>
             </div>
+
+            <p className={style.additionally}>
+                Области - WARD, линии - DBSCAN, точки - kMeans
+            </p>
         </MenuWrapper>
     );
 }
