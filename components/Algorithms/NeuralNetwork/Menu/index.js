@@ -20,7 +20,7 @@ export default function Menu({
     correctDigit,
     setCorrectDigit,
     isFixed,
-    setIsFixed
+    setIsFixed,
 }) {
     const [digit, setDigit] = useState(0);
 
@@ -62,9 +62,64 @@ export default function Menu({
     const getDigit = () => {
         setIsFixed(false);
 
-        let image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = image.data;
+        let image1 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data1 = image1.data;
+        
+        let left = canvas.width;
+        let right = 0; 
+        let top = canvas.height;
+        let bottom = 0;
 
+        for (let i = 0; i < data1.length; i += 4) {
+            let value = 0;
+            for (let j = 0; j < 3; j++) {
+                value += data1[i + j];
+            }
+            value /= 3;
+
+            if (value / 255 > 0) {
+                const newX = i / 4 % canvas.width;
+                const newY = Math.floor(i / 4 / canvas.width);
+
+                if (newX < left) left = newX;
+                if (newX > right) right = newX;
+                if (newY < top) top = newY ;
+                if (newY > bottom) bottom = newY ;
+            }
+        }
+
+        console.log(left);
+        console.log(right);
+        console.log(top);
+        console.log(bottom);
+
+        const originWidth = Math.abs(left - right);
+        const originHeight = Math.abs(bottom - top);
+        
+        console.log(originHeight);
+        console.log(originWidth);
+        
+        const ratio = Math.max(originHeight, originWidth) / 32;
+
+        const newHeight = originHeight / ratio;
+        const newWidth = originWidth / ratio;
+
+        const startX = (50 - newWidth) / 2;
+        const startY = (50 - newHeight) / 2;
+
+        const hiddenCanvas = document.createElement("canvas");
+        hiddenCanvas.style.display = "block";
+        hiddenCanvas.style.backgroundColor = "grey";
+        hiddenCanvas.width = 50;
+        hiddenCanvas.height = 50;
+        document.body.appendChild(hiddenCanvas);
+        const hiddenCtx = hiddenCanvas.getContext("2d");
+
+        hiddenCtx.drawImage(canvas, left, top, originWidth, originHeight, startX, startY, newWidth, newHeight);
+        
+        let image = hiddenCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = image.data;
+        
         const pixels = [];
         for (let i = 0; i < data.length; i += 4) {
             let value = 0;
@@ -75,7 +130,7 @@ export default function Menu({
     
             pixels.push(value / 255);
         }
-        
+        console.log(pixels);
         const output = feedForward(NN, pixels);
         
         let endDigit = 0;
