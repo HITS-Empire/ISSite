@@ -17,7 +17,7 @@ export default function Field({
     const isPainting = () => {
         setCondition(false);
         setCorrectDigit(0);
-        setIsFixed(false);
+        setIsFixed(0);
         setProcessIsActive(true);
     };
 

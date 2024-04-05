@@ -1,6 +1,3 @@
-// На будущее: решить проблему с fs...
-const fs = null;
-
 // Функции для нахождения производных
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 const dsigmoid = (y) => y * (1 - y);
@@ -105,31 +102,4 @@ export function feedForward(NN, inputs) {
     }
     
     return NN.layers[NN.layers.length - 1].neurons;
-}
-
-// Путь для сохранения нейросети
-const path = "./neuro/out";
-
-// Сохранить все веса сети в файл JSON
-export function saveWeightsToFile(NN, file) {
-    const weightsToSave = NN.layers.map((layer) => layer.weights);
-    const jsonWeights = JSON.stringify(weightsToSave);
-
-    fs.writeFileSync(path + "/" + file, jsonWeights);
-}
-
-// Сохранить все нейроны сети в файл JSON
-export function saveNeuronsToFile(NN, file) {
-    const neuronsToSave = NN.layers.map((layer) => layer.neurons);
-    const jsonNeurons = JSON.stringify(neuronsToSave);
-
-    fs.writeFileSync(path + "/" + file, jsonNeurons);
-}
-
-// Сохранить все биасы сети в файл JSON
-export function saveBiasesToFile(NN, file) {
-    const biasesToSave = NN.layers.map((layer) => layer.biases);
-    const jsonBiases = JSON.stringify(biasesToSave);
-
-    fs.writeFileSync(path + "/" + file, jsonBiases);
 }

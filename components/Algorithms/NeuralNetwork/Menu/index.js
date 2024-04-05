@@ -1,15 +1,10 @@
-import {
-    feedForward,
-    backpropagation,
-    saveBiasesToFile,
-    saveWeightsToFile,
-    saveNeuronsToFile 
-} from "../Utils/neuralNetwork";
 import { useState } from "react";
 import Input from "../../../Input";
 import Button from "../../../Button";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
+import { sleep } from "../../../../utils/helpers";
+import { feedForward, backpropagation } from "../Utils/neuralNetwork";
 
 export default function Menu({
     NN,
@@ -22,7 +17,7 @@ export default function Menu({
     correctDigit,
     setCorrectDigit,
     isFixed,
-    setIsFixed,
+    setIsFixed
 }) {
     const [digit, setDigit] = useState(0);
 
@@ -49,19 +44,22 @@ export default function Menu({
     }
 
     // Изменить веса, если нейросеть не распознала цифру
-    const newBackpropagation = () => {
-        setIsFixed(true);
+    const newBackpropagation = async () => {
+        setIsFixed(1);
 
         const targets = new Array(10).fill(0);
         targets[correctDigit] = 1;
 
         backpropagation(NN, targets);
 
-        return; // Не сохранять, пока не исправлена запись в файл
+        await sleep(0);
 
-        saveWeightsToFile(NN, "weights.json");
-        saveNeuronsToFile(NN, "neurons.json");
-        saveBiasesToFile(NN, "biases.json");
+        fetch("/api/neyro", {
+            method: "POST",
+            body: JSON.stringify(NN)
+        });
+
+        setIsFixed(2);
     }
 
     const getDigit = () => {
@@ -183,9 +181,13 @@ export default function Menu({
                 </Button>
             </div>
 
-            {isFixed && (
-                <span className={`${style.status} ${style.success}`}>
-                    Спасибо, Ваше мнение учтено!
+            {isFixed > 0 && (
+                <span className={`${style.status} ${isFixed === 2 ? style.success : ""}`}>
+                    {isFixed === 1 ? (
+                        "Пожалуйста, подождите..."
+                    ) : (
+                        "Спасибо, Ваше мнение учтено!"
+                    )}
                 </span>
             )}
         </MenuWrapper>

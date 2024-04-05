@@ -3,8 +3,8 @@
 # картинки для нейросети
 /neuro/images
 
-# побочные файлы нейросети
-/neuro/out *
+# файлы нейросети
+/neuro/out
 
 # dependencies
 /node_modules

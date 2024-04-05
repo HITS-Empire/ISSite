@@ -33,7 +33,7 @@ export default function NeuralNetwork({ NN }) {
     const [correctDigit, setCorrectDigit] = useState(0);
 
     // Исправлена нейросеть или нет
-    const [isFixed, setIsFixed] = useState(false);
+    const [isFixed, setIsFixed] = useState(0);
 
     // Создать Canvas'ы
     useEffect(() => {
