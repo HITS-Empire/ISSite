@@ -1,13 +1,21 @@
 import style from "./style.module.scss";
 
 export default function MenuWrapper({
+    className,
     title,
     description,
-    css,
     children
 }) {
+    let classNames = [style.menu];
+
+    if (className) {
+        classNames.push(className);
+    }
+
+    classNames = classNames.join(" ");
+
     return (
-        <div className={style.menu} style={css}>
+        <div className={classNames}>
             <p className={style.title}>
                 {title}
             </p>

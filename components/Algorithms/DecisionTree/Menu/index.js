@@ -63,9 +63,9 @@ export default function Menu({
 
     return (
         <MenuWrapper
+            className={style.menu}
             title="Дерево решений"
             description="Сейчас вы узрите, как работают предсказания на основе обучающих данных."
-            css={{ width: "35%" }}
         >
             <div className={style.inputContainer}>
                 <Input
