@@ -1,6 +1,7 @@
 import fs from "fs";
 
-const path = "./neuro/out";
+// Путь до файлов нейросети
+const path = "./neuro/dist";
 
 // Перезаписать слои нейросети
 function saveToFile(NN, attribute) {

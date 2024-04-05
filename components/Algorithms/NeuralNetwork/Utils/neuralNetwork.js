@@ -4,8 +4,8 @@ const dsigmoid = (y) => y * (1 - y);
 
 // Получить нейросеть
 export function getNeuralNetwork(learningRate, ...sizes) {
-    const weights = require("/neuro/out/weights.json");
-    const biases = require("/neuro/out/biases.json");
+    const weights = require("/neuro/dist/weights.json");
+    const biases = require("/neuro/dist/biases.json");
 
     const layers = sizes.map((size, i) => {
         const nextLayerSize = i < sizes.length - 1 ? sizes[i + 1] : 0;

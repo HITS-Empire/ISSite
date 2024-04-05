@@ -67,8 +67,8 @@ class NeuralNetwork {
         this.dsigmoid = dsigmoid;
         this.layers = [];
 
-        const newWeights = require("./out/weights.json");
-        const newBiases = require("./out/biases.json");
+        const newWeights = require("./dist/weights.json");
+        const newBiases = require("./dist/biases.json");
         
         sizes.forEach((size, i) => {
             let nextLayerSize = i < sizes.length - 1 ? sizes[i + 1] : 0;
