@@ -17,10 +17,15 @@ export const getStaticProps = () => {
 
 export default function NeuralNetwork({ NN }) {
     const canvasRef = useRef();
+    const hiddenCanvasRef = useRef();
 
     // Состояния для работы с Canvas
     const [canvas, setCanvas] = useState();
     const [ctx, setCtx] = useState();
+
+    // Состояния для работы со скрытым Canvas
+    const [hiddenCanvas, setHiddenCanvas] = useState();
+    const [hiddenCtx, setHiddenCtx] = useState();
 
     const [condition, setCondition] = useState(false);
 
@@ -30,12 +35,19 @@ export default function NeuralNetwork({ NN }) {
     // Исправлена нейросеть или нет
     const [isFixed, setIsFixed] = useState(false);
 
-    // Создать Canvas
+    // Создать Canvas'ы
     useEffect(() => {
         createCanvas({
             canvasRef,
             setCanvas,
             setCtx,
+            size: 50
+        });
+
+        createCanvas({
+            canvasRef: hiddenCanvasRef,
+            setCanvas: setHiddenCanvas,
+            setCtx: setHiddenCtx,
             size: 50
         });
     }, []);
@@ -46,6 +58,8 @@ export default function NeuralNetwork({ NN }) {
                 NN={NN}
                 canvas={canvas}
                 ctx={ctx}
+                hiddenCanvas={hiddenCanvas}
+                hiddenCtx={hiddenCtx}
                 condition={condition}
                 setCondition={setCondition}
                 correctDigit={correctDigit}
@@ -56,6 +70,7 @@ export default function NeuralNetwork({ NN }) {
 
             <Field
                 canvasRef={canvasRef}
+                hiddenCanvasRef={hiddenCanvasRef}
                 canvas={canvas}
                 ctx={ctx}
                 setCondition={setCondition}

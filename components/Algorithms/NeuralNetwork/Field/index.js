@@ -1,8 +1,10 @@
 import { useState } from "react";
 import Canvas from "../../../Canvas";
+import style from "./style.module.scss";
 
 export default function Field({
     canvasRef,
+    hiddenCanvasRef,
     canvas,
     ctx,
     setCondition,
@@ -46,12 +48,18 @@ export default function Field({
     };
 
     return (
-        <Canvas
-            canvasRef={canvasRef}
-            onMouseDown={isPainting}
-            onMouseMove={painting}
-            onMouseUp={endPainting}
-            onMouseOut={endPainting}
-        />
+        <>
+            <Canvas
+                className={style.hiddenCanvas}
+                canvasRef={hiddenCanvasRef}
+            />
+            <Canvas
+                canvasRef={canvasRef}
+                onMouseDown={isPainting}
+                onMouseMove={painting}
+                onMouseUp={endPainting}
+                onMouseOut={endPainting}
+            />
+        </>
     );
 }

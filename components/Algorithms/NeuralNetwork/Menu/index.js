@@ -15,6 +15,8 @@ export default function Menu({
     NN,
     canvas,
     ctx,
+    hiddenCanvas,
+    hiddenCtx,
     condition,
     setCondition,
     correctDigit,
@@ -31,6 +33,9 @@ export default function Menu({
 
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        if (hiddenCtx) {
+            hiddenCtx.clearRect(0, 0, hiddenCanvas.width, hiddenCanvas.height);
         }
     }
 
@@ -62,18 +67,18 @@ export default function Menu({
     const getDigit = () => {
         setIsFixed(false);
 
-        let image1 = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data1 = image1.data;
-        
+        const firstImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const firstData = firstImage.data;
+
         let left = canvas.width;
         let right = 0; 
         let top = canvas.height;
         let bottom = 0;
 
-        for (let i = 0; i < data1.length; i += 4) {
+        for (let i = 0; i < firstData.length; i += 4) {
             let value = 0;
             for (let j = 0; j < 3; j++) {
-                value += data1[i + j];
+                value += firstData[i + j];
             }
             value /= 3;
 
@@ -83,23 +88,15 @@ export default function Menu({
 
                 if (newX < left) left = newX;
                 if (newX > right) right = newX;
-                if (newY < top) top = newY ;
-                if (newY > bottom) bottom = newY ;
+                if (newY < top) top = newY;
+                if (newY > bottom) bottom = newY;
             }
         }
 
-        console.log(left);
-        console.log(right);
-        console.log(top);
-        console.log(bottom);
-
         const originWidth = Math.abs(left - right);
         const originHeight = Math.abs(bottom - top);
-        
-        console.log(originHeight);
-        console.log(originWidth);
-        
-        const ratio = Math.max(originHeight, originWidth) / 32;
+
+        const ratio = Math.max(originHeight, originWidth) / 40;
 
         const newHeight = originHeight / ratio;
         const newWidth = originWidth / ratio;
@@ -107,32 +104,20 @@ export default function Menu({
         const startX = (50 - newWidth) / 2;
         const startY = (50 - newHeight) / 2;
 
-        const hiddenCanvas = document.createElement("canvas");
-        hiddenCanvas.style.display = "block";
-        hiddenCanvas.style.backgroundColor = "grey";
-        hiddenCanvas.width = 50;
-        hiddenCanvas.height = 50;
-        document.body.appendChild(hiddenCanvas);
-        const hiddenCtx = hiddenCanvas.getContext("2d");
-
         hiddenCtx.drawImage(canvas, left, top, originWidth, originHeight, startX, startY, newWidth, newHeight);
-        
-        let image = hiddenCtx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = image.data;
-        
+
+        const secondImage = hiddenCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const secondData = secondImage.data;
+
         const pixels = [];
-        for (let i = 0; i < data.length; i += 4) {
-            let value = 0;
-            for (let j = 0; j < 3; j++) {
-                value += data[i + j];
-            }
-            value /= 3;
-    
-            pixels.push(value / 255);
+        for (let i = 0; i < secondData.length; i += 4) {
+            pixels.push(
+                Math.pow(secondData[i + 3] / 255, 1 / Math.pow(ratio, 2))
+            );
         }
-        console.log(pixels);
+
         const output = feedForward(NN, pixels);
-        
+
         let endDigit = 0;
         let endDigitWeight = -1;
 
