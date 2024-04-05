@@ -15,12 +15,14 @@ export default function Menu({
     NN,
     canvas,
     ctx,
+    hiddenCanvas,
+    hiddenCtx,
     condition,
     setCondition,
     correctDigit,
     setCorrectDigit,
     isFixed,
-    setIsFixed
+    setIsFixed,
 }) {
     const [digit, setDigit] = useState(0);
 
@@ -31,6 +33,9 @@ export default function Menu({
 
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        if (hiddenCtx) {
+            hiddenCtx.clearRect(0, 0, hiddenCanvas.width, hiddenCanvas.height);
         }
     }
 
@@ -62,22 +67,57 @@ export default function Menu({
     const getDigit = () => {
         setIsFixed(false);
 
-        let image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = image.data;
+        const firstImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const firstData = firstImage.data;
 
-        const pixels = [];
-        for (let i = 0; i < data.length; i += 4) {
+        let left = canvas.width;
+        let right = 0; 
+        let top = canvas.height;
+        let bottom = 0;
+
+        for (let i = 0; i < firstData.length; i += 4) {
             let value = 0;
             for (let j = 0; j < 3; j++) {
-                value += data[i + j];
+                value += firstData[i + j];
             }
             value /= 3;
-    
-            pixels.push(value / 255);
+
+            if (value / 255 > 0) {
+                const newX = i / 4 % canvas.width;
+                const newY = Math.floor(i / 4 / canvas.width);
+
+                if (newX < left) left = newX;
+                if (newX > right) right = newX;
+                if (newY < top) top = newY;
+                if (newY > bottom) bottom = newY;
+            }
         }
-        
+
+        const originWidth = Math.abs(left - right);
+        const originHeight = Math.abs(bottom - top);
+
+        const ratio = Math.max(originHeight, originWidth) / 40;
+
+        const newHeight = originHeight / ratio;
+        const newWidth = originWidth / ratio;
+
+        const startX = (50 - newWidth) / 2;
+        const startY = (50 - newHeight) / 2;
+
+        hiddenCtx.drawImage(canvas, left, top, originWidth, originHeight, startX, startY, newWidth, newHeight);
+
+        const secondImage = hiddenCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const secondData = secondImage.data;
+
+        const pixels = [];
+        for (let i = 0; i < secondData.length; i += 4) {
+            pixels.push(
+                Math.pow(secondData[i + 3] / 255, 1 / Math.pow(ratio, 2))
+            );
+        }
+
         const output = feedForward(NN, pixels);
-        
+
         let endDigit = 0;
         let endDigitWeight = -1;
 
