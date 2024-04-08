@@ -36,7 +36,7 @@ export function getField(count) {
                 type: 1,
                 cost: Infinity,
                 heuristic: 0,
-                previousCost: Infinity,
+                selfCost: Infinity,
                 neighbours: [],
                 previous: null
             });
@@ -160,7 +160,7 @@ export function getExtendedField(field) {
             type: 1,
             cost: 0,
             heuristic: 0,
-            previousCost: 0,
+            selfCost: 0,
             neighbours: [],
             previous: null
         }));
@@ -189,6 +189,7 @@ export function getNextCell(i, { row, column }) {
 // Найти путь до конца поля
 export async function findPathInField({
     count,
+    renderingDelay,
     field,
     startCell,
     endCell,
@@ -197,8 +198,8 @@ export async function findPathInField({
     let openSet = [];
     let closedSet = [];
 
-    for (let row = 0;row < count;row++) {
-        for (let column = 0;column < count;column++) {
+    for (let row = 0; row < count; row++) {
+        for (let column = 0; column < count; column++) {
             for (let n = 0; n < 4; n++) {
                 if (cellIsExists(row + 1, column, count) && field[row + 1][column] !== 1) {
                     field[row][column].neighbours.push(field[row + 1][column]);
@@ -216,13 +217,17 @@ export async function findPathInField({
         }
     }
 
+    startCell.cost = 0;
+    startCell.heuristic = Math.abs(startCell.column - endCell.column) + Math.abs(startCell.row - endCell.row);
+    startCell.selfCost = startCell.cost + startCell.heuristic;
+    
     openSet.push(startCell);
 
     while (openSet.length) {
-        let current = openSet[0];
+       let current = openSet[0];
 
         for (let i = 1;i < openSet.length;i++) {
-            if (openSet[i].cost < current.cost || (openSet[i].cost === current.cost && current.heuristic < current.heuristic)) {
+            if (openSet[i].selfCost < current.selfCost) {
                 current = openSet[i];
             }
         }
@@ -234,7 +239,7 @@ export async function findPathInField({
             field[current.row][current.column].type = 4;
             field[current.row][current.column].draw();
 
-            await sleep(100 / count);
+            await sleep(renderingDelay);
         }
 
         if (current === endCell) {
@@ -262,21 +267,18 @@ export async function findPathInField({
 
         for (let neighbour of current.neighbours) {
             if (!closedSet.includes(neighbour)) {
-                let tempCost = current.selfCost + 1;
+                let tempCost = current.cost + 1;
 
-                if (openSet.includes(neighbour)) {
-                    neighbour.selfCost = tempCost;
-                } else {
-                    neighbour.selfCost = tempCost;
-                    if (neighbour.type !== 1)   {
+                if (!openSet.includes(neighbour) || tempCost < neighbour.cost) {
+                    neighbour.cost = tempCost;
+                    neighbour.heuristic = Math.abs(neighbour.column - endCell.column) + Math.abs(neighbour.row - endCell.row);
+                    neighbour.selfCost = neighbour.cost + neighbour.heuristic;
+                    
+                    neighbour.previous = current;
+                    if (!openSet.includes(neighbour) && neighbour.type !== 1) {
                         openSet.push(neighbour);
                     }
                 }
-
-                neighbour.heuristic = Math.abs(neighbour.column - endCell.column) + Math.abs(neighbour.row - endCell.row);
-                
-                neighbour.cost = neighbour.previousCost + neighbour.heuristic;
-                neighbour.previous = current;
             }
         }
     }

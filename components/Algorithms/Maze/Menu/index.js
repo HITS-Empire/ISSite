@@ -6,6 +6,8 @@ import MenuWrapper from "../../../MenuWrapper";
 export default function Menu({
     count,
     setCount,
+    renderingDelay,
+    setRenderingDelay,
     processIsActive,
     setProcessIsActive,
     refreshField,
@@ -23,6 +25,14 @@ export default function Menu({
         if (!/^\d*$/.test(value)) return;
 
         setCount(Math.min(Math.max(value, 0), 128));
+    };
+
+    const changeRenderingDelayEvent = (event) => {
+        const value = event.target.value;
+
+        if (!/^\d*$/.test(value)) return;
+
+        setRenderingDelay(Math.max(value, 0));
     };
 
     let statusDescription;
@@ -48,6 +58,18 @@ export default function Menu({
                     value={count}
                     disabled={processIsActive}
                     onChange={changeCountEvent}
+                />
+            </div>
+
+            <div className={style.inputContainer}>
+                <Input 
+                    type="text"
+                    label="Задержка отрисовки"
+                    description="Введите задержку отрисовки"
+                    maxLength={4}
+                    value={renderingDelay}
+                    disabled={processIsActive}
+                    onChange={changeRenderingDelayEvent}
                 />
             </div>
 
