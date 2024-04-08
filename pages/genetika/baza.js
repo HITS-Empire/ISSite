@@ -1,9 +1,13 @@
-import Canvas from "../../components/Canvas";
 import { createCanvas } from "../../utils/canvas";
 import { useRef, useState, useEffect } from "react";
 import Menu from "../../components/Algorithms/Genetic/Basic/Menu";
+import Field from "../../components/Algorithms/Genetic/Basic/Field"
 
 export default function Genetic() {
+    // Вершины графа
+    const [vertices, setVertices] = useState([]);
+    const [lines, setLines] = useState([]);
+
     const canvasRef = useRef();
 
     // Состояния для работы с Canvas
@@ -22,9 +26,23 @@ export default function Genetic() {
 
     return (
         <>
-            <Menu />
+            <Menu 
+                setVertices={setVertices}
+                vertices={vertices}
+                setLines={setLines}
+                canvas={canvas}
+                ctx={ctx}
+            />
 
-            <Canvas canvasRef={canvasRef} />
+            <Field
+                vertices={vertices}
+                setVertices={setVertices}
+                lines={lines}
+                setLines={setLines}
+                canvasRef={canvasRef}
+                canvas={canvas}
+                ctx={ctx}
+            />
         </>
     );
 }

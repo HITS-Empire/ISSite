@@ -109,7 +109,6 @@ export default function Menu({
         const clustersKMeans = kMeans(points, clusters);
         const clustersDBSCAN = DBSCAN(points, radius, minAmount);
         const clustersWARD = WARD(points, clusters);
-        console.log(clustersWARD);
 
         if (!ctx) return;
 
