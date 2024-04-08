@@ -6,7 +6,7 @@ export default function NavigationLink({ href, title }) {
     const router = useRouter();
 
 	// Если пользователь находится на странице ссылки, то выделять ссылку
-	const active = router.asPath === href ? "true" : "false";
+	const active = String(router.asPath.split("/")[1] === href.split("/")[1]);
 
     return (
         <li className={style.li}>
