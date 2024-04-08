@@ -2,20 +2,17 @@ import { createCanvas } from "../utils/canvas";
 import { useRef, useState, useEffect } from "react";
 import Menu from "../components/Algorithms/NeuralNetwork/Menu";
 import Field from "../components/Algorithms/NeuralNetwork/Field";
-import {
-    getNeuralNetwork
-} from "../components/Algorithms/NeuralNetwork/Utils/neuralNetwork";
 
-// Создать нейросеть на этапе билда приложения
-export const getStaticProps = () => {
-    const NN = getNeuralNetwork(0.01, 2500, 1000, 200, 10);
+// Доступные роуты API
+const routes = [
+    { url: "/api/neyro/correct", method: "POST" },
+    { url: "/api/neyro/predict", method: "POST" }
+];
 
-    return {
-        props: { NN }
-    };
-}
+// Скомпилировано ли API
+let apiIsCompiled = false;
 
-export default function NeuralNetwork({ NN }) {
+export default function NeuralNetwork() {
     const canvasRef = useRef();
     const hiddenCanvasRef = useRef();
 
@@ -35,7 +32,7 @@ export default function NeuralNetwork({ NN }) {
     // Исправлена нейросеть или нет
     const [isFixed, setIsFixed] = useState(0);
 
-    // Создать Canvas'ы
+    // Создать Canvas'ы и скомпилировать нейросеть
     useEffect(() => {
         createCanvas({
             canvasRef,
@@ -50,12 +47,19 @@ export default function NeuralNetwork({ NN }) {
             setCtx: setHiddenCtx,
             size: 50
         });
+
+        // Скомпилировать API холостыми вызовами
+        if (!apiIsCompiled) {
+            routes.forEach((route) => {
+                fetch(route.url, { mathod: route.method });
+            });
+            apiIsCompiled = true;
+        }
     }, []);
 
     return (
         <>
             <Menu
-                NN={NN}
                 canvas={canvas}
                 ctx={ctx}
                 hiddenCanvas={hiddenCanvas}

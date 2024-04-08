@@ -1,11 +1,16 @@
+import fs from "fs";
+
+// Путь до файлов нейросети
+const path = "./neuro/dist";
+
 // Функции для нахождения производных
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 const dsigmoid = (y) => y * (1 - y);
 
 // Получить нейросеть
-export function getNeuralNetwork(learningRate, ...sizes) {
-    const weights = require("/neuro/dist/weights.json");
-    const biases = require("/neuro/dist/biases.json");
+const getNeuralNetwork = (learningRate, ...sizes) => {
+    const weights = JSON.parse(fs.readFileSync(path + "/weights.json"));
+    const biases = JSON.parse(fs.readFileSync(path + "/biases.json"));
 
     const layers = sizes.map((size, i) => {
         const nextLayerSize = i < sizes.length - 1 ? sizes[i + 1] : 0;
@@ -30,7 +35,7 @@ export function getNeuralNetwork(learningRate, ...sizes) {
 }
 
 // Обучение нейросети на основе алгоритма обратной ошибки
-export function backpropagation(NN, targets) {
+const backpropagation = (NN, targets) => {
     let errors = new Array(NN.layers[NN.layers.length - 1].size);
 
     for (let i = 0; i < NN.layers[NN.layers.length - 1].size; i++) {
@@ -82,7 +87,7 @@ export function backpropagation(NN, targets) {
 }
 
 // Прямой просмотр нейронов
-export function feedForward(NN, inputs) {
+const feedForward = (NN, inputs) => {
     NN.layers[0].neurons = [...inputs];
 
     for (let i = 1; i < NN.layers.length; i++) {
@@ -103,3 +108,22 @@ export function feedForward(NN, inputs) {
     
     return NN.layers[NN.layers.length - 1].neurons;
 }
+
+// Перезаписать слои нейросети
+const saveToFile = (NN, attribute) => {
+    const array = NN.layers.map((layer) => layer[attribute]);
+    const jsonArray = JSON.stringify(array);
+
+    fs.writeFileSync(`${path}/${attribute}.json`, jsonArray);
+}
+
+// Создать нейросеть для API
+const NN = getNeuralNetwork(0.01, 2500, 1000, 200, 10);
+
+module.exports = {
+    NN,
+    getNeuralNetwork,
+    backpropagation,
+    feedForward,
+    saveToFile
+};

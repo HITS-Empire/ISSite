@@ -1,13 +1,11 @@
 import { useState } from "react";
 import Input from "../../../Input";
 import Button from "../../../Button";
-import style from "./style.module.scss";
+import Status from "../../../Status";
 import MenuWrapper from "../../../MenuWrapper";
-import { sleep } from "../../../../utils/helpers";
-import { feedForward, backpropagation } from "../Utils/neuralNetwork";
+import ButtonContainer from "../../../ButtonContainer";
 
 export default function Menu({
-    NN,
     canvas,
     ctx,
     hiddenCanvas,
@@ -24,7 +22,7 @@ export default function Menu({
     const refreshCanvas = () => {
         setCondition(false);
         setCorrectDigit(0);
-        setIsFixed(false);
+        setIsFixed(0);
 
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,29 +38,22 @@ export default function Menu({
 
         if (!/^\d*$/.test(value)) return;
 
-        setCorrectDigit(Number(value));
+        setCorrectDigit(Math.min(Math.max(value, 0), 9));
     }
 
     // Изменить веса, если нейросеть не распознала цифру
     const newBackpropagation = async () => {
         setIsFixed(1);
 
-        const targets = new Array(10).fill(0);
-        targets[correctDigit] = 1;
-
-        backpropagation(NN, targets);
-
-        await sleep(0);
-
-        fetch("/api/neyro", {
+        await fetch("/api/neyro/correct", {
             method: "POST",
-            body: JSON.stringify(NN)
+            body: correctDigit
         });
 
         setIsFixed(2);
     }
 
-    const getDigit = () => {
+    const getDigit = async () => {
         setIsFixed(false);
 
         const firstImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -114,21 +105,22 @@ export default function Menu({
             );
         }
 
-        const output = feedForward(NN, pixels);
+        let digit = 0;
 
-        let endDigit = 0;
-        let endDigitWeight = -1;
+        try {
+            const response = await fetch("/api/neyro/predict", {
+                method: "POST",
+                body: JSON.stringify(pixels)
+            });
 
-        for (let i = 0; i < 10; i++) {
-            if (endDigitWeight < output[i]) {
-                endDigitWeight = output[i];
-                endDigit = i;
-            }
+            digit = await response.json();
+        } catch (error) {
+            console.error(error);
         }
 
         setCondition(true);
-        setDigit(endDigit);
-        setCorrectDigit(endDigit);
+        setDigit(digit);
+        setCorrectDigit(digit);
     };
 
     return (
@@ -136,7 +128,7 @@ export default function Menu({
             title="Нейронная сеть"
             description="Сейчас вы узрите, как работает нейронная сеть IS Empire."
         >
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={getDigit}
@@ -150,28 +142,26 @@ export default function Menu({
                 >
                     Очистить
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            <span className={`${style.status} ${condition ? style.success : ""}`}>
+            <Status type={Number(condition)}>
                 {condition ? (
                     `Вы нарисовали цифру: ${digit}`
                 ) : (
                     "Нарисуйте Вашу цифру!"
                 )}
-            </span>
+            </Status>
 
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="Правильная цифра"
-                    description="Введите правильную цифру"
-                    value={correctDigit}
-                    onChange={getCorrectDigit}
-                    disabled={!condition || isFixed}
-                />
-            </div>
+            <Input
+                type="text"
+                label="Правильная цифра"
+                description="Введите правильную цифру"
+                value={correctDigit}
+                onChange={getCorrectDigit}
+                disabled={!condition || isFixed}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={newBackpropagation}
@@ -179,17 +169,17 @@ export default function Menu({
                 >
                     Исправить
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            {isFixed > 0 && (
-                <span className={`${style.status} ${isFixed === 2 ? style.success : ""}`}>
-                    {isFixed === 1 ? (
+            <Status type={Number(isFixed === 2)}>
+                {!!isFixed && (
+                    isFixed === 1 ? (
                         "Пожалуйста, подождите..."
                     ) : (
                         "Спасибо, Ваше мнение учтено!"
-                    )}
-                </span>
-            )}
+                    )
+                )}
+            </Status>
         </MenuWrapper>
     );
 }

@@ -1,7 +1,7 @@
-import Canvas from "../components/Canvas";
-import { createCanvas } from "../utils/canvas";
+import Canvas from "../../components/Canvas";
+import { createCanvas } from "../../utils/canvas";
 import { useRef, useState, useEffect } from "react";
-import Menu from "../components/Algorithms/Genetic/Menu";
+import Menu from "../../components/Algorithms/Genetic/Basic/Menu";
 
 export default function Genetic() {
     const canvasRef = useRef();

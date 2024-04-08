@@ -1,7 +1,9 @@
 import Input from "../../../Input";
 import Button from "../../../Button";
+import Status from "../../../Status";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
+import ButtonContainer from "../../../ButtonContainer";
 
 export default function Menu({
     count,
@@ -27,31 +29,30 @@ export default function Menu({
 
     let statusDescription;
     switch (status) {
-        case "success":
+        case 1:
             statusDescription = "Путь успешно найден!";
             break;
-        case "error":
+        case 2:
             statusDescription = "Не удалось найти путь...";
     }
 
     return (
         <MenuWrapper
+            className={style.menu}
             title="А*"
             description="Сейчас вы узрите, как работает алгоритм нахождения пути в лабиринте."
         >
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="Размеры поля"
-                    description="Введите размеры поля"
-                    maxLength={4}
-                    value={count}
-                    disabled={processIsActive}
-                    onChange={changeCountEvent}
-                />
-            </div>
+            <Input
+                type="text"
+                label="Размеры поля"
+                description="Введите размеры поля"
+                maxLength={4}
+                value={count}
+                disabled={processIsActive}
+                onChange={changeCountEvent}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={runProcess}
@@ -67,13 +68,11 @@ export default function Menu({
                 >
                     Перезагрузить
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            {status && (
-                <span className={`${style.status} ${style[status]}`}>
-                    {statusDescription}
-                </span>
-            )}
+            <Status type={status}>
+                {status && statusDescription}
+            </Status>
         </MenuWrapper>
     );
 }

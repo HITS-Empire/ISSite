@@ -5,6 +5,7 @@ import style from "./style.module.scss";
 import { kMeans } from "../Utils/kMeans";
 import { DBSCAN } from "../Utils/DBSCAN";
 import MenuWrapper from "../../../MenuWrapper";
+import ButtonContainer from "../../../ButtonContainer";
 
 export default function Menu({
     points,
@@ -66,6 +67,8 @@ export default function Menu({
         let currentPoint = startPoint;
         let currentLook = 0;
         let isEnd = false;
+
+        action(startPoint);
 
         while (true) {
             let nextPoint;
@@ -238,40 +241,35 @@ export default function Menu({
 
     return (
         <MenuWrapper
+            className={style.menu}
             title="Алгоритм кластеризации"
             description="Сейчас вы узрите, как работает алгоритм кластеризации."
         >
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="kMeans и WARD: Количество кластеров"
-                    description="Введите количество кластеров"
-                    value={clusters}
-                    onChange={changeAmountOfClusters}
-                />
-            </div>
+            <Input
+                type="text"
+                label="kMeans и WARD: Количество кластеров"
+                description="Введите количество кластеров"
+                value={clusters}
+                onChange={changeAmountOfClusters}
+            />
 
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="DBSCAN: Радиус поиска"
-                    description="Введите радиус поиска"
-                    value={radius}
-                    onChange={changeRadius}
-                />
-            </div>
+            <Input
+                type="text"
+                label="DBSCAN: Радиус поиска"
+                description="Введите радиус поиска"
+                value={radius}
+                onChange={changeRadius}
+            />
 
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="DBSCAN: Количество точек в радиусе"
-                    description="Введите количество точек в радиусе"
-                    value={minAmount}
-                    onChange={changeMinAmount}
-                />
-            </div>
+            <Input
+                type="text"
+                label="DBSCAN: Количество точек в радиусе"
+                description="Введите количество точек в радиусе"
+                value={minAmount}
+                onChange={changeMinAmount}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={drawClusters}
@@ -285,7 +283,7 @@ export default function Menu({
                 >
                     Перезагрузить
                 </Button>
-            </div>
+            </ButtonContainer>
 
             <p className={style.additionally}>
                 Области - WARD, линии - DBSCAN, точки - kMeans

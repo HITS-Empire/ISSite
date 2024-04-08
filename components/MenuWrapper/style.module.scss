@@ -1,14 +1,17 @@
 .menu {
-    width: 40%;
-    margin-left: auto;
-    margin-right: 20px;
+    width: 30%;
+    margin: 10px 60px 0 auto;
+    font-size: 18px;
+
+    @media (max-width: 800px) {
+        width: 80%;
+        margin: auto;
+    }
+    @media (max-width: 960px) {
+        font-size: 14px;
+    }
 
     .title {
         font-weight: 600;
-        font-size: 18px;
-    }
-
-    .description {
-        font-size: 18px;
     }
 }
