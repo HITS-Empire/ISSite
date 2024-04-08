@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Input from "../../../Input";
 import Button from "../../../Button";
-import style from "./style.module.scss";
+import Status from "../../../Status";
 import MenuWrapper from "../../../MenuWrapper";
 import { sleep } from "../../../../utils/helpers";
+import ButtonContainer from "../../../ButtonContainer";
 import { feedForward, backpropagation } from "../Utils/neuralNetwork";
 
 export default function Menu({
@@ -136,7 +137,7 @@ export default function Menu({
             title="Нейронная сеть"
             description="Сейчас вы узрите, как работает нейронная сеть IS Empire."
         >
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={getDigit}
@@ -150,28 +151,26 @@ export default function Menu({
                 >
                     Очистить
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            <span className={`${style.status} ${condition ? style.success : ""}`}>
+            <Status type={Number(condition)}>
                 {condition ? (
                     `Вы нарисовали цифру: ${digit}`
                 ) : (
                     "Нарисуйте Вашу цифру!"
                 )}
-            </span>
+            </Status>
 
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="Правильная цифра"
-                    description="Введите правильную цифру"
-                    value={correctDigit}
-                    onChange={getCorrectDigit}
-                    disabled={!condition || isFixed}
-                />
-            </div>
+            <Input
+                type="text"
+                label="Правильная цифра"
+                description="Введите правильную цифру"
+                value={correctDigit}
+                onChange={getCorrectDigit}
+                disabled={!condition || isFixed}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={newBackpropagation}
@@ -179,17 +178,17 @@ export default function Menu({
                 >
                     Исправить
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            {isFixed > 0 && (
-                <span className={`${style.status} ${isFixed === 2 ? style.success : ""}`}>
-                    {isFixed === 1 ? (
+            <Status type={Number(isFixed === 2)}>
+                {!!isFixed && (
+                    isFixed === 1 ? (
                         "Пожалуйста, подождите..."
                     ) : (
                         "Спасибо, Ваше мнение учтено!"
-                    )}
-                </span>
-            )}
+                    )
+                )}
+            </Status>
         </MenuWrapper>
     );
 }

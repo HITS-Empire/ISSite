@@ -1,8 +1,9 @@
 import Input from "../../../Input";
 import Button from "../../../Button";
 import style from "./style.module.scss";
-import MenuWrapper from "../../../MenuWrapper";
 import { getEmptyCell } from "../Utils/field";
+import MenuWrapper from "../../../MenuWrapper";
+import ButtonContainer from "../../../ButtonContainer";
 
 export default function Menu({
     count,
@@ -58,21 +59,20 @@ export default function Menu({
 
     return (
         <MenuWrapper
+            className={style.menu}
             title="Муравьиный алгоритм"
             description="Сейчас вы узрите муравьиную колонию, которая кипит жизнью."
         >
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="Размеры поля"
-                    description="Введите размеры поля"
-                    value={count}
-                    disabled={processIsActive}
-                    onChange={changeCountEvent}
-                />
-            </div>
+            <Input
+                type="text"
+                label="Размеры поля"
+                description="Введите размеры поля"
+                value={count}
+                disabled={processIsActive}
+                onChange={changeCountEvent}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={runProcess}
@@ -88,20 +88,18 @@ export default function Menu({
                 >
                     {processIsPaused ? "Возобновить" : "Остановить"}
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="Количество муравьёв"
-                    description="Введите количество муравьёв"
-                    value={population}
-                    disabled={processIsActive}
-                    onChange={changePopulationEvent}
-                />
-            </div>
+            <Input
+                type="text"
+                label="Количество муравьёв"
+                description="Введите количество муравьёв"
+                value={population}
+                disabled={processIsActive}
+                onChange={changePopulationEvent}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={addFood}
@@ -117,7 +115,7 @@ export default function Menu({
                 >
                     Перезагрузить
                 </Button>
-            </div>
+            </ButtonContainer>
         </MenuWrapper>
     );
 }

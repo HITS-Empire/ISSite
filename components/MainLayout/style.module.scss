@@ -1,11 +1,9 @@
 .main {
     display: flex;
-    height: calc(100% - 80px);
-    margin-top: 10px;
-}
+    flex-wrap: wrap;
+    width: 100%;
 
-.container {
-    display: flex;
-    height: 100%;
-    margin: auto;
+    @media (max-width: 800px) {
+        flex-direction: column;
+    }
 }

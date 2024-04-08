@@ -1,8 +1,10 @@
 import Input from "../../../Input";
 import Button from "../../../Button";
+import Status from "../../../Status";
 import style from "./style.module.scss";
 import MenuWrapper from "../../../MenuWrapper";
 import { readFile } from "../../../../utils/helpers";
+import ButtonContainer from "../../../ButtonContainer";
 import { convertCSVtoJSON } from "../../../../utils/helpers";
 
 export default function Menu({
@@ -67,18 +69,16 @@ export default function Menu({
             title="Дерево решений"
             description="Сейчас вы узрите, как работают предсказания на основе обучающих данных."
         >
-            <div className={style.inputContainer}>
-                <Input
-                    type="text"
-                    label="Максимальная глубина дерева"
-                    description="Введите максимальную глубину дерева"
-                    value={maxDepth}
-                    disabled={trainingSet}
-                    onChange={changeMaxDepthEvent}
-                />
-            </div>
+            <Input
+                type="text"
+                label="Максимальная глубина дерева"
+                description="Введите максимальную глубину дерева"
+                value={maxDepth}
+                disabled={trainingSet}
+                onChange={changeMaxDepthEvent}
+            />
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onChange={addTrainingSet}
@@ -104,9 +104,9 @@ export default function Menu({
                 >
                     Предсказать событие
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="soft"
                     onClick={clearDecisionTree}
@@ -114,13 +114,11 @@ export default function Menu({
                 >
                     Очистить
                 </Button>
-            </div>
+            </ButtonContainer>
 
-            {prediction && (
-                <span className={style.status}>
-                    Результат: {prediction}
-                </span>
-            )}
+            <Status type={1}>
+                {prediction && `Результат: ${prediction}`}
+            </Status>
         </MenuWrapper>
     );
 }
