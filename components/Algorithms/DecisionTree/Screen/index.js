@@ -116,7 +116,7 @@ export default function Screen({
                 onMouseUp={moveScreenEnd}
                 onMouseOut={moveScreenEnd}
                 onMouseMove={moveScreen}
-                active={!processIsActive ? "true" : "false"}
+                active={String(!processIsActive)}
             />
             <div
                 className={style.tree}
