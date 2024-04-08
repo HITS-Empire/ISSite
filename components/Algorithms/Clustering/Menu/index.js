@@ -67,6 +67,8 @@ export default function Menu({
         let currentLook = 0;
         let isEnd = false;
 
+        action(startPoint);
+
         while (true) {
             let nextPoint;
             let nextLook;
