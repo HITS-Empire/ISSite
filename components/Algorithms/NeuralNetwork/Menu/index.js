@@ -41,7 +41,7 @@ export default function Menu({
 
         if (!/^\d*$/.test(value)) return;
 
-        setCorrectDigit(Number(value));
+        setCorrectDigit(Math.min(Math.max(value, 0), 9));
     }
 
     // Изменить веса, если нейросеть не распознала цифру
