@@ -262,7 +262,7 @@ export async function findPathInField({
                 }
             }
 
-            return setStatus("success");
+            return setStatus(1);
         }
 
         for (let neighbour of current.neighbours) {
@@ -282,5 +282,6 @@ export async function findPathInField({
             }
         }
     }
-    setStatus("error");
+
+    setStatus(2);
 }

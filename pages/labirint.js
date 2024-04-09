@@ -26,8 +26,8 @@ export default function Maze() {
     // Активен ли процесс поиска пути
     const [processIsActive, setProcessIsActive] = useState(false);
 
-    // Статус поиска ("success" или "error")
-    const [status, setStatus] = useState();
+    // Статус поиска (0 - нет статуса, 1 - успех, 2 - ошибка)
+    const [status, setStatus] = useState(0);
 
     // Перезагрузить поле
     const refreshField = () => {

@@ -1,11 +1,18 @@
 .field {
     display: flex;
-    margin-right: auto;
+    margin: 10px auto auto 0;
     flex-flow: row wrap;
-    height: 90%;
-    aspect-ratio: 1 / 1;
+    width: 50%;
+    max-width: 80vh;
+    aspect-ratio: 1;
     position: relative;
-    
+
+    @media (max-width: 800px) {
+        width: 80%;
+        max-width: 100%;
+        margin: 10px auto 20px auto;
+    }
+
     canvas {
         position: absolute;
         z-index: 0;

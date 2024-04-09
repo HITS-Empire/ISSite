@@ -1,22 +1,8 @@
 .menu {
-    width: 35% !important;
-}
+    min-width: 430px;
 
-.inputContainer {
-    margin: 30px 0 20px;
-    width: 80%;
-}
-
-.buttonContainer {
-    display: flex;
-    margin: 20px 0;
-
-    button, label {
-        margin-right: 10px;
+    @media (max-width: 960px) {
+        min-width: 80%;
+        margin: auto;
     }
-}
-
-.status {
-    font-size: 20px;
-    color: $success;
 }

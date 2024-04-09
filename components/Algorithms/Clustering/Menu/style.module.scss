@@ -1,15 +1,9 @@
-.buttonContainer {
-    display: flex;
-    margin: 10px 0;
+.menu {
+    min-width: 330px;
 
-    button {
-        margin-right: 10px;
+    @media (max-width: 960px) {
+        min-width: 260px;
     }
-}
-
-.inputContainer {
-    margin: 30px 0 20px;
-    width: 80%;
 }
 
 .additionally {

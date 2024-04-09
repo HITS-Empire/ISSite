@@ -1,0 +1,71 @@
+.codeContainer {
+    display: flex;
+    margin: 10px auto auto 0;
+    flex-flow: row wrap;
+    width: 50%;
+    max-width: 80vh;
+    aspect-ratio: 1;
+
+    @media (max-width: 800px) {
+        width: 80%;
+        max-width: 100%;
+        margin: 10px auto 20px auto;
+    }
+
+    .highlight {
+        display: flex;
+        width: 100%;
+        height: 78%;
+        margin: 0;
+        border-radius: 12px;
+        background: $gradientWhite50;
+        font-size: 14px;
+
+        code {
+            width: 100%;
+            margin: 8px;
+            overflow: auto;
+        }
+    }
+
+    .console {
+        display: flex;
+        width: 100%;
+        height: 20%;
+        margin-top: auto;
+        border-radius: 12px;
+        background: $gradientWhite50;
+
+        .arrow {
+            display: flex;
+            min-width: 20px;
+            margin: 5px;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 22px;
+            color: $purple;
+        }
+
+        .output {
+            display: flex;
+            margin: 10px 5px;
+            font-weight: 500;
+            font-size: 14px;
+            color: $success;
+            overflow: auto;
+        }
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+        border-radius: 6px;
+        background: $gradientWhite50;
+        cursor: pointer;
+    }
+    ::-webkit-scrollbar-corner {
+        display: none;
+    }
+}

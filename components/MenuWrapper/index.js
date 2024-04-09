@@ -19,9 +19,7 @@ export default function MenuWrapper({
             <p className={style.title}>
                 {title}
             </p>
-            <span className={style.description}>
-                {description}
-            </span>
+            <span>{description}</span>
 
             {children}
         </div>

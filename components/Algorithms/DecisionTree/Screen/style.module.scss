@@ -1,15 +1,23 @@
 .screen {
     display: flex;
-    position: relative;
-    margin-right: auto;
+    margin: 10px auto auto 0;
     flex-flow: row wrap;
-    height: 90%;
-    aspect-ratio: 1.4 / 1;
+    width: 60%;
+    height: 80vh;
     position: relative;
     border-radius: 12px;
     background: $gradientWhite50;
     overflow: hidden;
     user-select: none;
+
+    @media (max-width: 1600px) {
+        width: calc(100% - 600px);
+    }
+    @media (max-width: 960px) {
+        width: 80%;
+        max-width: 100%;
+        margin: 10px auto 20px auto;
+    }
 
     .handler {
         position: absolute;
