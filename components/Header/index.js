@@ -24,7 +24,7 @@ export default function Header() {
                         titles={["Алгоритм кластеризации", "Кластеризация"]}
                     />
                     <NavigationLink
-                        href="/genetika/baza"
+                        href="/genetika/bonus"
                         titles={["Генетический алгоритм", "Генетика"]}
                     />
                     <NavigationLink
