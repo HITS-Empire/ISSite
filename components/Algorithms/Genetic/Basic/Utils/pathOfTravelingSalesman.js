@@ -1,7 +1,6 @@
 import { sleep } from "../../../../../utils/helpers";
 
 export function pathOfTravelingSalesman(vertices, ctx) {
-
     const randomPath = (size) => {
         const path = new Array(size).fill(0).map((_, i) => i + 1);
         for (let i = path.length - 1; i > 0; i--) {

@@ -29,6 +29,7 @@ export default function Menu({
         setCount(Math.min(Math.max(value, 0), 128));
     };
 
+    // Изменить задержку работы алгоритма
     const changeRenderingDelayEvent = (event) => {
         const value = event.target.value;
 

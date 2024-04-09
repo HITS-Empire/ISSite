@@ -220,7 +220,7 @@ export async function findPathInField({
     startCell.cost = 0;
     startCell.heuristic = Math.abs(startCell.column - endCell.column) + Math.abs(startCell.row - endCell.row);
     startCell.selfCost = startCell.cost + startCell.heuristic;
-    
+
     openSet.push(startCell);
 
     while (openSet.length) {
@@ -243,7 +243,6 @@ export async function findPathInField({
         }
 
         if (current === endCell) {
-            let path = [];
             let temporary = current;
             
             while (temporary) {

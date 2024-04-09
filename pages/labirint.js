@@ -13,7 +13,7 @@ export default function Maze() {
     const [field, setField] = useState([]);
 
     // Скорость отрисовки
-    const [renderingDelay, setRenderingDelay] = useState(0);
+    const [renderingDelay, setRenderingDelay] = useState(16);
 
     // Стартовая и конечная ячейка
     const [startCell, setStartCell] = useState();
@@ -40,9 +40,9 @@ export default function Maze() {
         setStatus();
     };
 
-    // При заходе пользователя установить поле размером 10 x 10
+    // При заходе пользователя установить поле размером 16 x 16
     useEffect(() => {
-        setCount(10);
+        setCount(16);
         setStatus();
     }, []);
 

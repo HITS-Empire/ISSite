@@ -1,7 +1,7 @@
-import MenuWrapper from "../../../../MenuWrapper";
 import Button from "../../../../Button";
-import style from "./style.module.scss"
-import { pathOfTravelingSalesman } from "../Utils/pathOfTravelingSalesman"
+import MenuWrapper from "../../../../MenuWrapper";
+import ButtonContainer from "../../../../ButtonContainer";
+import { pathOfTravelingSalesman } from "../Utils/pathOfTravelingSalesman";
 
 export default function Menu({
     setVertices,
@@ -10,7 +10,6 @@ export default function Menu({
     canvas,
     ctx
 }) {
-
     const refreshCanvas = () => {
         setVertices([]);
         setLines([]);
@@ -29,7 +28,7 @@ export default function Menu({
             title="Генетический алгоритм"
             description="Сейчас вы узрите, как работает базовый генетический алгоритм."
         >
-            <div className={style.buttonContainer}>
+            <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={getPathOfTravelingSalesman}
@@ -43,9 +42,7 @@ export default function Menu({
                 >
                     Перезагрузить
                 </Button>
-            </div>
+            </ButtonContainer>
         </MenuWrapper>
-
-        
     );
 }
