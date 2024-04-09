@@ -8,6 +8,8 @@ import ButtonContainer from "../../../ButtonContainer";
 export default function Menu({
     count,
     setCount,
+    renderingDelay,
+    setRenderingDelay,
     processIsActive,
     setProcessIsActive,
     refreshField,
@@ -25,6 +27,14 @@ export default function Menu({
         if (!/^\d*$/.test(value)) return;
 
         setCount(Math.min(Math.max(value, 0), 128));
+    };
+
+    const changeRenderingDelayEvent = (event) => {
+        const value = event.target.value;
+
+        if (!/^\d*$/.test(value)) return;
+
+        setRenderingDelay(Math.min(Math.max(value, 0), 2048));
     };
 
     let statusDescription;
@@ -46,10 +56,18 @@ export default function Menu({
                 type="text"
                 label="Размеры поля"
                 description="Введите размеры поля"
-                maxLength={4}
                 value={count}
                 disabled={processIsActive}
                 onChange={changeCountEvent}
+            />
+
+            <Input
+                type="text"
+                label="Задержка отрисовки"
+                description="Введите задержку отрисовки"
+                value={renderingDelay}
+                disabled={processIsActive}
+                onChange={changeRenderingDelayEvent}
             />
 
             <ButtonContainer>

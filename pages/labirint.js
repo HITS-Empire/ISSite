@@ -12,6 +12,9 @@ export default function Maze() {
     const [count, setCount] = useState(0);
     const [field, setField] = useState([]);
 
+    // Скорость отрисовки
+    const [renderingDelay, setRenderingDelay] = useState(0);
+
     // Стартовая и конечная ячейка
     const [startCell, setStartCell] = useState();
     const [endCell, setEndCell] = useState();
@@ -54,6 +57,7 @@ export default function Maze() {
 
         findPathInField({
             count,
+            renderingDelay,
             field,
             startCell,
             endCell,
@@ -66,6 +70,8 @@ export default function Maze() {
             <Menu
                 count={count}
                 setCount={setCount}
+                renderingDelay={renderingDelay}
+                setRenderingDelay={setRenderingDelay}
                 processIsActive={processIsActive}
                 setProcessIsActive={setProcessIsActive}
                 refreshField={refreshField}
