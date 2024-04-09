@@ -1,12 +1,15 @@
 import { createCanvas } from "../../utils/canvas";
 import { useRef, useState, useEffect } from "react";
 import Menu from "../../components/Algorithms/Genetic/Basic/Menu";
-import Field from "../../components/Algorithms/Genetic/Basic/Field"
+import Field from "../../components/Algorithms/Genetic/Basic/Field";
 
 export default function Genetic() {
     // Вершины графа
     const [vertices, setVertices] = useState([]);
     const [lines, setLines] = useState([]);
+
+    // Количество популяций
+    const [maxAmountOfPopulations, setMaxAmountOfPopulations] = useState(50);
 
     const canvasRef = useRef();
 
@@ -29,6 +32,8 @@ export default function Genetic() {
             <Menu 
                 setVertices={setVertices}
                 vertices={vertices}
+                maxAmountOfPopulations={maxAmountOfPopulations}
+                setMaxAmountOfPopulations={setMaxAmountOfPopulations}
                 setLines={setLines}
                 canvas={canvas}
                 ctx={ctx}
