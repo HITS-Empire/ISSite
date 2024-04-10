@@ -60,7 +60,7 @@ export default function Menu({
     const setStartPopulation = () => {
         const newPopulation = [];
         
-        // 256 - количество популяций
+        // 256 - количество особей
         for (let i = 0; i < 256; i++) {
             const program = getRandomIndividual();
             const code = getCodeFromProgram(program);
@@ -69,8 +69,11 @@ export default function Menu({
             const ratio = getRatio(output, correctOutput);
 
             newPopulation.push({ program, code, ratio });
-            newPopulation.sort((a, b) => a.)
         }
+
+        newPopulation.sort((a, b) => {
+            return Math.abs(1 - b.ratio) - Math.abs(1 - a.ratio)}
+        );
 
         setPopulation(newPopulation);
     }
