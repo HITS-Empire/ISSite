@@ -23,26 +23,23 @@ export default function Genetic() {
 
     // Выполнить код в изменённом контексте console.log
     const runCode = () => {
-        const stdout = [];
-    
-        const console = {
-            log(message) {
-                stdout.push(message);
-            }
-        };
+        const messages = [];
+        const console = {};
+
+        console.log = (message) => messages.push(message);
 
         try {
             eval(code);
         } catch (error) {
-            stdout.push(error.message);
+            messages.push(error.message);
         }
 
-        return stdout;
+        return messages;
     };
 
     // Отследить изменение программы, чтобы изменить вывод
     useEffect(() => {
-        setOutput(runCode().join(" "));
+        setOutput(runCode().join("\n"));
     }, [code]);
 
     return (
