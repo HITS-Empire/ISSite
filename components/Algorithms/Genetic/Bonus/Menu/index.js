@@ -1,7 +1,8 @@
 import {
     runCode,
+    getRatio,
     getCodeFromProgram,
-    getRatio
+    getRandomIndividual
 } from "../Utils/fibonacci";
 import {
     getRandomIndex,
@@ -17,7 +18,9 @@ export default function Menu({
     number,
     setNumber,
     setPopulation,
-    correctOutput
+    correctOutput,
+    processIsActive,
+    setProcessIsActive
 }) {
     // Изменить номер нужного элемента последовательности
     const changeNumber = (event) => {
@@ -28,38 +31,9 @@ export default function Menu({
         setNumber(Math.min(Math.max(value, 0), 512));
     };
 
-    const getRandomIndividual = () => {
-        const individual = getInitProgram();
-
-        const types = ["basic", "condition", "body", "console"];
-
-        for (let i = 0; i < 128; i++) {
-            const firstType = getRandomElement(types);
-            const secondType = getRandomElement(types);
-        
-            const firstLine = getRandomElement(individual.find((part) => part.type === firstType).lines);
-            const secondLine = getRandomElement(individual.find((part) => part.type === secondType).lines);
-
-            for (let j = 0; j < 16; j++) {
-                const firstIndex = getRandomIndex(firstLine);
-                const secondIndex = getRandomIndex(secondLine);
-
-                [
-                    firstLine[firstIndex],
-                    secondLine[secondIndex]
-                ] = [
-                    secondLine[secondIndex],
-                    firstLine[firstIndex]
-                ];
-            }
-        }
-
-        return individual;
-    }
-
     const setStartPopulation = () => {
         const newPopulation = [];
-        
+
         // 256 - количество особей
         for (let i = 0; i < 256; i++) {
             const program = getRandomIndividual();
@@ -76,12 +50,14 @@ export default function Menu({
         );
 
         setPopulation(newPopulation);
-    }
+        setProcessIsActive(true);
+    };
 
     // Остановить программу
     const stopProgram = () => {
         setPopulation([]);
-    }
+        setProcessIsActive(false);
+    };
 
     return (
         <MenuWrapper
@@ -94,13 +70,14 @@ export default function Menu({
                 description="Введите номер элемента"
                 value={number}
                 onChange={changeNumber}
+                disabled={processIsActive}
             />
 
             <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={setStartPopulation}
-                    disabled={number < 4}
+                    disabled={processIsActive || number < 4}
                 >
                     Запустить
                 </Button>
@@ -108,7 +85,7 @@ export default function Menu({
                 <Button
                     type="soft"
                     onClick={stopProgram}
-                    disabled={number < 4}
+                    disabled={!processIsActive || number < 4}
                 >
                     Отменить
                 </Button>

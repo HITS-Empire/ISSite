@@ -28,19 +28,22 @@ export default function Genetic({ source }) {
     // Популяция
     const [population, setPopulation] = useState([]);
 
+    // Работает ли сейчас программа
+    const [processIsActive, setProcessIsActive] = useState(false);
+
     // При изменении вывода запустить снова
     useEffect(() => {
-        if (!population.length) {
+        if (!processIsActive) {
             return setCode(source);
         }
 
         fibonacci({ setCode, output, setPopulation, population, number });
-    }, [output, population]);
+    }, [output, processIsActive]);
 
     // Отследить изменение программы, чтобы изменить вывод
     useEffect(() => {
         setOutput(runCode(code, number));
-    }, [number, code]);
+    }, [code, number]);
 
     return (
         <>
@@ -50,6 +53,8 @@ export default function Genetic({ source }) {
                 population={population}
                 setPopulation={setPopulation}
                 correctOutput={output}
+                processIsActive={processIsActive}
+                setProcessIsActive={setProcessIsActive}
             />
 
             <Code
