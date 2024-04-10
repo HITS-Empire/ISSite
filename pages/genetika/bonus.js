@@ -18,6 +18,9 @@ export default function Genetic() {
     // Вывод программы
     const [output, setOutput] = useState();
 
+    // Номер элемента
+    const [number, setNumber] = useState(8);
+
     // Выполнить код в изменённом контексте console.log
     const runCode = () => {
         const stdout = [];
