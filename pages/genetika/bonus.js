@@ -1,50 +1,56 @@
+import fs from "fs";
 import { useState, useEffect } from "react";
 import Menu from "../../components/Algorithms/Genetic/Bonus/Menu";
 import Code from "../../components/Algorithms/Genetic/Bonus/Code";
+import {
+    runCode,
+    fibonacci
+} from "../../components/Algorithms/Genetic/Bonus/Utils/fibonacci";
 
-export default function Genetic() {
+export const getStaticProps = () => {
+    const source = fs.readFileSync("./public/fibonacci.js", "utf8");
+
+    return {
+        props: { source }
+    };
+};
+
+export default function Genetic({ source }) {
     // Код программы
-    const [code, setCode] = useState(
-        [
-            "// Напечатать сообщение в консоль",
-            "const print = (message) => {",
-            "    console.log(message);",
-            "};",
-            "",
-            "print(\"Higher IT School\");"
-        ].join("\n")
-    );
+    const [code, setCode] = useState(source);
 
     // Вывод программы
-    const [output, setOutput] = useState();
+    const [output, setOutput] = useState([]);
 
     // Номер элемента
     const [number, setNumber] = useState(8);
 
-    // Выполнить код в изменённом контексте console.log
-    const runCode = () => {
-        const messages = [];
-        const console = {};
+    // Популяция
+    const [population, setPopulation] = useState([]);
 
-        console.log = (message) => messages.push(message);
-
-        try {
-            eval(code);
-        } catch (error) {
-            messages.push(error.message);
+    // При изменении вывода запустить снова
+    useEffect(() => {
+        if (!population.length) {
+            return setCode(source);
         }
 
-        return messages;
-    };
+        fibonacci({ setCode, output, setPopulation, population });
+    }, [output, population]);
 
     // Отследить изменение программы, чтобы изменить вывод
     useEffect(() => {
-        setOutput(runCode().join("\n"));
-    }, [code]);
+        setOutput(runCode(code, number));
+    }, [number, code]);
 
     return (
         <>
-            <Menu />
+            <Menu
+                number={number}
+                setNumber={setNumber}
+                population={population}
+                setPopulation={setPopulation}
+                correctOutput={output}
+            />
 
             <Code
                 code={code}

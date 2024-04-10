@@ -49,6 +49,7 @@
         .output {
             display: flex;
             margin: 10px 5px;
+            white-space: pre-line;
             font-weight: 500;
             font-size: 14px;
             color: $success;

@@ -9,9 +9,14 @@ export function getNearRandom() {
     return Math.sin(Math.acos(Math.random()));
 }
 
+// Получить случайный индекс массива
+export function getRandomIndex(array) {
+    return array ? Math.floor(Math.random() * array.length) : -1;
+}
+
 // Получить случайный элемент массива
 export function getRandomElement(array) {
-    return array?.[Math.floor(Math.random() * array.length)];
+    return array?.[getRandomIndex(array)];
 }
 
 // Задержаться на какое-то время (в мс)

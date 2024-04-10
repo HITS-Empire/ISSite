@@ -23,7 +23,7 @@ export default function Menu({
     }
 
     // Изменить количество популяций
-    const changeMaxAmountOfPopulations= (event) => {
+    const changeMaxAmountOfPopulations = (event) => {
         const value = event.target.value;
 
         if (!/^\d*$/.test(value)) return;
