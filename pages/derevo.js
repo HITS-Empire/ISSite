@@ -7,8 +7,8 @@ import {
 } from "../components/Algorithms/DecisionTree/Utils/decisionTree";
 
 export default function DecisionTree() {
-    // Максимальная глубина дерева
-    const [maxDepth, setMaxDepth] = useState(128);
+    // Нужно ли оптимизировать дерево
+    const [isOptimized, setIsOptimized] = useState(false);
 
     // Обучающая выборка
     const [trainingSet, setTrainingSet] = useState();
@@ -38,6 +38,11 @@ export default function DecisionTree() {
 
     // Перезагрузить дерево решений при изменении выборки
     useEffect(() => {
+        setMarginLeft(0);
+        setMarginTop(0);
+        setSavedMarginLeft(0);
+        setSavedMarginTop(0);
+
         if (!trainingSet) {
             setDecisionTree();
             setPrediction();
@@ -58,15 +63,16 @@ export default function DecisionTree() {
             getDecisionTree({
                 trainingSet,
                 requiredAttribute,
-                maxDepth
+                isOptimized
             })
         );
-    }, [trainingSet]);
+    }, [isOptimized, trainingSet]);
 
     // Сбросить состояния поля при перезагрузке дерева
     useEffect(() => {
         if (decisionTree) return;
 
+        setIsOptimized(false);
         setMarginLeft(0);
         setMarginTop(0);
         setSavedMarginLeft(0);
@@ -114,8 +120,8 @@ export default function DecisionTree() {
     return (
         <>
             <Menu
-                maxDepth={maxDepth}
-                setMaxDepth={setMaxDepth}
+                isOptimized={isOptimized}
+                setIsOptimized={setIsOptimized}
                 trainingSet={trainingSet}
                 setTrainingSet={setTrainingSet}
                 setFieldForPrediction={setFieldForPrediction}
