@@ -40,7 +40,7 @@ export function splitCSVLine(line) {
 
     let targetQuotesCount = 0;
 
-    line.split(",").forEach((word) => {
+    line.split(/[,;\n\t]/g).forEach((word) => {
         const quotesFromStartCount = word.match(expressionQuotesFromStart)[0].length;
         const quotesFromEndCount = word.match(expressionQuotesFromEnd)[0].length;
 
