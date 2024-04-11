@@ -12,6 +12,7 @@ export default function Menu() {
                 <Button
                     type="primary"
                     onClick={() => {}}
+                    disabled={true}
                 >
                     Запустить
                 </Button>
@@ -19,6 +20,7 @@ export default function Menu() {
                 <Button
                     type="soft"
                     onClick={() => {}}
+                    disabled={true}
                 >
                     Отменить
                 </Button>
