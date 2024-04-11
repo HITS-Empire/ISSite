@@ -209,7 +209,7 @@ export function crossover(firstInd, secondInd) {
                     newInd[newIndPartIndex].lines[k] = newLine;
 
                     for (let j = 0; j < newLine.length; j++) {
-                        newGen = secondInd.find((part) => part.type === type).lines[k][j];
+                        const newGen = secondInd.find((part) => part.type === type).lines[k][j];
                         if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1] ) {
                             usedGens.push(newIndLine[j]);
                         }
