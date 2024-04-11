@@ -152,14 +152,14 @@ const repetitiveGens = [
 ];
 
 const allGens = [
-    "let",
-    "i",
-    "=",
+    "=", "=", "=", "=", "=", "=",
+    "let", "let", "let", "let",
+    "b", "b", "b", "b", "b",
+    "i", "i", "i",
+    "a", "a", "a",
+    "c", "c", "c",
+    "1", "1", "1",
     "0",
-    "a",
-    "b",
-    "c",
-    "1",
     "n",
     "<",
     "-",
@@ -172,22 +172,54 @@ export function crossover(firstInd, secondInd) {
 
     const newInd = getRandomIndividual();
 
-    const newIndLine = getRandomElement(newInd.find((part) => part.type === type).lines);
+    const newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
+    const newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
     const usedGens = [];
     let index;
     
     const firstLine = getRandomElement(firstInd.find((part) => part.type === type).lines);
-    const breakPointIndex = getRandomIndex(firstLine);
+    const lineIndex = getRandomIndex(firstInd.find((part) => part.type === type).lines);
+
+    const breakPointIndex = getRandomIndex(newIndLine);
 
     for (let i = 0; i < types.length; i++) {
         if (types[i] === type) {
-            for (let j = 0; j < breakPointIndex; j++) {
-                // ИСПРАВИТЬ 0 !!!
-                newIndLine[j] = firstInd.find((part) => part.type === type).lines[0][j];
-                usedGens.push(newIndLine[j]);
+            
+            const firstIndLines = firstInd.find((part) => part.type === type).lines;
+            let k = 0;
+
+            while (k < firstIndLines.length) {
+                if (k === newIndLineIndex) {
+                    
+                    for (let j = 0; j < breakPointIndex; j++) {
+                        const newGen = secondInd.find((part) => part.type === type).lines[k][j];
+                        
+                        if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1] ) {
+                            newIndLine[j] = newGen;
+                            usedGens.push(newIndLine[j]);
+                        } else {
+                            newIndLine[j] = "skipped";
+                        }
+                    }
+                    break;
+                } else {
+                    const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
+                    const newLine = firstInd.find((part) => part.type === types[i]).lines[k];
+                    newInd[newIndPartIndex].lines[k] = newLine;
+
+                    for (let j = 0; j < newLine.length; j++) {
+                        newGen = secondInd.find((part) => part.type === type).lines[k][j];
+                        if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1] ) {
+                            usedGens.push(newIndLine[j]);
+                        }
+                    }
+                }
+
+                k++;
             }
-            break;
+
+            if (k === newIndLine) break;
         } else {
             const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
             const newLines = firstInd.find((part) => part.type === types[i]).lines;
@@ -195,7 +227,15 @@ export function crossover(firstInd, secondInd) {
 
             const usedLines = firstInd.find((part) => part.type === types[i]).lines;
             for (const usedLine of usedLines) {
-                usedGens.push(...usedLine);
+                for (let k = 0; k < usedLine.length; k++) {
+                    if (!usedGens.includes(usedLine[k])) {
+                        usedGens.push(usedLine[k]);
+                    } else {
+                        if (repetitiveGens.includes(usedLine[k]) && usedGens.filter((gen) => gen === usedLine[k]).length < repetitiveGens[repetitiveGens.indexOf(usedLine[k]) + 1]) {
+                            usedGens.push(usedLine[k]);
+                        }
+                    }
+                }
             }
         }
         index++;
@@ -213,7 +253,7 @@ export function crossover(firstInd, secondInd) {
                     usedGens.push(newIndLine[j]);
                 } else {
                     if (repetitiveGens.includes(newGen)) {
-                        if (usedGens.filter((element) => element === newGen).length !== repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
+                        if (usedGens.filter((element) => element === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
                             newIndLine[j] = newGen;
                             usedGens.push(newIndLine[j]);
                         } else {
@@ -234,7 +274,7 @@ export function crossover(firstInd, secondInd) {
     for (let i = 0; i < newIndLine.length; i++) {
         if (newIndLine[i] === "skipped") {
             for (let j = 0; j < allGens.length; j++) {
-                if (!usedGens.includes(allGens[j])) {
+                if (!usedGens.includes(allGens[j]) || usedGens.includes(allGens[j]) && repetitiveGens.includes(allGens[j]) && usedGens.filter((gen) => gen === allGens[j]).length < repetitiveGens[repetitiveGens.indexOf(allGens[j]) + 1]) {
                     newIndLine[i] = allGens[j];
                 }
             }
