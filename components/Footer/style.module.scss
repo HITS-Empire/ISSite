@@ -1,0 +1,21 @@
+.footer {
+    display: none;
+
+    @media (max-width: 800px) {
+        display: flex;
+    }
+
+    .nav {
+        display: flex;
+        margin: auto;
+
+        .ul {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+        }
+    }
+}

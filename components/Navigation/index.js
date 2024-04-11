@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import style from "../style.module.scss";
+import style from "./style.module.scss";
+import { useState, useEffect } from "react";
 
-export default function NavigationLink({ href, titles }) {
+export default function Navigation({
+    href,
+    titles,
+    isResizing = false
+}) {
     const router = useRouter();
 
 	// Название ссылки
@@ -17,15 +21,17 @@ export default function NavigationLink({ href, titles }) {
 	};
 
 	// Добавить ивент на изменение ширины экрана
-	useEffect(() => {
-		resizeEvent();
+    if (isResizing) {
+        useEffect(() => {
+            resizeEvent();
 
-		window.addEventListener("resize", resizeEvent);
+            window.addEventListener("resize", resizeEvent);
 
-		return () => {
-			window.removeEventListener("resize", resizeEvent);
-		};
-	}, []);
+            return () => {
+                window.removeEventListener("resize", resizeEvent);
+            };
+        }, []);
+    }
 
 	// Если пользователь находится на странице ссылки, то выделять ссылку
 	const active = String(router.asPath.split("/")[1] === href.split("/")[1]);
