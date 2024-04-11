@@ -1,4 +1,3 @@
-import Input from "../../../Input";
 import Button from "../../../Button";
 import Status from "../../../Status";
 import style from "./style.module.scss";
@@ -8,8 +7,8 @@ import ButtonContainer from "../../../ButtonContainer";
 import { convertCSVtoJSON } from "../../../../utils/helpers";
 
 export default function Menu({
-    maxDepth,
-    setMaxDepth,
+    isOptimized,
+    setIsOptimized,
     trainingSet,
     setTrainingSet,
     setFieldForPrediction,
@@ -30,6 +29,11 @@ export default function Menu({
         } catch (error) {
             console.error(error);
         }
+    };
+
+    // Изменить оптимизацию дерева решений
+    const changeOptimizeOfDecisionTree = () => {
+        setIsOptimized(!isOptimized);
     };
 
     // Добавить данные для предсказания
@@ -54,30 +58,12 @@ export default function Menu({
         setPrediction();
     };
 
-    // Изменить максимальную глубину дерева
-    const changeMaxDepthEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setMaxDepth(Math.min(Math.max(value, 0), 1024));
-    };
-
     return (
         <MenuWrapper
             className={style.menu}
             title="Дерево решений"
             description="Сейчас вы узрите, как работают предсказания на основе обучающих данных."
         >
-            <Input
-                type="text"
-                label="Максимальная глубина дерева"
-                description="Введите максимальную глубину дерева"
-                value={maxDepth}
-                disabled={trainingSet}
-                onChange={changeMaxDepthEvent}
-            />
-
             <ButtonContainer>
                 <Button
                     type="primary"
@@ -94,6 +80,16 @@ export default function Menu({
 
                 <Button
                     type="soft"
+                    onClick={changeOptimizeOfDecisionTree}
+                    disabled={!trainingSet || processIsActive}
+                >
+                    {isOptimized ? "Ликвидировать" : "Оптимизировать"}
+                </Button>
+            </ButtonContainer>
+
+            <ButtonContainer>
+                <Button
+                    type="primary"
                     onChange={addFieldForPrediction}
                     disabled={!trainingSet || processIsActive}
                     input={{
@@ -104,9 +100,7 @@ export default function Menu({
                 >
                     Предсказать событие
                 </Button>
-            </ButtonContainer>
 
-            <ButtonContainer>
                 <Button
                     type="soft"
                     onClick={clearDecisionTree}

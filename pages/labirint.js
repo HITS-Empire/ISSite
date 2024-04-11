@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import EmptyField from "../components/EmptyField";
 import {
     getField,
+    clearField,
     findPathInField
 } from "../components/Algorithms/Maze/Utils/field";
 import Menu from "../components/Algorithms/Maze/Menu";
@@ -31,11 +32,17 @@ export default function Maze() {
 
     // Перезагрузить поле
     const refreshField = () => {
-        const { field, startCell, endCell } = getField(count);
+        if (status) {
+            clearField(field);
+            setField([...field]);
+        } else {
+            const { field, startCell, endCell } = getField(count)
 
-        setField(field);
-        setStartCell(startCell);
-        setEndCell(endCell);
+            setField(field);
+            setStartCell(startCell);
+            setEndCell(endCell);
+        }
+
         setProcessIsActive(false);
         setStatus();
     };

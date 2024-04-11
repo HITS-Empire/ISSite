@@ -144,16 +144,16 @@ export function getPredictionNode(trainingSet, requiredAttribute, currentNode) {
 export function getDecisionTree({
     trainingSet,
     requiredAttribute,
-    maxDepth = 128,
+    isOptimized = false,
     currentNode = { id: 0 }
 }) {
     const minEntropy = 0.01;
 
-    if (maxDepth === 0 || trainingSet.length <= 1) {
+    if (trainingSet.length <= 1) {
         return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
 
-    let initialEntropy = getEntropy(trainingSet, requiredAttribute);
+    const initialEntropy = getEntropy(trainingSet, requiredAttribute) * (!isOptimized || trainingSet.length);
 
     if (initialEntropy <= minEntropy) {
         return getPredictionNode(trainingSet, requiredAttribute, currentNode);
@@ -178,13 +178,15 @@ export function getDecisionTree({
             const yesNodesEntropy = getEntropy(currentSplit.yesNodes, requiredAttribute);
             const noNodesEntropy = getEntropy(currentSplit.noNodes, requiredAttribute);
 
+            const different = !isOptimized || Math.abs(currentSplit.yesNodes.length - currentSplit.noNodes.length);
+
             const newEntropy = (
                 (
                     yesNodesEntropy * currentSplit.yesNodes.length
                 ) + (
                     noNodesEntropy * currentSplit.noNodes.length
                 )
-            ) / trainingSet.length;
+            ) * different / trainingSet.length;
 
             const profit = initialEntropy - newEntropy;
             if (profit > bestSplit.profit) {
@@ -204,19 +206,17 @@ export function getDecisionTree({
         return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
 
-    maxDepth--;
-
     // Рекурсивно заполняем деревья-потомки
     const noNodes = getDecisionTree({
         trainingSet: bestSplit.noNodes,
         requiredAttribute,
-        maxDepth,
+        isOptimized,
         currentNode
     });
     const yesNodes = getDecisionTree({
         trainingSet: bestSplit.yesNodes,
         requiredAttribute,
-        maxDepth,
+        isOptimized,
         currentNode
     });
 
