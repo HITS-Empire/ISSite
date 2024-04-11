@@ -26,7 +26,7 @@ export default function Header() {
                         titles={["Алгоритм кластеризации", "Кластеризация"]}
                         isResizing={true}
                     />
-                    <NavigationLink
+                    <Navigation
                         href="/genetika/bonus"
                         titles={["Генетический алгоритм", "Генетика"]}
                         isResizing={true}
