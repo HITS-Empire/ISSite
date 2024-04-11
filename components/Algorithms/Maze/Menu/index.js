@@ -85,12 +85,12 @@ export default function Menu({
                     onClick={refreshField}
                     disabled={count <= 1 || processIsActive && !status}
                 >
-                    Перезагрузить
+                    {status ? "Отменить" : "Перезагрузить" }
                 </Button>
             </ButtonContainer>
 
             <Status type={status}>
-                {status && statusDescription}
+                {!!status && statusDescription}
             </Status>
         </MenuWrapper>
     );

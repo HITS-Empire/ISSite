@@ -151,6 +151,23 @@ export function getField(count) {
     };
 }
 
+// Очистить поле
+export function clearField(field) {
+    field.forEach((line) => {
+        line.forEach((cell) => {
+            if (cell.type > 3) {
+                cell.type = 0;
+            }
+
+            cell.cost = Infinity;
+            cell.heuristic = 0;
+            cell.selfCost = Infinity;
+            cell.neighbours = [];
+            cell.previous = null;
+        });
+    });
+}
+
 // Получить поле для поиска пути
 export function getExtendedField(field) {
     return field.map((line, row) => {

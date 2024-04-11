@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Navigation from "../Navigation";
 import style from "./style.module.scss";
-import NavigationLink from "./NavigationLink";
 
 export default function Header() {
     return (
@@ -11,33 +11,40 @@ export default function Header() {
 
             <nav className={style.nav}>
                 <ul className={style.ul}>
-                    <NavigationLink
+                    <Navigation
                         href="/"
                         titles={["Главная", "Главная"]}
+                        isResizing={true}
                     />
-                    <NavigationLink
+                    <Navigation
                         href="/labirint"
                         titles={["А*", "А*"]}
+                        isResizing={true}
                     />
-                    <NavigationLink
+                    <Navigation
                         href="/klasterizatsiya"
                         titles={["Алгоритм кластеризации", "Кластеризация"]}
+                        isResizing={true}
                     />
                     <NavigationLink
                         href="/genetika/bonus"
                         titles={["Генетический алгоритм", "Генетика"]}
+                        isResizing={true}
                     />
-                    <NavigationLink
+                    <Navigation
                         href="/muravey"
                         titles={["Муравьиный алгоритм", "Муравьи"]}
+                        isResizing={true}
                     />
-                    <NavigationLink
+                    <Navigation
                         href="/derevo"
                         titles={["Дерево решений", "Дерево"]}
+                        isResizing={true}
                     />
-                    <NavigationLink
+                    <Navigation
                         href="/neyro"
                         titles={["Нейронная сеть", "Нейросеть"]}
+                        isResizing={true}
                     />
                 </ul>
             </nav>
