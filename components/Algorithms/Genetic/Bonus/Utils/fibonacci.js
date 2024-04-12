@@ -142,23 +142,23 @@ export function mutation(ind) {
 }
 
 const repetitiveGens = [
-    "let", 4, 
-    "a", 3, 
     "=", 6, 
     "b", 5, 
+    "let", 4, 
+    "a", 3, 
     "c", 3, 
     "i", 3, 
     "1", 3
 ];
 
 const allGens = [
-    "=", "=", "=", "=", "=", "=",
-    "let", "let", "let", "let",
-    "b", "b", "b", "b", "b",
-    "i", "i", "i",
-    "a", "a", "a",
-    "c", "c", "c",
-    "1", "1", "1",
+    "=", 
+    "let",
+    "b",
+    "i",
+    "a",
+    "c",
+    "1",
     "0",
     "n",
     "<",
@@ -171,37 +171,33 @@ export function crossover(firstInd, secondInd) {
     const type = getRandomElement(types);
 
     const newInd = getRandomIndividual();
-
+    
     const newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     const newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
     const usedGens = [];
-    let index;
     
-    const firstLine = getRandomElement(firstInd.find((part) => part.type === type).lines);
-    const lineIndex = getRandomIndex(firstInd.find((part) => part.type === type).lines);
+    let index;
+    let k = 0;
 
     const breakPointIndex = getRandomIndex(newIndLine);
+
+    //console.log(newInd, usedGens, breakPointIndex, newIndLineIndex, type);
 
     for (let i = 0; i < types.length; i++) {
         if (types[i] === type) {
             
             const firstIndLines = firstInd.find((part) => part.type === type).lines;
-            let k = 0;
 
             while (k < firstIndLines.length) {
                 if (k === newIndLineIndex) {
-                    
                     for (let j = 0; j < breakPointIndex; j++) {
-                        const newGen = secondInd.find((part) => part.type === type).lines[k][j];
-                        
-                        if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1] ) {
-                            newIndLine[j] = newGen;
-                            usedGens.push(newIndLine[j]);
-                        } else {
-                            newIndLine[j] = "skipped";
-                        }
+                        const newGen = firstIndLines[k][j];
+                        newIndLine[j] = newGen;
+                        usedGens.push(newGen);
                     }
+
+
                     break;
                 } else {
                     const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
@@ -209,78 +205,120 @@ export function crossover(firstInd, secondInd) {
                     newInd[newIndPartIndex].lines[k] = newLine;
 
                     for (let j = 0; j < newLine.length; j++) {
-                        const newGen = secondInd.find((part) => part.type === type).lines[k][j];
-                        if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1] ) {
-                            usedGens.push(newIndLine[j]);
+                        const newGen = firstInd.find((part) => part.type === type).lines[k][j];
+                        usedGens.push(newGen);
+                    }
+                }
+
+                k++;
+            }
+            index = i;
+            if (k === newIndLineIndex) break;
+        } else {
+            const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
+            const newLines = firstInd.find((part) => part.type === types[i]).lines;
+            newInd[newIndPartIndex].lines = newLines.map((line) => [...line]);
+
+            for (const newLine of newLines) {
+                for (let k = 0; k < newLine.length; k++) {
+                    usedGens.push(newLine[k]);
+                }
+            }
+        }
+    }
+    
+    for (let i = index; i < types.length; i++) {
+        if (types[i] === type) {
+            const secondIndLines = secondInd.find((part) => part.type === type).lines;
+
+            while (k < secondIndLines.length) {
+                if (k === newIndLineIndex) {
+                    
+                    for (let j = breakPointIndex; j < secondIndLines[k].length; j++) {
+                        const newGen = secondIndLines[k][j];
+                        
+                        if (!usedGens.includes(newGen) || (usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1])) {
+                            newIndLine[j] = newGen;
+                            usedGens.push(newGen);
+                        } else {
+                            newIndLine[j] = "skipped";
+                        }
+                    }
+                    
+                } else {
+                    const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
+                    const newLine = secondInd.find((part) => part.type === types[i]).lines[k];
+
+                    for (let j = 0; j < newLine.length; j++) {
+                        const newGen = newLine[j];
+                        if (!usedGens.includes(newGen) || (usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1])) {
+                            newInd[newIndPartIndex].lines[k][j] = newLine[j];
+                            usedGens.push(newGen);
+                        } else {
+                            newInd[newIndPartIndex].lines[k][j] = "skipped";
                         }
                     }
                 }
 
                 k++;
             }
-
-            if (k === newIndLine) break;
         } else {
             const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
-            const newLines = firstInd.find((part) => part.type === types[i]).lines;
-            newInd[newIndPartIndex].lines = newLines.map((line) => [...line]);
+            const newLines = secondInd.find((part) => part.type === types[i]).lines;
+            
+            for (let j = 0; j < newLines.length; j++) {
+                const newLine = newLines[j];
 
-            const usedLines = firstInd.find((part) => part.type === types[i]).lines;
-            for (const usedLine of usedLines) {
-                for (let k = 0; k < usedLine.length; k++) {
-                    if (!usedGens.includes(usedLine[k])) {
-                        usedGens.push(usedLine[k]);
+                for (let h = 0; h < newLine.length; h++) {
+                    const newGen = newLine[h];
+                    
+                    if (!usedGens.includes(newGen)) {        
+                        newInd[newIndPartIndex].lines[j][h] = newGen;
+                        usedGens.push(newGen);
                     } else {
-                        if (repetitiveGens.includes(usedLine[k]) && usedGens.filter((gen) => gen === usedLine[k]).length < repetitiveGens[repetitiveGens.indexOf(usedLine[k]) + 1]) {
-                            usedGens.push(usedLine[k]);
-                        }
-                    }
-                }
-            }
-        }
-        index++;
-    }
-
-    const secondLine = getRandomElement(secondInd.find((part) => part.type === type).lines);
-
-    for (let i = index; i < types.length; i++) {
-        if (types[i] === type) {
-            for (let j = breakPointIndex; j < secondLine.length; j++) {
-                const newGen = secondInd.find((part) => part.type === type).lines[j];
-
-                if (!usedGens.includes(newGen)) {        
-                    newIndLine[j] = newGen;
-                    usedGens.push(newIndLine[j]);
-                } else {
-                    if (repetitiveGens.includes(newGen)) {
-                        if (usedGens.filter((element) => element === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
-                            newIndLine[j] = newGen;
-                            usedGens.push(newIndLine[j]);
+                        if (repetitiveGens.includes(newGen)) {
+                            if (usedGens.filter((element) => element === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
+                                newInd[newIndPartIndex].lines[j][h] = newGen;
+                                usedGens.push(newGen);
+                            } else {
+                                newInd[newIndPartIndex].lines[j][h] = "skipped";
+                            }
                         } else {
-                            newIndLine[j] = "skipped";
+                            newInd[newIndPartIndex].lines[j][h] = "skipped";
                         }
-                    } else {
-                        newIndLine[j] = "skipped";
                     }
                 }
             }
-        } else {
-            const newIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
-            const newLines = firstInd.find((part) => part.type === types[i]).lines;
-            newInd[newIndPartIndex].lines = newLines.map((line) => [...line]);
         }
     }
 
-    for (let i = 0; i < newIndLine.length; i++) {
-        if (newIndLine[i] === "skipped") {
-            for (let j = 0; j < allGens.length; j++) {
-                if (!usedGens.includes(allGens[j]) || usedGens.includes(allGens[j]) && repetitiveGens.includes(allGens[j]) && usedGens.filter((gen) => gen === allGens[j]).length < repetitiveGens[repetitiveGens.indexOf(allGens[j]) + 1]) {
-                    newIndLine[i] = allGens[j];
+    const newIndPartIndex = newInd.findIndex((part) => part.type === type);
+    newInd[newIndPartIndex].lines[newIndLineIndex] = newIndLine;
+
+    for (let i = 0; i < types.length; i++) {
+        const newLines = newInd.find((part) => part.type === types[i]).lines;
+        const newNewIndPartIndex = newInd.findIndex((part) => part.type === types[i]);
+        
+        for (let j = 0; j < newLines.length; j++) {
+            const newLine = newLines[j];
+            
+            for (let h = 0; h < newLine.length; h++) {
+                if (newLine[h] === "skipped") {
+
+                    for (let g = 0; g < allGens.length; g++) {
+                        if (!usedGens.includes(allGens[g]) || usedGens.includes(allGens[g]) && repetitiveGens.includes(allGens[g]) && usedGens.filter((gen) => gen === allGens[g]).length < repetitiveGens[repetitiveGens.indexOf(allGens[g]) + 1]) {
+                            newLine[h] = allGens[g];
+                            usedGens.push(allGens[g]);
+                            break;
+                        }
+                    }
                 }
             }
+
+            newInd[newNewIndPartIndex].lines[j] = newLine;
         }
     }
-
+    console.log(newInd, usedGens);
     return newInd;
 }
 
@@ -298,16 +336,20 @@ export async function fibonacci({ setCode, output, setPopulation, population, nu
 
         const mutatedFirstNewInd = mutation(firstNewInd);
         const mutatedSecondNewInd = mutation(secondNewInd);
+
         const codeOfMutatedFirstNewInd = getCodeFromProgram(mutatedFirstNewInd);
         const codeOfMutatedSecondNewInd = getCodeFromProgram(mutatedSecondNewInd);
+        
         const outputOfMutatedFirstNewInd = runCode(codeOfMutatedFirstNewInd, number);
         const outputOfMutatedSecondNewInd = runCode(codeOfMutatedSecondNewInd, number);
+        
         const ratioOfMutatedFirstNewInd = getRatio(outputOfMutatedFirstNewInd, output);
         const ratioOfMutatedSecondNewInd = getRatio(outputOfMutatedSecondNewInd, output);
 
         newPopulation.push({program: mutatedFirstNewInd, code: codeOfMutatedFirstNewInd, ratio: ratioOfMutatedFirstNewInd});
         newPopulation.push({program: mutatedSecondNewInd, code: codeOfMutatedSecondNewInd, ratio: ratioOfMutatedSecondNewInd});
     }
+
     newPopulation.sort((a, b) => {
         return Math.abs(1 - b.ratio) - Math.abs(1 - a.ratio)}
     );
