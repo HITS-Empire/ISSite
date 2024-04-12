@@ -168,6 +168,74 @@ const allGens = [
     "+"
 ];
 
+const typesOfGen = [
+    {
+        type: "let",
+        gens: ["let"]
+    },
+    {
+        type: "operator",
+        gens: ["=", "+", "+=", "-", "<"]
+    },
+    {
+        type: "variable",
+        gens: ["a", "b", "c", "n", "i"]
+    },
+    {
+        type: "number",
+        gens: ["0", "1", "2"]
+    }
+];
+
+export function getTypeOfGen(gen) {
+    return typesOfGen.find((typeOfGen) => typeOfGen.gens.indexOf(gen) !== -1).type;
+}
+
+export function lineIsAvailable(line) {
+    for (let i = 0; i < line.length; i++) {
+        const typeOfGen = getTypeOfGen(line[i]);
+
+        switch (typeOfGen) {
+            case "let":
+                if (i > 0) return false;
+
+                break;
+            case "operator":
+                if (i === 0 || i === line.length - 1) return false;
+
+                const typeOfPreviosGen = getTypeOfGen(line[i - 1]);
+                const typeOfNextGen = getTypeOfGen(line[i + 1]);
+
+                if (typeOfPreviosGen === "let" || typeOfPreviosGen === "operator") return false;
+                if (typeOfNextGen === "let" || typeOfNextGen === "operator") return false;
+
+                break;
+            case "variable":
+                if (i > 0) {
+                    const typeOfPreviosGen = getTypeOfGen(line[i - 1]);
+                    if (typeOfPreviosGen === "variable" || typeOfPreviosGen === "number") return false;
+                }
+                if (i < line.length - 1) {
+                    const typeOfNextGen = getTypeOfGen(line[i + 1]);
+                    if (typeOfNextGen === "variable" || typeOfNextGen === "number") return false;
+                }
+
+                break;
+            case "number":
+                if (i > 0) {
+                    const typeOfPreviosGen = getTypeOfGen(line[i - 1]);
+                    if (typeOfPreviosGen !== "operator") return false;
+                }
+                if (i < line.length - 1) {
+                    const typeOfNextGen = getTypeOfGen(line[i + 1]);
+                    if (typeOfNextGen !== "operator") return false;
+                }
+        }
+    }
+
+    return true;
+}
+
 export function crossover(firstInd, secondInd) {
     const type = getRandomElement(types);
 
@@ -338,8 +406,16 @@ export async function fibonacci({ setCode, output, setPopulation, population, nu
         const ratioOfMutatedFirstNewInd = getRatio(outputOfMutatedFirstNewInd, output);
         const ratioOfMutatedSecondNewInd = getRatio(outputOfMutatedSecondNewInd, output);
 
-        newPopulation.push({program: mutatedFirstNewInd, code: codeOfMutatedFirstNewInd, ratio: ratioOfMutatedFirstNewInd});
-        newPopulation.push({program: mutatedSecondNewInd, code: codeOfMutatedSecondNewInd, ratio: ratioOfMutatedSecondNewInd});
+        newPopulation.push({
+            program: mutatedFirstNewInd,
+            code: codeOfMutatedFirstNewInd,
+            ratio: ratioOfMutatedFirstNewInd
+        });
+        newPopulation.push({
+            program: mutatedSecondNewInd,
+            code: codeOfMutatedSecondNewInd,
+            ratio: ratioOfMutatedSecondNewInd
+        });
     }
 
     newPopulation.sort((a, b) => {
