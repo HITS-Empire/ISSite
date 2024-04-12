@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Navigation from "../Navigation";
 import style from "./style.module.scss";
 
@@ -6,6 +7,7 @@ export default function Header() {
     return (
         <header className={style.header}>
             <Link className={style.logo} href="/">
+                <Image src="/gte.png" width={384} height={384} />
                 ISSite
             </Link>
 
