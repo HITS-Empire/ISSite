@@ -1,8 +1,8 @@
 .menu {
-    min-width: 390px;
+    min-width: 430px;
 
     @media (max-width: 960px) {
-        min-width: 80%;
-        margin: auto;
+        min-width: 80% !important;
+        margin: auto !important;
     }
 }
