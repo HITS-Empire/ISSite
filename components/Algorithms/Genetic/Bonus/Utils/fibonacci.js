@@ -21,8 +21,8 @@ export function runCode(code, n) {
 };
 
 // Получить начальную программу
-export function getInitProgram() {
-    return [
+export function getInitProgram(phase = 2) {
+    const program = [
         {
             type: "basic",
             lines: [
@@ -31,72 +31,87 @@ export function getInitProgram() {
                 ["let", "b", "=", "1"],
                 ["let", "c"]
             ]
-        },
-        {
-            type: "condition",
-            lines: [
-                ["i", "<", "n", "-", "2"]
-            ]
-        },
-        {
-            type: "body",
-            lines: [
-                ["c", "=", "a", "+", "b"],
-                ["a", "=", "b"],
-                ["b", "=", "c"],
-                ["i", "+=", "1"]
-            ]
-        },
-        {
-            type: "console",
-            lines: [
-                ["b"]
-            ]
         }
     ];
+
+    if (phase > 0) {
+        program.push(
+            {
+                type: "condition",
+                lines: [
+                    ["i", "<", "n", "-", "2"]
+                ]
+            },
+            {
+                type: "body",
+                lines: [
+                    ["c", "=", "a", "+", "b"],
+                    ["a", "=", "b"],
+                    ["b", "=", "c"],
+                    ["i", "+=", "1"]
+                ]
+            }
+        );
+    }
+
+    if (phase > 1) {
+        program.push(
+            {
+                type: "console",
+                lines: [
+                    ["b"]
+                ]
+            }
+        );
+    }
+
+    return program;
 };
 
 // Получить линии программы по типу
 export function getLinesFromType(program, type) {
-    return program.find((part) => part.type === type).lines.map((line) => line.join(" "));
+    return program.find((part) => part.type === type)?.lines.map((line) => line.join(" "));
 }
 
 // Получить код по структуре программы
 export function getCodeFromProgram(program) {
-    const lines = [
-        getLinesFromType(program, "basic"),
-        [
-            `while (${getLinesFromType(program, "condition").join(" ")}) {`,
+    const lines = [getLinesFromType(program, "basic")];
+
+    const conditionLine = getLinesFromType(program, "condition")?.join(" ");
+    if (conditionLine) {
+        lines.push([
+            `while (${conditionLine}) {`,
             ...getLinesFromType(program, "body").map((line) => "    " + line),
             "}"
-        ],
-        [
-            `console.log(${getLinesFromType(program, "console").join(" ")})`
-        ]
-    ];
+        ]);
+    }
+
+    const consoleLine = getLinesFromType(program, "console")?.join(" ");
+    if (consoleLine) {
+        lines.push([`console.log(${consoleLine})`]);
+    }
 
     return lines.map((line) => line.join("\n")).join("\n\n");
 }
 
-export function getRandomIndividual() {
-    const individual = getInitProgram();
-
-    const types = ["basic", "condition", "body", "console"];
+export function getRandomIndividual(phase = 2) {
+    const individual = getInitProgram(phase);
 
     for (let i = 0; i < 128; i++) {
-        const firstType = getRandomElement(types);
-        const secondType = getRandomElement(types);
+        const randomPart = getRandomElement(individual);
 
-        const firstLine = getRandomElement(individual.find((part) => part.type === firstType).lines);
-        const secondLine = getRandomElement(individual.find((part) => part.type === secondType).lines);
+        const firstLine = getRandomElement(randomPart.lines);
+        const secondLine = getRandomElement(randomPart.lines);
 
         for (let j = 0; j < 4; j++) {
             const firstIndex = getRandomIndex(firstLine);
             const secondIndex = getRandomIndex(secondLine);
 
-            const temp = firstLine[firstIndex];
-            firstLine[firstIndex] = secondLine[secondIndex];
-            secondLine[secondIndex] = temp;
+            [
+                firstLine[firstIndex], secondLine[secondIndex]
+            ] = [
+                secondLine[secondIndex], firstLine[firstIndex]
+            ];
         }
     }
 
