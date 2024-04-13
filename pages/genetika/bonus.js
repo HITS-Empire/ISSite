@@ -1,11 +1,11 @@
 import fs from "fs";
 import { useState, useEffect } from "react";
-import Menu from "../../components/Algorithms/Genetic/Bonus/Menu";
-import Code from "../../components/Algorithms/Genetic/Bonus/Code";
 import {
     runCode,
-    fibonacci
-} from "../../components/Algorithms/Genetic/Bonus/Utils/fibonacci";
+    runGenetic
+} from "../../components/Algorithms/Genetic/Bonus/Utils/genetic";
+import Menu from "../../components/Algorithms/Genetic/Bonus/Menu";
+import Code from "../../components/Algorithms/Genetic/Bonus/Code";
 
 export const getStaticProps = () => {
     const source = fs.readFileSync("./public/fibonacci.js", "utf8");
@@ -28,23 +28,31 @@ export default function Genetic({ source }) {
     // Популяция
     const [population, setPopulation] = useState([]);
 
+    // Искомое число последовательности
+    const [correctValue, setCorrectValue] = useState();
+
     // Работает ли сейчас программа
     const [processIsActive, setProcessIsActive] = useState(false);
 
     // При изменении вывода запустить снова
     useEffect(() => {
         if (!processIsActive) {
+            if (code === source) {
+                setCorrectValue(Number(output[0]));
+            }
+
             return setCode(source);
         }
 
-        fibonacci({
+        runGenetic({
             code,
             setCode,
             output,
             setOutput,
+            number,
             population,
             setPopulation,
-            number
+            correctValue
         });
     }, [output, processIsActive]);
 
@@ -60,7 +68,6 @@ export default function Genetic({ source }) {
                 setNumber={setNumber}
                 population={population}
                 setPopulation={setPopulation}
-                correctOutput={output}
                 processIsActive={processIsActive}
                 setProcessIsActive={setProcessIsActive}
             />

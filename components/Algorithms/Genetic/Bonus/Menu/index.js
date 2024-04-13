@@ -1,24 +1,13 @@
-import {
-    runCode,
-    getRatio,
-    getCodeFromProgram,
-    getRandomIndividual
-} from "../Utils/fibonacci";
-import {
-    getRandomIndex,
-    getRandomElement
-} from "../../../../../utils/helpers";
 import Input from "../../../../Input";
 import Button from "../../../../Button";
+import { getPopulation } from "../Utils/genetic";
 import MenuWrapper from "../../../../MenuWrapper";
-import { getInitProgram } from "../Utils/fibonacci";
 import ButtonContainer from "../../../../ButtonContainer";
 
 export default function Menu({
     number,
     setNumber,
     setPopulation,
-    correctOutput,
     processIsActive,
     setProcessIsActive
 }) {
@@ -28,33 +17,17 @@ export default function Menu({
 
         if (!/^\d*$/.test(value)) return;
 
-        setNumber(Math.min(Math.max(value, 0), 512));
+        setNumber(Math.min(Math.max(value, 0), 1024));
     };
 
-    const setStartPopulation = () => {
-        const newPopulation = [];
-
-        // 4096 - количество особей
-        for (let i = 0; i < 4096; i++) {
-            const program = getRandomIndividual();
-            const code = getCodeFromProgram(program);
-            const output = runCode(code, number);
-
-            const ratio = getRatio(output, correctOutput);
-
-            newPopulation.push({ program, code, ratio, count: 0, coolPoints: 0 });
-        }
-
-        newPopulation.sort((a, b) => {
-            return Math.abs(1 - b.ratio) - Math.abs(1 - a.ratio)}
-        );
-
-        setPopulation(newPopulation);
+    // Запустить алгоритм
+    const runProcess = () => {
+        setPopulation(getPopulation());
         setProcessIsActive(true);
     };
 
-    // Остановить программу
-    const stopProgram = () => {
+    // Остановить алгоритм
+    const stopProcess = () => {
         setPopulation([]);
         setProcessIsActive(false);
     };
@@ -76,16 +49,16 @@ export default function Menu({
             <ButtonContainer>
                 <Button
                     type="primary"
-                    onClick={setStartPopulation}
-                    disabled={processIsActive || number < 4}
+                    onClick={runProcess}
+                    disabled={processIsActive}
                 >
                     Запустить
                 </Button>
 
                 <Button
                     type="soft"
-                    onClick={stopProgram}
-                    disabled={!processIsActive || number < 4}
+                    onClick={stopProcess}
+                    disabled={!processIsActive}
                 >
                     Отменить
                 </Button>
