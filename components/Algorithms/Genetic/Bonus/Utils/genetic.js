@@ -602,7 +602,7 @@ export async function runGenetic({
             return b.phase - a.phase;
         }
         if (a.phase < 2) {
-            if (b.countOfRightLines !== a.countOfRightLines) {
+            if (a.countOfRightLines !== b.countOfRightLines) {
                 return b.countOfRightLines - a.countOfRightLines;
             }
             return Math.random() - 0.5;
