@@ -30,7 +30,17 @@ export function getInitProgram(phase = 2) {
                 ["let", "a", "=", "1"],
                 ["let", "b", "=", "1"],
                 ["let", "c"]
-            ]
+            ],
+            gens: {
+                "let": 4,
+                "a": 1,
+                "b": 1,
+                "c": 1,
+                "i": 1,
+                "=": 3,
+                "0": 1,
+                "1": 2
+            }
         }
     ];
 
@@ -40,7 +50,14 @@ export function getInitProgram(phase = 2) {
                 type: "condition",
                 lines: [
                     ["i", "<", "n", "-", "2"]
-                ]
+                ],
+                gens: {
+                    "i": 1,
+                    "<": 1,
+                    "n": 1,
+                    "-": 1,
+                    "2": 1
+                }
             },
             {
                 type: "body",
@@ -49,7 +66,17 @@ export function getInitProgram(phase = 2) {
                     ["a", "=", "b"],
                     ["b", "=", "c"],
                     ["i", "+=", "1"]
-                ]
+                ],
+                gens: {
+                    "a": 2,
+                    "b": 3,
+                    "c": 2,
+                    "i": 1,
+                    "=": 3,
+                    "+": 1,
+                    "+=": 1,
+                    "1": 1
+                }
             }
         );
     }
@@ -60,7 +87,10 @@ export function getInitProgram(phase = 2) {
                 type: "console",
                 lines: [
                     ["b"]
-                ]
+                ],
+                gens: {
+                    "b": 1
+                }
             }
         );
     }
