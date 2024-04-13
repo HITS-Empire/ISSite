@@ -112,12 +112,12 @@ export function getRatio(firstOutput, secondOutput) {
 }
 
 const types = ["basic", "condition", "body", "console"];
-const mutationRate = 0.01;
+const mutationRate = 0.2;
 
 export function mutation(ind) {
     const newInd = ind;
 
-    for (let j = 0; j < 16; j++) {
+    for (let j = 0; j < 4; j++) {
         if (mutationRate > Math.random()) {
             let firstType = getRandomElement(types);
             let secondType = getRandomElement(types);
@@ -237,13 +237,25 @@ export function lineIsAvailable(line) {
 }
 
 export function crossover(firstInd, secondInd) {
-    const type = getRandomElement(types);
+    let type = getRandomElement(types);
 
     const newInd = getRandomIndividual();
 
-    const newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
-    const newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
+    let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
+    let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
+    const conditionOfAvailableLine = 0.001;
+
+    // Если выбрали работающую линию
+    while (lineIsAvailable(firstInd.find((part) => part.type === type).lines[newIndLineIndex]) && lineIsAvailable(secondInd.find((part) => part.type === type).lines[newIndLineIndex])) {
+        if (Math.random() < conditionOfAvailableLine) break;
+        type = getRandomElement(types);
+
+        newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
+        newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
+    }
+    
+    // Использованные гены
     const usedGens = [];
 
     let index;
@@ -382,6 +394,23 @@ export function crossover(firstInd, secondInd) {
     return newInd;
 }
 
+// Получить количество работающих линий
+export function getAmountOfAvailableLines( newInd ) {
+    const availableLines = [];
+    
+    for (let i = 0; i < types.length; i++) {
+        const newLines = newInd.find((part) => part.type === types[i]).lines;
+        
+        for (const newLine of newLines) {
+            if (!availableLines.includes(newLine) && lineIsAvailable(newLine)) {
+                availableLines.push(newLine);
+            }
+        }
+    }
+
+    return availableLines.length;
+}
+
 export async function fibonacci({ setCode, output, setPopulation, population, number }) {
     if (population.length == 0) return;
 
@@ -391,9 +420,12 @@ export async function fibonacci({ setCode, output, setPopulation, population, nu
         const firstInd = getRandomElement(population).program;
         const secondInd = getRandomElement(population).program;
 
+    // for (let i = 0; i < population.length; i+=2) {
+    //     const firstInd = population[i].program;
+    //     const secondInd = population[i + 1].program;
         const firstNewInd = crossover(firstInd, secondInd);
         const secondNewInd = crossover(secondInd, firstInd);
-
+        
         const mutatedFirstNewInd = mutation(firstNewInd);
         const mutatedSecondNewInd = mutation(secondNewInd);
 
@@ -406,24 +438,33 @@ export async function fibonacci({ setCode, output, setPopulation, population, nu
         const ratioOfMutatedFirstNewInd = getRatio(outputOfMutatedFirstNewInd, output);
         const ratioOfMutatedSecondNewInd = getRatio(outputOfMutatedSecondNewInd, output);
 
+        const firstCount = getAmountOfAvailableLines(mutatedFirstNewInd);
+        const secondCount = getAmountOfAvailableLines(mutatedSecondNewInd);
+
         newPopulation.push({
             program: mutatedFirstNewInd,
             code: codeOfMutatedFirstNewInd,
-            ratio: ratioOfMutatedFirstNewInd
+            ratio: ratioOfMutatedFirstNewInd,
+            count: firstCount
         });
         newPopulation.push({
             program: mutatedSecondNewInd,
             code: codeOfMutatedSecondNewInd,
-            ratio: ratioOfMutatedSecondNewInd
+            ratio: ratioOfMutatedSecondNewInd,
+            count: secondCount
         });
     }
 
     newPopulation.sort((a, b) => {
         return Math.abs(1 - b.ratio) - Math.abs(1 - a.ratio)}
     );
-    
-    await sleep(200);
 
+    newPopulation.sort((a, b) => {
+        return b.count - a.count;
+    });
+
+    await sleep(100);
+console.log(newPopulation[0]);
     setPopulation(newPopulation);
     setCode(newPopulation[0].code);
 }

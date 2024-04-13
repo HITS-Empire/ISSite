@@ -34,15 +34,15 @@ export default function Menu({
     const setStartPopulation = () => {
         const newPopulation = [];
 
-        // 256 - количество особей
-        for (let i = 0; i < 256; i++) {
+        // 4096 - количество особей
+        for (let i = 0; i < 4096; i++) {
             const program = getRandomIndividual();
             const code = getCodeFromProgram(program);
             const output = runCode(code, number);
 
             const ratio = getRatio(output, correctOutput);
 
-            newPopulation.push({ program, code, ratio });
+            newPopulation.push({ program, code, ratio, count: 0 });
         }
 
         newPopulation.sort((a, b) => {
