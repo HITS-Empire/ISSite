@@ -466,17 +466,29 @@ export async function fibonacci({
         const firstCount = getAmountOfAvailableLines(mutatedFirstNewInd);
         const secondCount = getAmountOfAvailableLines(mutatedSecondNewInd);
 
+        let firstCoolPoints = 0;
+        if (firstCount === 10) {
+            firstCoolPoints = 1;
+        }
+
+        let secondCoolPoints = 0;
+        if (secondCount === 10) {
+            secondCoolPoints = 1;
+        }
+
         newPopulation.push({
             program: mutatedFirstNewInd,
             code: codeOfMutatedFirstNewInd,
             ratio: ratioOfMutatedFirstNewInd,
-            count: firstCount
+            count: firstCount,
+            coolPoints: firstCoolPoints
         });
         newPopulation.push({
             program: mutatedSecondNewInd,
             code: codeOfMutatedSecondNewInd,
             ratio: ratioOfMutatedSecondNewInd,
-            count: secondCount
+            count: secondCount,
+            coolPoints: secondCoolPoints
         });
     }
 
@@ -486,6 +498,10 @@ export async function fibonacci({
 
     newPopulation.sort((a, b) => {
         return b.count - a.count;
+    });
+
+    newPopulation.sort((a, b) => {
+        return b.coolPoints - a.coolPoints;
     });
 
     await sleep(0);

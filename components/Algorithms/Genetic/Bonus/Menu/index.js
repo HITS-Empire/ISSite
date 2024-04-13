@@ -42,7 +42,7 @@ export default function Menu({
 
             const ratio = getRatio(output, correctOutput);
 
-            newPopulation.push({ program, code, ratio, count: 0 });
+            newPopulation.push({ program, code, ratio, count: 0, coolPoints: 0 });
         }
 
         newPopulation.sort((a, b) => {
