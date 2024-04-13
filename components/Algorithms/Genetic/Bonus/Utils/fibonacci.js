@@ -197,7 +197,7 @@ export function lineIsAvailable(line) {
 
         switch (typeOfGen) {
             case "let":
-                if (i > 0) return false;
+                if (i > 0 || line.length === 1) return false;
 
                 break;
             case "operator":
@@ -244,7 +244,7 @@ export function crossover(firstInd, secondInd) {
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
-    const conditionOfAvailableLine = 0.001;
+    const conditionOfAvailableLine = 0.000001;
 
     // Если выбрали работающую линию
     while (lineIsAvailable(firstInd.find((part) => part.type === type).lines[newIndLineIndex]) && lineIsAvailable(secondInd.find((part) => part.type === type).lines[newIndLineIndex])) {
@@ -411,18 +411,24 @@ export function getAmountOfAvailableLines( newInd ) {
     return availableLines.length;
 }
 
-export async function fibonacci({ setCode, output, setPopulation, population, number }) {
+export async function fibonacci({
+    code,
+    setCode,
+    output,
+    setOutput,
+    population,
+    setPopulation,
+    number
+}) {
     if (population.length == 0) return;
 
     const newPopulation = [];
 
     for (let i = 0; i < population.length / 2; i++) {
-        const firstInd = getRandomElement(population).program;
-        const secondInd = getRandomElement(population).program;
+        const secondIndIndex = i + Math.floor(Math.random() * (population.length - i));
 
-    // for (let i = 0; i < population.length; i+=2) {
-    //     const firstInd = population[i].program;
-    //     const secondInd = population[i + 1].program;
+        const firstInd = population[i].program;
+        const secondInd = population[secondIndIndex].program;
         const firstNewInd = crossover(firstInd, secondInd);
         const secondNewInd = crossover(secondInd, firstInd);
         
@@ -456,15 +462,20 @@ export async function fibonacci({ setCode, output, setPopulation, population, nu
     }
 
     newPopulation.sort((a, b) => {
-        return Math.abs(1 - b.ratio) - Math.abs(1 - a.ratio)}
-    );
+        return Math.abs(1 - b.ratio) - Math.abs(1 - a.ratio);
+    });
 
     newPopulation.sort((a, b) => {
         return b.count - a.count;
     });
 
-    await sleep(100);
-console.log(newPopulation[0]);
+    await sleep(0);
+
     setPopulation(newPopulation);
-    setCode(newPopulation[0].code);
+
+    if (code !== newPopulation[0].code) {
+        setCode(newPopulation[0].code);
+    } else {
+        setOutput([...output]);
+    }
 }

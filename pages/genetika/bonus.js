@@ -37,7 +37,15 @@ export default function Genetic({ source }) {
             return setCode(source);
         }
 
-        fibonacci({ setCode, output, setPopulation, population, number });
+        fibonacci({
+            code,
+            setCode,
+            output,
+            setOutput,
+            population,
+            setPopulation,
+            number
+        });
     }, [output, processIsActive]);
 
     // Отследить изменение программы, чтобы изменить вывод
