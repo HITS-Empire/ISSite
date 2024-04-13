@@ -174,8 +174,12 @@ const typesOfGen = [
         gens: ["let"]
     },
     {
+        type: "assignment",
+        gens: ["="]
+    },
+    {
         type: "operator",
-        gens: ["=", "+", "+=", "-", "<"]
+        gens: ["+", "+=", "-", "<"]
     },
     {
         type: "variable",
@@ -192,44 +196,59 @@ export function getTypeOfGen(gen) {
 }
 
 export function lineIsAvailable(line) {
+    let countOfAssignments = 0;
+
+    const lineWithTypes = line.map((gen) => getTypeOfGen(gen));
+
     for (let i = 0; i < line.length; i++) {
-        const typeOfGen = getTypeOfGen(line[i]);
+        const typeOfGen = lineWithTypes[i];
 
-        switch (typeOfGen) {
-            case "let":
-                if (i > 0 || line.length === 1) return false;
+        if (typeOfGen === "let") {
+            if (i > 0 || line.length === 1) return false;
+            if (lineWithTypes[i + 1] !== "variable") return false;
+            if (line.length > 2 && lineWithTypes[i + 2] !== "assignment") return false;
+        }
+        if (typeOfGen === "assignment") {
+            if (i === 0 || i === line.length - 1) return false;
 
-                break;
-            case "operator":
-                if (i === 0 || i === line.length - 1) return false;
+            countOfAssignments++;
 
-                const typeOfPreviosGen = getTypeOfGen(line[i - 1]);
-                const typeOfNextGen = getTypeOfGen(line[i + 1]);
+            if (countOfAssignments > 1) return false;
 
-                if (typeOfPreviosGen === "let" || typeOfPreviosGen === "operator") return false;
-                if (typeOfNextGen === "let" || typeOfNextGen === "operator") return false;
+            const typeOfPreviosGen = lineWithTypes[i - 1];
+            const typeOfNextGen = lineWithTypes[i + 1];
 
-                break;
-            case "variable":
-                if (i > 0) {
-                    const typeOfPreviosGen = getTypeOfGen(line[i - 1]);
-                    if (typeOfPreviosGen === "variable" || typeOfPreviosGen === "number") return false;
-                }
-                if (i < line.length - 1) {
-                    const typeOfNextGen = getTypeOfGen(line[i + 1]);
-                    if (typeOfNextGen === "variable" || typeOfNextGen === "number") return false;
-                }
+            if (typeOfPreviosGen !== "variable") return false;
+            if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
+        }
+        if (typeOfGen === "operator") {
+            if (i === 0 || i === line.length - 1) return false;
 
-                break;
-            case "number":
-                if (i > 0) {
-                    const typeOfPreviosGen = getTypeOfGen(line[i - 1]);
-                    if (typeOfPreviosGen !== "operator") return false;
-                }
-                if (i < line.length - 1) {
-                    const typeOfNextGen = getTypeOfGen(line[i + 1]);
-                    if (typeOfNextGen !== "operator") return false;
-                }
+            const typeOfPreviosGen = lineWithTypes[i - 1];
+            const typeOfNextGen = lineWithTypes[i + 1];
+
+            if (typeOfPreviosGen !== "variable" && typeOfPreviosGen !== "number") return false;
+            if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
+        }
+        if (typeOfGen === "variable") {
+            if (i > 0) {
+                const typeOfPreviosGen = lineWithTypes[i - 1];
+                if (typeOfPreviosGen === "variable" || typeOfPreviosGen === "number") return false;
+            }
+            if (i < line.length - 1) {
+                const typeOfNextGen = lineWithTypes[i + 1];
+                if (typeOfNextGen === "variable" || typeOfNextGen === "number") return false;
+            }
+        }
+        if (typeOfGen === "number") {
+            if (i > 0) {
+                const typeOfPreviosGen = lineWithTypes[i - 1];
+                if (typeOfPreviosGen !== "operator") return false;
+            }
+            if (i < line.length - 1) {
+                const typeOfNextGen = lineWithTypes[i + 1];
+                if (typeOfNextGen !== "operator") return false;
+            }
         }
     }
 
@@ -244,7 +263,7 @@ export function crossover(firstInd, secondInd) {
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
-    const conditionOfAvailableLine = 0.000001;
+    const conditionOfAvailableLine = 1 / 1000000;
 
     // Если выбрали работающую линию
     while (lineIsAvailable(firstInd.find((part) => part.type === type).lines[newIndLineIndex]) && lineIsAvailable(secondInd.find((part) => part.type === type).lines[newIndLineIndex])) {
