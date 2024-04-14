@@ -139,7 +139,7 @@ export function getCodeFromProgram(program, isProtected = false) {
                 isProtected ? [
                     "    counter++",
                     "",
-                    "    if (counter > 1000) throw Error(\"Time limit exceed\")"
+                    "    if (counter > 100) throw Error(\"Time limit exceed\")"
                 ] : []
             ),
             "}"
