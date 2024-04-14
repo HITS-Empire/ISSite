@@ -2,11 +2,11 @@ import {
     getRandomIndex, 
     getRandomElement
 } from "../../../../../utils/helpers";
-import { sleep } from "../../../../../utils/helpers";
 
+const SEQUENCE_SIZE = 8; // Количество первых чисел для сравнения
 const POPULATION_SIZE = 4096; // Количество особей в популяции
 const MUTATION_RATE = 0.2; // Вероятность мутации
-const CROSSOVER_IN_RIGHT_LINES_RATE = 0.001; // Вероятность кроссинговера в правильных линиях
+const CROSSOVER_IN_RIGHT_LINES_RATE = 0.01; // Вероятность кроссинговера в правильных линиях
 
 // Информация о генах по типам
 const infoAboutGenesByTypes = {
@@ -18,18 +18,28 @@ const infoAboutGenesByTypes = {
 };
 
 // Выполнить код в изменённом контексте console.log
-export function runCode(code, number = 0) {
+export function runCode(code, number = -1) {
     const messages = [];
     const console = {};
 
-    console.log = (message) => messages.push(message);
-    number;
-    for (let n = 1; n < number; n++) {
+    console.log = (message) => messages.push(String(message));
+
+    const evalWrapper = (n) => {
         try {
             eval(code);    
         } catch (error) {
             messages.push(error.message);
         }
+    };
+
+    if (number === -1) {
+        for (let i = 1; i <= SEQUENCE_SIZE; i++) {
+            evalWrapper(i);
+        }
+    } else if (number === 0) {
+        messages.push("Console is empty");
+    } else {
+        evalWrapper(number);
     }
 
     return messages;
@@ -129,8 +139,9 @@ export function getCodeFromProgram(program, isProtected = false) {
                 isProtected ? [
                     "    counter++",
                     "",
-                    "    if (counter > 1000) throw Error(\"Time limit exceed!\")"
-                ] : []),
+                    "    if (counter > 1000) throw Error(\"Time limit exceed\")"
+                ] : []
+            ),
             "}"
         ]);
     }
@@ -238,12 +249,13 @@ export function getPopulation() {
 }
 
 // Получить разницу между выводом и искомым значением
-export function getDifference(value, correctValue) {
+export function getDifference(output, correctOutput) {
     let difference = 0;
     
-    for (let i = 0; i < value.length; i++) {
-        if (typeof value[i] === "string") return Infinity;
-        difference += Math.abs(value - correctValue);
+    for (let i = 0; i < output.length; i++) {
+        if (Number.isNaN(Number(output[i]))) return Infinity;
+
+        difference += Math.abs(output[i] - correctOutput[i]);
     }
 
     return difference;
@@ -347,7 +359,7 @@ export async function runGenetic({
     population,
     setPopulation,
     setStatus,
-    correctSequence
+    correctOutput
 }) {
     for (let i = 0; i < POPULATION_SIZE; i += 2) {
         const firstIndividual = population[i];
@@ -410,22 +422,16 @@ export async function runGenetic({
 
         if (firstNewPhase === 2) {
             const firstNewCode = getCodeFromProgram(firstNewProgram, true);
-            const firstNewOutput = runCode(firstNewCode, number);
-            const firstNewDifference = getDifference(firstNewOutput, correctSequence);
+            const firstNewOutput = runCode(firstNewCode, -1);
 
-            firstNewIndividual.code = firstNewCode;
-            firstNewIndividual.output = firstNewOutput;
-            firstNewIndividual.difference = firstNewDifference;
+            firstNewIndividual.difference = getDifference(firstNewOutput, correctOutput);
         }
 
         if (secondNewPhase === 2) {
             const secondNewCode = getCodeFromProgram(secondNewProgram, true);
-            const secondNewOutput = runCode(secondNewCode, number);
-            const secondNewDifference = getDifference(secondNewOutput, correctSequence);
+            const secondNewOutput = runCode(secondNewCode, -1);
 
-            secondNewIndividual.code = secondNewCode;
-            secondNewIndividual.output = secondNewOutput;
-            secondNewIndividual.difference = secondNewDifference;
+            secondNewIndividual.difference = getDifference(secondNewOutput, correctOutput);
         }
 
         population.push(firstNewIndividual, secondNewIndividual);
@@ -448,13 +454,13 @@ export async function runGenetic({
     });
 
     setPopulation(population.slice(0, POPULATION_SIZE));
+
+    const output = runCode(getCodeFromProgram(population[0].program, true), number);
+
     setCode(getCodeFromProgram(population[0].program));
+    setOutput(output);
 
-    if (population[0].phase < 2) {
-        setOutput(runCode(getCodeFromProgram(population[0].program, true), number));
-    } else {
-        if (population[0].difference === 0) setStatus(2);
+    console.log(population[0].difference);
 
-        setOutput(population[0].output);
-    }
+    if (population[0].difference === 0) setStatus(2);
 }

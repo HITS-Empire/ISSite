@@ -51,7 +51,7 @@ export default function Menu({
                 <Button
                     type="primary"
                     onClick={runProcess}
-                    disabled={status !== 0}
+                    disabled={number === 0 || status !== 0}
                 >
                     Запустить
                 </Button>
@@ -59,7 +59,7 @@ export default function Menu({
                 <Button
                     type="soft"
                     onClick={stopProcess}
-                    disabled={status === 0}
+                    disabled={number === 0 || status === 0}
                 >
                     Отменить
                 </Button>
