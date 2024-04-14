@@ -6,7 +6,7 @@ import { sleep } from "../../../../../utils/helpers";
 
 const POPULATION_SIZE = 4096; // Количество особей в популяции
 const MUTATION_RATE = 0.2; // Вероятность мутации
-const CROSSOVER_IN_RIGHT_LINES_RATE = 0.001; // Вероятность кроссинговера в правильных линиях
+const CROSSOVER_IN_RIGHT_LINES_RATE = 0.01; // Вероятность кроссинговера в правильных линиях
 
 // Информация о возможных генах в программе
 const infoAboutGensInProgram = {
@@ -62,8 +62,6 @@ const infoAboutGenesByTypes = {
     "operator": ["<", "+", "-"],
     "number": ["0", "1", "2"]
 };
-
-const types = ["basic", "condition", "body", "console"];
 
 // Выполнить код в изменённом контексте console.log
 export function runCode(code, n = 0) {
@@ -213,7 +211,7 @@ export function lineIsRight(line, location) {
             const typeOfNextGen = typesOfGenes[i + 1];
 
             if (typeOfPreviosGen !== "variable") return false;
-            if (location === "basic" && typeOfNextGen !== "number") return false;
+            // if (location === "basic" && typeOfNextGen !== "number") return false;
             if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
         }
         if (typeOfGen === "operator") {
@@ -277,8 +275,8 @@ export function getPopulation() {
 
         population.push({
             program,
-            countOfRightLines,
-            phase
+            phase,
+            countOfRightLines
         });
     }
 
@@ -291,286 +289,270 @@ export function getDifference(value, correctValue) {
     return Math.abs(value - correctValue);
 }
 
-// Кроссинговер
-export function $crossover(firstProgram, secondProgram) {
-    // Индекс, до которого будет выполняться кроссинговер
-    const maxCrossoverCount = Math.min(firstProgram.length, secondProgram.length);
+// Старый кроссинговер
+// export function crossover(firstIndividual, secondIndividual) {
+//     const firstProgram = firstIndividual.program;
+//     const secondProgram = secondIndividual.program;
 
-    // Определить фазу программы
-    const phase = maxCrossoverCount === 1 ? 0 : maxCrossoverCount === 3 ? 1 : 2;
+//     const newTypes = Object
+//         .keys(infoAboutGensInProgram)
+//         .slice(0, Math.min(firstProgram.length, secondProgram.length));
 
-    const newProgram = getProgram(phase);
+//     const allGens = [];
+//     const repetitiveGens = [];
 
-    shuffleProgram(newProgram);
+//     // Заполнить массивы генов по типу части программы
+//     const fillGenes = (type) => {
+//         for (const gen of infoAboutGensInProgram[type].set) {
+//             if (!allGens.includes(gen)) allGens.push(gen);
 
-    let indexOfRandomPart, randomPart;
-    let indexOfRandomLine, randomLine;
+//             if (infoAboutGensInProgram[type].count[gen] > 1) {
+//                 if (!repetitiveGens.includes(gen)) {
+//                     repetitiveGens.push(gen, infoAboutGensInProgram[type].count[gen]);
+//                 } else {
+//                     repetitiveGens[repetitiveGens.indexOf(gen) + 1] += infoAboutGensInProgram[type].count[gen];
+//                 }
+//             }
+//         }
+//     };
 
-    do {
-        indexOfRandomPart = Math.floor(Math.random() * maxCrossoverCount);
-        randomPart = newProgram[indexOfRandomPart];
+//     let phase = 0;
 
-        console.log(indexOfRandomPart, randomPart);
+//     fillGenes("basic");
 
-        indexOfRandomLine = getRandomIndex(randomPart.lines);
-        randomLine = randomPart.lines[indexOfRandomLine];
+//     if (newTypes.length > 1) {
+//         fillGenes("condition");
+//         fillGenes("body");
+//         phase++;
+//     }
 
-        // Если выбрали работающую линию
-        if (Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) break;
-    } while ((
-        lineIsRight(firstProgram[indexOfRandomPart].lines[indexOfRandomLine], randomPart.type)
-    ) && (
-        lineIsRight(secondProgram[indexOfRandomPart].lines[indexOfRandomLine], randomPart.type)
-    ));
+//     if (newTypes.length > 3) {
+//         fillGenes("console");
+//         phase++;
+//     }
 
-    // Использованные гены
-    const usedGenes = [];
+//     const newInd = getProgram(phase);
 
-    let index;
-    let k = 0;
+//     shuffleProgram(newInd);
 
-    const breakPointIndex = getRandomIndex(randomLine);
+//     let type = getRandomElement(newTypes);
 
-    for (let indexOfPart = 0; indexOfPart < maxCrossoverCount; indexOfPart++) {
-        if (indexOfPart !== indexOfRandomPart) {
-            // Полностью скопировать линии первой программы
-            newProgram[indexOfPart].lines = firstProgram[indexOfPart].lines.map((line) => {
-                for (const gen of line) {
-                    usedGenes.push(gen);
-                }
+//     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
+//     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
-                return [...line];
-            });
+//     const conditionOfAvailableLine = 1 / 1000;
 
-            continue;
-        }
+//     // Если выбрали работающую линию
+//     while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex], type) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex], type)) {
+//         if (Math.random() < conditionOfAvailableLine) break;
+//         type = getRandomElement(newTypes);
 
-        const linesFromFirstProgram = firstProgram[indexOfPart].lines;
-        const stopMark = Math.min(indexOfRandomLine + 1, linesFromFirstProgram.length);
-
-        for (k; k < stopMark; k++) {
-            if (k !== indexOfRandomLine) {
-                // Скопировать одну линию первой программы
-                newProgram[indexOfPart].lines[k] = firstProgram[indexOfPart].lines[k].map((gen) => {
-                    usedGenes.push(gen);
-
-                    return gen;
-                });
-
-                continue;
-            }
-
-            for (let i = 0; i < breakPointIndex; i++) {
-                const gen = linesFromFirstProgram[k][i];
-
-                randomLine[i] = gen;
-                usedGenes.push(gen);
-            }
-        }
-
-        index = indexOfPart;
-
-        if (k === indexOfRandomLine) break;
-    }
-
-    return newProgram;
-}
-
-export function crossover(firstProgram, secondProgram) {
-    const newTypes = Object
-        .keys(infoAboutGensInProgram)
-        .slice(0, Math.min(firstProgram.length, secondProgram.length));
-
-    const allGens = [];
-    const repetitiveGens = [];
-
-    // Заполнить массивы генов по типу части программы
-    const fillGenes = (type) => {
-        for (const gen of infoAboutGensInProgram[type].set) {
-            if (!allGens.includes(gen)) allGens.push(gen);
-
-            if (infoAboutGensInProgram[type].count[gen] > 1) {
-                if (!repetitiveGens.includes(gen)) {
-                    repetitiveGens.push(gen, infoAboutGensInProgram[type].count[gen]);
-                } else {
-                    repetitiveGens[repetitiveGens.indexOf(gen) + 1] += infoAboutGensInProgram[type].count[gen];
-                }
-            }
-        }
-    };
-
-    let phase = 0;
-
-    fillGenes("basic");
-
-    if (newTypes.length > 1) {
-        fillGenes("condition");
-        fillGenes("body");
-        phase++;
-    }
-
-    if (newTypes.length > 3) {
-        fillGenes("console");
-        phase++;
-    }
-
-    const newInd = getProgram(phase);
-
-    shuffleProgram(newInd);
-
-    let type = getRandomElement(newTypes);
-
-    let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
-    let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
-
-    const conditionOfAvailableLine = 1 / 1000;
-
-    // Если выбрали работающую линию
-    while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex], type) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex], type)) {
-        if (Math.random() < conditionOfAvailableLine) break;
-        type = getRandomElement(newTypes);
-
-        newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
-        newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
-    }
+//         newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
+//         newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
+//     }
     
-    // Использованные гены
-    const usedGens = [];
+//     // Использованные гены
+//     const usedGens = [];
 
-    let index;
-    let k = 0;
+//     let index;
+//     let k = 0;
 
-    const breakPointIndex = getRandomIndex(newIndLine);
+//     const breakPointIndex = getRandomIndex(newIndLine);
 
-    for (let i = 0; i < newTypes.length; i++) {
-        if (newTypes[i] === type) {
-            const firstProgramLines = firstProgram.find((part) => part.type === type).lines;
+//     for (let i = 0; i < newTypes.length; i++) {
+//         if (newTypes[i] === type) {
+//             const firstProgramLines = firstProgram.find((part) => part.type === type).lines;
 
-            while (k < firstProgramLines.length) {
-                if (k === newIndLineIndex) {
-                    for (let j = 0; j < breakPointIndex; j++) {
-                        const newGen = firstProgramLines[k][j];
-                        newIndLine[j] = newGen;
-                        usedGens.push(newGen);
-                    }
+//             while (k < firstProgramLines.length) {
+//                 if (k === newIndLineIndex) {
+//                     for (let j = 0; j < breakPointIndex; j++) {
+//                         const newGen = firstProgramLines[k][j];
+//                         newIndLine[j] = newGen;
+//                         usedGens.push(newGen);
+//                     }
 
-                    break;
-                } else {
-                    const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
-                    const newLine = firstProgram.find((part) => part.type === newTypes[i]).lines[k];
-                    newInd[newIndPartIndex].lines[k] = [...newLine];
+//                     break;
+//                 } else {
+//                     const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
+//                     const newLine = firstProgram.find((part) => part.type === newTypes[i]).lines[k];
+//                     newInd[newIndPartIndex].lines[k] = [...newLine];
 
-                    for (let j = 0; j < newLine.length; j++) {
-                        const newGen = firstProgram.find((part) => part.type === type).lines[k][j];
-                        usedGens.push(newGen);
-                    }
-                }
+//                     for (let j = 0; j < newLine.length; j++) {
+//                         const newGen = firstProgram.find((part) => part.type === type).lines[k][j];
+//                         usedGens.push(newGen);
+//                     }
+//                 }
 
-                k++;
-            }
-            index = i;
+//                 k++;
+//             }
+//             index = i;
 
-            if (k === newIndLineIndex) break;
-        } else {
-            const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
-            const newLines = firstProgram.find((part) => part.type === newTypes[i]).lines;
-            newInd[newIndPartIndex].lines = newLines.map((line) => [...line]);
+//             if (k === newIndLineIndex) break;
+//         } else {
+//             const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
+//             const newLines = firstProgram.find((part) => part.type === newTypes[i]).lines;
+//             newInd[newIndPartIndex].lines = newLines.map((line) => [...line]);
 
-            for (const newLine of newLines) {
-                for (let k = 0; k < newLine.length; k++) {
-                    usedGens.push(newLine[k]);
-                }
-            }
-        }
-    }
+//             for (const newLine of newLines) {
+//                 for (let k = 0; k < newLine.length; k++) {
+//                     usedGens.push(newLine[k]);
+//                 }
+//             }
+//         }
+//     }
     
-    for (let i = index; i < newTypes.length; i++) {
-        if (newTypes[i] === type) {
-            const secondProgramLines = secondProgram.find((part) => part.type === type).lines;
+//     for (let i = index; i < newTypes.length; i++) {
+//         if (newTypes[i] === type) {
+//             const secondProgramLines = secondProgram.find((part) => part.type === type).lines;
 
-            while (k < secondProgramLines.length) {
-                if (k === newIndLineIndex) {
-                    for (let j = breakPointIndex; j < secondProgramLines[k].length; j++) {
-                        const newGen = secondProgramLines[k][j];
+//             while (k < secondProgramLines.length) {
+//                 if (k === newIndLineIndex) {
+//                     for (let j = breakPointIndex; j < secondProgramLines[k].length; j++) {
+//                         const newGen = secondProgramLines[k][j];
 
-                        if (!usedGens.includes(newGen) || (usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1])) {
-                            newIndLine[j] = newGen;
-                            usedGens.push(newGen);
-                        } else {
-                            newIndLine[j] = "skipped";
-                        }
-                    }
-                } else {
-                    const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
-                    const newLine = secondProgram.find((part) => part.type === newTypes[i]).lines[k];
+//                         if (!usedGens.includes(newGen) || (usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1])) {
+//                             newIndLine[j] = newGen;
+//                             usedGens.push(newGen);
+//                         } else {
+//                             newIndLine[j] = "skipped";
+//                         }
+//                     }
+//                 } else {
+//                     const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
+//                     const newLine = secondProgram.find((part) => part.type === newTypes[i]).lines[k];
 
-                    for (let j = 0; j < newLine.length; j++) {
-                        const newGen = newLine[j];
-                        if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
-                            newInd[newIndPartIndex].lines[k][j] = newLine[j];
-                            usedGens.push(newGen);
-                        } else {
-                            newInd[newIndPartIndex].lines[k][j] = "skipped";
-                        }
-                    }
-                }
+//                     for (let j = 0; j < newLine.length; j++) {
+//                         const newGen = newLine[j];
+//                         if (!usedGens.includes(newGen) || usedGens.includes(newGen) && repetitiveGens.includes(newGen) && usedGens.filter((gen) => gen === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
+//                             newInd[newIndPartIndex].lines[k][j] = newLine[j];
+//                             usedGens.push(newGen);
+//                         } else {
+//                             newInd[newIndPartIndex].lines[k][j] = "skipped";
+//                         }
+//                     }
+//                 }
 
-                k++;
-            }
-        } else {
-            const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
-            const newLines = secondProgram.find((part) => part.type === newTypes[i]).lines;
+//                 k++;
+//             }
+//         } else {
+//             const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
+//             const newLines = secondProgram.find((part) => part.type === newTypes[i]).lines;
             
-            for (let j = 0; j < newLines.length; j++) {
-                const newLine = newLines[j];
+//             for (let j = 0; j < newLines.length; j++) {
+//                 const newLine = newLines[j];
 
-                for (let h = 0; h < newLine.length; h++) {
-                    const newGen = newLine[h];
+//                 for (let h = 0; h < newLine.length; h++) {
+//                     const newGen = newLine[h];
 
-                    if (!usedGens.includes(newGen)) {        
-                        newInd[newIndPartIndex].lines[j][h] = newGen;
-                        usedGens.push(newGen);
-                    } else {
-                        if (repetitiveGens.includes(newGen)) {
-                            if (usedGens.filter((element) => element === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
-                                newInd[newIndPartIndex].lines[j][h] = newGen;
-                                usedGens.push(newGen);
-                            } else {
-                                newInd[newIndPartIndex].lines[j][h] = "skipped";
-                            }
-                        } else {
-                            newInd[newIndPartIndex].lines[j][h] = "skipped";
-                        }
-                    }
+//                     if (!usedGens.includes(newGen)) {        
+//                         newInd[newIndPartIndex].lines[j][h] = newGen;
+//                         usedGens.push(newGen);
+//                     } else {
+//                         if (repetitiveGens.includes(newGen)) {
+//                             if (usedGens.filter((element) => element === newGen).length < repetitiveGens[repetitiveGens.indexOf(newGen) + 1]) {
+//                                 newInd[newIndPartIndex].lines[j][h] = newGen;
+//                                 usedGens.push(newGen);
+//                             } else {
+//                                 newInd[newIndPartIndex].lines[j][h] = "skipped";
+//                             }
+//                         } else {
+//                             newInd[newIndPartIndex].lines[j][h] = "skipped";
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     const newIndPartIndex = newInd.findIndex((part) => part.type === type);
+//     newInd[newIndPartIndex].lines[newIndLineIndex] = newIndLine;
+
+//     for (let i = 0; i < newTypes.length; i++) {
+//         const newLines = newInd.find((part) => part.type === newTypes[i]).lines;
+
+//         for (let j = 0; j < newLines.length; j++) {
+//             const newLine = newLines[j];
+
+//             for (let h = 0; h < newLine.length; h++) {
+//                 if (newLine[h] === "skipped") {
+//                     for (let gen of allGens) {
+//                         if (!usedGens.includes(gen) || usedGens.includes(gen) && repetitiveGens.includes(gen) && usedGens.filter((usedGen) => gen === usedGen).length < repetitiveGens[repetitiveGens.indexOf(gen) + 1]) {
+//                             newLine[h] = gen;
+//                             usedGens.push(gen);
+//                             break;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     return newInd;
+// }
+
+// Новый кроссинговер
+export function crossover(firstIndividual, secondIndividual) {
+    const phase = Math.min(firstIndividual.phase, secondIndividual.phase);
+    const childProgram = getProgram(phase);
+
+    const linesForCrossover = []; // Линии, которые будут подвержены кроссинговеру
+
+    const firstGenes = []; // Все гены из линий для кроссинговера
+    const secondGenes = []; // Все гены, которые нужно скопировать
+
+    // Индекс случайной части программы для кроссинговера
+    const indexOfRandomPart = getRandomIndex(childProgram);
+
+    // Скопировать первую программу и заполнить информацию для кроссинговера
+    childProgram.forEach((part, index) => {
+        part.lines = firstIndividual.program[index].lines.map((line) => {
+            const copyOfLine = [...line];
+
+            if (index === indexOfRandomPart) {
+                if (!lineIsRight(line, part.type) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
+                    linesForCrossover.push(copyOfLine);
+                    firstGenes.push(...line);
                 }
             }
-        }
-    }
 
-    const newIndPartIndex = newInd.findIndex((part) => part.type === type);
-    newInd[newIndPartIndex].lines[newIndLineIndex] = newIndLine;
+            return copyOfLine;
+        });
 
-    for (let i = 0; i < newTypes.length; i++) {
-        const newLines = newInd.find((part) => part.type === newTypes[i]).lines;
-
-        for (let j = 0; j < newLines.length; j++) {
-            const newLine = newLines[j];
-
-            for (let h = 0; h < newLine.length; h++) {
-                if (newLine[h] === "skipped") {
-                    for (let gen of allGens) {
-                        if (!usedGens.includes(gen) || usedGens.includes(gen) && repetitiveGens.includes(gen) && usedGens.filter((usedGen) => gen === usedGen).length < repetitiveGens[repetitiveGens.indexOf(gen) + 1]) {
-                            newLine[h] = gen;
-                            usedGens.push(gen);
-                            break;
-                        }
-                    }
+        if (index === indexOfRandomPart) {
+            secondIndividual.program[index].lines.forEach((line) => {
+                if (!lineIsRight(line, part.type) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
+                    secondGenes.push(...line);
                 }
-            }
+            });
         }
+    });
+
+    const commonGenes = []; // Общие гены для обеих частей
+    const remainingGenes = []; // Оставшиеся гены
+
+    // Получить общие гены для обеих частей
+    firstGenes.forEach((gen) => {
+        const index = secondGenes.indexOf(gen);
+
+        if (index === -1) {
+            remainingGenes.push(gen);
+        } else {
+            secondGenes.splice(index, 1);
+            commonGenes.push(gen);
+        }
+    });
+
+    const allGenes = [...commonGenes, ...remainingGenes]; // Все гены для вставки
+    allGenes.sort(() => Math.random() - 0.5);
+
+    let index = 0;
+
+    for (let i = 0; i < linesForCrossover.length; i++) {
+        linesForCrossover[i] = allGenes.slice(index, index + linesForCrossover[i].length);
+        index += linesForCrossover[i].length;
     }
 
-    return newInd;
+    return childProgram;
 }
 
 // Мутация
@@ -611,14 +593,12 @@ export async function runGenetic({
     setPopulation,
     correctValue
 }) {
-    for (let i = 0; i < POPULATION_SIZE; i++) {
-        const secondRandomIndex = i + Math.floor(Math.random() * (POPULATION_SIZE - i));
+    for (let i = 0; i < POPULATION_SIZE; i += 2) {
+        const firstIndividual = population[i];
+        const secondIndividual = population[i + 1];
 
-        const firstIndividual = population[0];
-        const secondIndividual = population[secondRandomIndex];
-
-        const firstNewProgram = crossover(firstIndividual.program, secondIndividual.program);
-        const secondNewProgram = crossover(secondIndividual.program, firstIndividual.program);
+        const firstNewProgram = crossover(firstIndividual, secondIndividual);
+        const secondNewProgram = crossover(secondIndividual, firstIndividual);
 
         mutation(firstNewProgram);
         mutation(secondNewProgram);
@@ -626,17 +606,19 @@ export async function runGenetic({
         let firstCountOfRightLines = getCountOfRightLines(firstNewProgram);
         let secondCountOfRightLines = getCountOfRightLines(secondNewProgram);
 
-        let firstNewPhase = firstIndividual.phase;
-        let secondNewPhase = secondIndividual.phase;
+        const newPhase = Math.min(firstIndividual.phase, secondIndividual.phase);
 
-        if (firstNewPhase === 0 && firstCountOfRightLines > 2) {
+        let firstNewPhase = newPhase;
+        let secondNewPhase = newPhase;
+
+        if (firstNewPhase === 0 && firstCountOfRightLines > 1) {
             firstCountOfRightLines += raise(
                 firstNewProgram,
                 firstNewPhase
             );
             firstNewPhase++;
         }
-        if (firstNewPhase === 1 && firstCountOfRightLines > 8) {
+        if (firstNewPhase === 1 && firstCountOfRightLines > 6) {
             firstCountOfRightLines += raise(
                 firstNewProgram,
                 firstNewPhase
@@ -644,14 +626,14 @@ export async function runGenetic({
             firstNewPhase++;
         }
 
-        if (secondNewPhase === 0 && secondCountOfRightLines > 2) {
+        if (secondNewPhase === 0 && secondCountOfRightLines > 1) {
             secondCountOfRightLines += raise(
                 secondNewProgram,
                 secondNewPhase
             );
             secondNewPhase++;
         }
-        if (secondNewPhase === 1 && secondCountOfRightLines > 8) {
+        if (secondNewPhase === 1 && secondCountOfRightLines > 6) {
             secondCountOfRightLines += raise(
                 secondNewProgram,
                 secondNewPhase
@@ -695,7 +677,7 @@ export async function runGenetic({
         if (a.phase !== b.phase) {
             return b.phase - a.phase;
         }
-        if (a.phase < 2) {
+        if (a.phase < 2 || a.difference === Infinity && b.difference === Infinity) {
             if (a.countOfRightLines !== b.countOfRightLines) {
                 return b.countOfRightLines - a.countOfRightLines;
             }
@@ -704,7 +686,7 @@ export async function runGenetic({
         return a.difference - b.difference;
     });
 
-    await sleep(50);
+    await sleep(0);
 
     setPopulation(population.slice(0, POPULATION_SIZE));
 
