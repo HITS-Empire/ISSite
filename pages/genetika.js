@@ -3,7 +3,8 @@ import {
     runCode,
     getProgram,
     runGenetic,
-    getCodeFromProgram
+    getCodeFromProgram,
+    getPopulation
 } from "../components/Algorithms/Genetic/Utils/genetic";
 import Menu from "../components/Algorithms/Genetic/Menu";
 import Code from "../components/Algorithms/Genetic/Code";
@@ -15,14 +16,11 @@ export default function Genetic() {
     // Вывод программы
     const [output, setOutput] = useState([]);
 
-    // Номер элемента последовательности
-    const [number, setNumber] = useState(8);
-
-    // Популяция
-    const [population, setPopulation] = useState([]);
-
     // Статус программы (0 - не активно, 1 - выполняется поиск, 2 - поиск завершён)
     const [status, setStatus] = useState(0);
+
+    // Номер элемента последовательности
+    const [number, setNumber] = useState(8);
 
     // Запустить или остановить программу
     useEffect(() => {
@@ -35,15 +33,15 @@ export default function Genetic() {
         }
 
         if (status === 1) {
+            const population = getPopulation();
             const correctOutput = runCode(code, -1);
 
             const interval = setInterval(runGenetic, 50, {
                 setCode,
                 setOutput,
+                setStatus,
                 number,
                 population,
-                setPopulation,
-                setStatus,
                 correctOutput
             });
 
@@ -58,7 +56,6 @@ export default function Genetic() {
             <Menu
                 number={number}
                 setNumber={setNumber}
-                setPopulation={setPopulation}
                 status={status}
                 setStatus={setStatus}
             />

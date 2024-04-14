@@ -2,13 +2,11 @@ import Input from "../../../Input";
 import Button from "../../../Button";
 import Status from "../../../Status";
 import MenuWrapper from "../../../MenuWrapper";
-import { getPopulation } from "../Utils/genetic";
 import ButtonContainer from "../../../ButtonContainer";
 
 export default function Menu({
     number,
     setNumber,
-    setPopulation,
     status,
     setStatus,
 }) {
@@ -23,13 +21,11 @@ export default function Menu({
 
     // Запустить алгоритм
     const runProcess = () => {
-        setPopulation(getPopulation());
         setStatus(1);
     };
 
     // Остановить алгоритм
     const stopProcess = () => {
-        setPopulation([]);
         setStatus(0);
     };
 

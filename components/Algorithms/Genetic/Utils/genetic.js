@@ -4,7 +4,7 @@ import {
 } from "../../../../utils/helpers";
 
 const SEQUENCE_SIZE = 8; // Количество первых чисел для сравнения
-const POPULATION_SIZE = 4096; // Количество особей в популяции
+const POPULATION_SIZE = 256; // Количество особей в популяции
 const MUTATION_RATE = 0.2; // Вероятность мутации
 const CROSSOVER_IN_RIGHT_LINES_RATE = 0.01; // Вероятность кроссинговера в правильных линиях
 
@@ -355,10 +355,9 @@ export function raise(program, phase = 0) {
 export async function runGenetic({
     setCode,
     setOutput,
+    setStatus,
     number,
     population,
-    setPopulation,
-    setStatus,
     correctOutput
 }) {
     for (let i = 0; i < POPULATION_SIZE; i += 2) {
@@ -453,7 +452,7 @@ export async function runGenetic({
         return Math.random() - 0.5;
     });
 
-    setPopulation(population.slice(0, POPULATION_SIZE));
+    population.splice(POPULATION_SIZE);
 
     const output = runCode(getCodeFromProgram(population[0].program, true), number);
 
