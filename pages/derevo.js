@@ -7,8 +7,8 @@ import {
 } from "../components/Algorithms/DecisionTree/Utils/decisionTree";
 
 export default function DecisionTree() {
-    // Нужно ли оптимизировать дерево
-    const [isOptimized, setIsOptimized] = useState(false);
+    // Процент оптимизации
+    const [optimizationPercentage, setOptimizationPercentage] = useState(true);
 
     // Обучающая выборка
     const [trainingSet, setTrainingSet] = useState();
@@ -63,16 +63,16 @@ export default function DecisionTree() {
             getDecisionTree({
                 trainingSet,
                 requiredAttribute,
-                isOptimized
+                optimizationPercentage
             })
         );
-    }, [isOptimized, trainingSet]);
+    }, [optimizationPercentage, trainingSet]);
 
     // Сбросить состояния поля при перезагрузке дерева
     useEffect(() => {
         if (decisionTree) return;
 
-        setIsOptimized(false);
+        setOptimizationPercentage(0);
         setMarginLeft(0);
         setMarginTop(0);
         setSavedMarginLeft(0);
@@ -120,8 +120,8 @@ export default function DecisionTree() {
     return (
         <>
             <Menu
-                isOptimized={isOptimized}
-                setIsOptimized={setIsOptimized}
+                optimizationPercentage={optimizationPercentage}
+                setOptimizationPercentage={setOptimizationPercentage}
                 trainingSet={trainingSet}
                 setTrainingSet={setTrainingSet}
                 setFieldForPrediction={setFieldForPrediction}

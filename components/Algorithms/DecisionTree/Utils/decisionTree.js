@@ -73,12 +73,12 @@ export async function predict(decisionTree, field, {
 export function getCounterOfUniqueValues(set, attribute) {
     const counter = {};
 
-    for (let i = set.length - 1; i >= 0; i--) {
-        counter[set[i][attribute]] = 0;
-    }
-
-    for (let i = set.length - 1; i >= 0; i--) {
-        counter[set[i][attribute]]++;
+    for (const field of set) {
+        if (counter[field[attribute]]) {
+            counter[field[attribute]]++;
+        } else {
+            counter[field[attribute]] = 1;
+        }
     }
 
     return counter;
@@ -103,10 +103,10 @@ export function getMostFrequentValue(set, attribute) {
 // Получить значение энтропии
 export function getEntropy(set, attribute) {
     const counter = getCounterOfUniqueValues(set, attribute);
+    let entropy = 0;
 
-    let k, entropy = 0;
     for (const i in counter) {
-        k = counter[i] / set.length;
+        const k = counter[i] / (set.length + 1);
         entropy += -k * Math.log(k);
     }
 
@@ -144,20 +144,19 @@ export function getPredictionNode(trainingSet, requiredAttribute, currentNode) {
 export function getDecisionTree({
     trainingSet,
     requiredAttribute,
-    isOptimized = false,
+    optimizationPercentage = 0,
     currentNode = { id: 0 }
 }) {
-    const minEntropy = 0.01;
-
     if (trainingSet.length <= 1) {
         return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
 
-    const initialEntropy = getEntropy(trainingSet, requiredAttribute) * (!isOptimized || trainingSet.length);
-
-    if (initialEntropy <= minEntropy) {
+    const counter = getCounterOfUniqueValues(trainingSet, requiredAttribute);
+    if (Object.keys(counter).length <= 1) {
         return getPredictionNode(trainingSet, requiredAttribute, currentNode);
     }
+
+    const initialEntropy = getEntropy(trainingSet, requiredAttribute);
 
     const alreadyChecked = {};
     let bestSplit = { profit: 0 };
@@ -173,25 +172,35 @@ export function getDecisionTree({
             if (alreadyChecked[expression]) continue;
             alreadyChecked[expression] = true;
 
-            const currentSplit = getSplit(trainingSet, attribute, condition, value);
+            const { noNodes, yesNodes } = getSplit(trainingSet, attribute, condition, value);
 
-            const yesNodesEntropy = getEntropy(currentSplit.yesNodes, requiredAttribute);
-            const noNodesEntropy = getEntropy(currentSplit.noNodes, requiredAttribute);
+            const noNodesEntropy = getEntropy(noNodes, requiredAttribute);
+            const yesNodesEntropy = getEntropy(yesNodes, requiredAttribute);
 
-            const different = !isOptimized || Math.abs(currentSplit.yesNodes.length - currentSplit.noNodes.length);
+            const noNodesCounter = getCounterOfUniqueValues(noNodes, requiredAttribute);
+            const yesNodesCounter = getCounterOfUniqueValues(yesNodes, requiredAttribute);
+            const noNodesCounterLength = Object.keys(noNodesCounter).length;
+            const yesNodesCounterLength = Object.keys(yesNodesCounter).length;
+
+            const different = 1 + (
+                Math.abs(
+                    noNodesCounterLength / (yesNodes.length + 0.1) - yesNodesCounterLength / (noNodes.length + 0.1)
+                ) - 1
+            ) * (optimizationPercentage / 100);
 
             const newEntropy = (
                 (
-                    yesNodesEntropy * currentSplit.yesNodes.length
+                    noNodesEntropy * noNodes.length
                 ) + (
-                    noNodesEntropy * currentSplit.noNodes.length
+                    yesNodesEntropy * yesNodes.length
                 )
-            ) * different / trainingSet.length;
+            ) / trainingSet.length * different;
 
             const profit = initialEntropy - newEntropy;
             if (profit > bestSplit.profit) {
                 bestSplit = {
-                    ...currentSplit,
+                    noNodes,
+                    yesNodes,
                     attribute,
                     condition,
                     value,
@@ -210,15 +219,21 @@ export function getDecisionTree({
     const noNodes = getDecisionTree({
         trainingSet: bestSplit.noNodes,
         requiredAttribute,
-        isOptimized,
+        optimizationPercentage,
         currentNode
     });
     const yesNodes = getDecisionTree({
         trainingSet: bestSplit.yesNodes,
         requiredAttribute,
-        isOptimized,
+        optimizationPercentage,
         currentNode
     });
+
+    if (noNodes.prediction !== undefined && yesNodes.prediction !== undefined) {
+        if (noNodes.prediction === yesNodes.prediction) {
+            return getPredictionNode(trainingSet, requiredAttribute, currentNode);
+        }
+    }
 
     return {
         attribute: bestSplit.attribute,

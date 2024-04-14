@@ -55,7 +55,7 @@ export default function Menu({
         if (!/^\d*$/.test(value)) return;
 
         setPopulation(Math.min(Math.max(value, 0), 64));
-    }
+    };
 
     return (
         <MenuWrapper
