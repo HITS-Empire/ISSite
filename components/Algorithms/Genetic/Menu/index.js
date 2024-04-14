@@ -1,9 +1,9 @@
-import Input from "../../../../Input";
-import Button from "../../../../Button";
-import Status from "../../../../Status";
+import Input from "../../../Input";
+import Button from "../../../Button";
+import Status from "../../../Status";
+import MenuWrapper from "../../../MenuWrapper";
 import { getPopulation } from "../Utils/genetic";
-import MenuWrapper from "../../../../MenuWrapper";
-import ButtonContainer from "../../../../ButtonContainer";
+import ButtonContainer from "../../../ButtonContainer";
 
 export default function Menu({
     number,

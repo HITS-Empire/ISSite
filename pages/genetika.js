@@ -4,9 +4,9 @@ import {
     getProgram,
     runGenetic,
     getCodeFromProgram
-} from "../../components/Algorithms/Genetic/Bonus/Utils/genetic";
-import Menu from "../../components/Algorithms/Genetic/Bonus/Menu";
-import Code from "../../components/Algorithms/Genetic/Bonus/Code";
+} from "../components/Algorithms/Genetic/Utils/genetic";
+import Menu from "../components/Algorithms/Genetic/Menu";
+import Code from "../components/Algorithms/Genetic/Code";
 
 export default function Genetic() {
     // Код, который показывается пользователю

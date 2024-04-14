@@ -1,7 +1,7 @@
 import { 
     getRandomIndex, 
     getRandomElement
-} from "../../../../../utils/helpers";
+} from "../../../../utils/helpers";
 
 const SEQUENCE_SIZE = 8; // Количество первых чисел для сравнения
 const POPULATION_SIZE = 4096; // Количество особей в популяции
