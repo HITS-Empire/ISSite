@@ -6,6 +6,7 @@ import { sleep } from "../../../../../utils/helpers";
 
 const POPULATION_SIZE = 4096; // Количество особей в популяции
 const MUTATION_RATE = 0.2; // Вероятность мутации
+const CROSSOVER_IN_RIGHT_LINES_RATE = 0.001; // Вероятность кроссинговера в правильных линиях
 
 // Информация о возможных генах в программе
 const infoAboutGensInProgram = {
@@ -318,13 +319,95 @@ export function getDifference(value, correctValue) {
 
 // Кроссинговер
 export function crossover(firstProgram, secondProgram) {
+    // Индекс, до которого будет выполняться кроссинговер
+    const maxCrossoverCount = Math.min(firstProgram.length, secondProgram.length);
+
+    // Определить фазу программы
+    const phase = maxCrossoverCount === 1 ? 0 : maxCrossoverCount === 3 ? 1 : 2;
+
+    const newProgram = getProgram(phase);
+
+    shuffleProgram(newProgram);
+
+    let indexOfRandomPart, randomPart;
+    let indexOfRandomLine, randomLine;
+
+    do {
+        indexOfRandomPart = Math.floor(Math.random() * maxCrossoverCount);
+        randomPart = newProgram[indexOfRandomPart];
+
+        console.log(indexOfRandomPart, randomPart);
+
+        indexOfRandomLine = getRandomIndex(randomPart.lines);
+        randomLine = randomPart.lines[indexOfRandomLine];
+
+        // Если выбрали работающую линию
+        if (Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) break;
+    } while ((
+        lineIsRight(firstProgram[indexOfRandomPart].lines[indexOfRandomLine])
+    ) && (
+        lineIsRight(secondProgram[indexOfRandomPart].lines[indexOfRandomLine])
+    ));
+
+    // Использованные гены
+    const usedGenes = [];
+
+    let index;
+    let k = 0;
+
+    const breakPointIndex = getRandomIndex(randomLine);
+
+    for (let indexOfPart = 0; indexOfPart < maxCrossoverCount; indexOfPart++) {
+        if (indexOfPart !== indexOfRandomPart) {
+            // Полностью скопировать линии первой программы
+            newProgram[indexOfPart].lines = firstProgram[indexOfPart].lines.map((line) => {
+                for (const gen of line) {
+                    usedGenes.push(gen);
+                }
+
+                return [...line];
+            });
+
+            continue;
+        }
+
+        const linesFromFirstProgram = firstProgram[indexOfPart].lines;
+        const stopMark = Math.min(indexOfRandomLine + 1, linesFromFirstProgram.length);
+
+        for (k; k < stopMark; k++) {
+            if (k !== indexOfRandomLine) {
+                // Скопировать одну линию первой программы
+                newProgram[indexOfPart].lines[k] = firstProgram[indexOfPart].lines[k].map((gen) => {
+                    usedGenes.push(gen);
+
+                    return gen;
+                });
+
+                continue;
+            }
+
+            for (let i = 0; i < breakPointIndex; i++) {
+                const gen = linesFromFirstProgram[k][i];
+
+                randomLine[i] = gen;
+                usedGenes.push(gen);
+            }
+        }
+
+        index = indexOfPart;
+
+        if (k === indexOfRandomLine) break;
+    }
+
+    return newProgram;
+}
+
+export function $crossover(firstProgram, secondProgram) {
     let type = getRandomElement(types);
 
     const newInd = getProgram();
 
     shuffleProgram(newInd);
-
-    return newInd;
 
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
@@ -389,6 +472,8 @@ export function crossover(firstProgram, secondProgram) {
             }
         }
     }
+
+    // ОСТАНОВИЛСЯ ВОТ ЗДЕСЬ
     
     for (let i = index; i < types.length; i++) {
         if (types[i] === type) {
