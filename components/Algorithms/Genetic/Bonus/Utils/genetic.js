@@ -376,94 +376,48 @@ export function $crossover(firstProgram, secondProgram) {
 }
 
 export function crossover(firstProgram, secondProgram) {
-    const newTypes = ["basic", "condition", "body", "console"].slice(0, Math.min(firstProgram.length, secondProgram.length))
-    const allGens = infoAboutGensInProgram.basic.set;
+    const newTypes = Object
+        .keys(infoAboutGensInProgram)
+        .slice(0, Math.min(firstProgram.length, secondProgram.length));
+
+    const allGens = [];
     const repetitiveGens = [];
 
-    for (let i = 0; i < infoAboutGensInProgram.basic.set.length; i++) {
-        const newGen = infoAboutGensInProgram.basic.set[i];
+    // Заполнить массивы генов по типу части программы
+    const fillGenes = (type) => {
+        for (const gen of infoAboutGensInProgram[type].set) {
+            if (!allGens.includes(gen)) allGens.push(gen);
 
-        if (infoAboutGensInProgram.basic.count[newGen] > 1) {
-            if (!repetitiveGens.includes(newGen)) {
-                repetitiveGens.push(newGen);
-                repetitiveGens.push(infoAboutGensInProgram.basic.count[newGen]);
-            } else {
-                repetitiveGens[repetitiveGens.indexOf(newGen) + 1] += infoAboutGensInProgram.basic.count[newGen];
-            }
-        }
-    }
-
-    if (newTypes.length > 1) {
-        newTypes.push("condition");
-        for (let i = 0; i < infoAboutGensInProgram.condition.set.length; i++) {
-            const newGen = infoAboutGensInProgram.condition.set[i];
-
-            if (!allGens.includes(newGen)) {
-                allGens.push(newGen);
-            }
-
-            
-            if (infoAboutGensInProgram.condition.count[newGen] > 1) {
-                if (!repetitiveGens.includes(newGen)) {
-                    repetitiveGens.push(newGen);
-                    repetitiveGens.push(infoAboutGensInProgram.condition.count[newGen]);
+            if (infoAboutGensInProgram[type].count[gen] > 1) {
+                if (!repetitiveGens.includes(gen)) {
+                    repetitiveGens.push(gen, infoAboutGensInProgram[type].count[gen]);
                 } else {
-                    repetitiveGens[repetitiveGens.indexOf(newGen) + 1] += infoAboutGensInProgram.condition.count[newGen];
+                    repetitiveGens[repetitiveGens.indexOf(gen) + 1] += infoAboutGensInProgram[type].count[gen];
                 }
             }
         }
-
-        newTypes.push("body");
-        for (let i = 0; i < infoAboutGensInProgram.body.set.length; i++) {
-            const newGen = infoAboutGensInProgram.body.set[i];
-
-            if (!allGens.includes(newGen)) {
-                allGens.push(newGen);
-            }
-
-            
-            if (infoAboutGensInProgram.body.count[newGen] > 1) {
-                if (!repetitiveGens.includes(newGen)) {
-                    repetitiveGens.push(newGen);
-                    repetitiveGens.push(infoAboutGensInProgram.body.count[newGen]);
-                } else {
-                    repetitiveGens[repetitiveGens.indexOf(newGen) + 1] += infoAboutGensInProgram.body.count[newGen];
-                }
-            }
-        }
-    }
-    if (newTypes.length > 3) {
-        newTypes.push("console");
-        for (let i = 0; i < infoAboutGensInProgram.console.set.length; i++) {
-            const newGen = infoAboutGensInProgram.console.set[i];
-
-            if (!allGens.includes(newGen)) {
-                allGens.push(newGen);
-            }
-
-            if (infoAboutGensInProgram.console.count[newGen] > 1) {
-                if (!repetitiveGens.includes(newGen)) {
-                    repetitiveGens.push(newGen);
-                    repetitiveGens.push(infoAboutGensInProgram.console.count[newGen]);
-                } else {
-                    repetitiveGens[repetitiveGens.indexOf(newGen) + 1] += infoAboutGensInProgram.console.count[newGen];
-                }
-            }
-        }
-    }
-
-    let type = getRandomElement(newTypes);
+    };
 
     let phase = 0;
+
+    fillGenes("basic");
+
     if (newTypes.length > 1) {
-        phase = 1;
+        fillGenes("condition");
+        fillGenes("body");
+        phase++;
     }
+
     if (newTypes.length > 3) {
-        phase = 2;
+        fillGenes("console");
+        phase++;
     }
 
     const newInd = getProgram(phase);
+
     shuffleProgram(newInd);
+
+    let type = getRandomElement(newTypes);
 
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
