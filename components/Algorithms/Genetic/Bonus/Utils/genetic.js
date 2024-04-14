@@ -422,7 +422,7 @@ export function crossover(firstProgram, secondProgram) {
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
-    const conditionOfAvailableLine = 1 / 1000000;
+    const conditionOfAvailableLine = 1 / 100;
 
     // Если выбрали работающую линию
     while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex]) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex])) {
@@ -457,7 +457,7 @@ export function crossover(firstProgram, secondProgram) {
                 } else {
                     const newIndPartIndex = newInd.findIndex((part) => part.type === newTypes[i]);
                     const newLine = firstProgram.find((part) => part.type === newTypes[i]).lines[k];
-                    newInd[newIndPartIndex].lines[k] = newLine;
+                    newInd[newIndPartIndex].lines[k] = [...newLine];
 
                     for (let j = 0; j < newLine.length; j++) {
                         const newGen = firstProgram.find((part) => part.type === type).lines[k][j];
@@ -482,9 +482,6 @@ export function crossover(firstProgram, secondProgram) {
             }
         }
     }
-    if (usedGens.filter((gen) => gen === "let").length === 5) { console.log(newInd, usedGens, firstProgram, breakPointIndex, newIndLineIndex);}
-
-    // ОСТАНОВИЛСЯ ВОТ ЗДЕСЬ
     
     for (let i = index; i < newTypes.length; i++) {
         if (newTypes[i] === type) {
@@ -572,10 +569,6 @@ export function crossover(firstProgram, secondProgram) {
         }
     }
 
-    // if (usedGens.filter(gen => gen === "let").length === 5) {
-    // console.log(usedGens, repetitiveGens, allGens, newInd, breakPointIndex, newIndLineIndex, type);
-    // }
-
     return newInd;
 }
 
@@ -619,10 +612,8 @@ export async function runGenetic({
 }) {
 
     for (let i = 0; i < POPULATION_SIZE; i++) {
-        const secondIndividualIndex = i + Math.floor(Math.random() * (POPULATION_SIZE - i));
-
-        const firstIndividual = population[i];
-        const secondIndividual = population[secondIndividualIndex];
+        const firstIndividual = getRandomElement(population);
+        const secondIndividual = getRandomElement(population);
 
         const firstNewProgram = crossover(firstIndividual.program, secondIndividual.program);
         const secondNewProgram = crossover(secondIndividual.program, firstIndividual.program);
