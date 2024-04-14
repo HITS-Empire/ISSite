@@ -1,75 +1,66 @@
-import fs from "fs";
 import { useState, useEffect } from "react";
 import {
     runCode,
-    runGenetic
+    getProgram,
+    runGenetic,
+    getCodeFromProgram
 } from "../../components/Algorithms/Genetic/Bonus/Utils/genetic";
 import Menu from "../../components/Algorithms/Genetic/Bonus/Menu";
 import Code from "../../components/Algorithms/Genetic/Bonus/Code";
 
-export const getStaticProps = () => {
-    const source = fs.readFileSync("./public/fibonacci.js", "utf8");
-
-    return {
-        props: { source }
-    };
-};
-
-export default function Genetic({ source }) {
-    // Код программы
-    const [code, setCode] = useState(source);
+export default function Genetic() {
+    // Код, который показывается пользователю
+    const [code, setCode] = useState("");
 
     // Вывод программы
     const [output, setOutput] = useState([]);
 
-    // Номер элемента
+    // Номер элемента последовательности
     const [number, setNumber] = useState(8);
 
     // Популяция
     const [population, setPopulation] = useState([]);
 
-    // Искомое число последовательности
-    const [correctValue, setCorrectValue] = useState();
+    // Статус программы (0 - не активно, 1 - выполняется поиск, 2 - поиск завершён)
+    const [status, setStatus] = useState(0);
 
-    // Работает ли сейчас программа
-    const [processIsActive, setProcessIsActive] = useState(false);
-
-    // При изменении вывода запустить снова
+    // Запустить или остановить программу
     useEffect(() => {
-        if (!processIsActive) {
-            if (code === source) {
-                setCorrectValue(Number(output[0]));
-            }
+        if (status === 0) {
+            const correctProgram = getProgram(2);
+            const correctOutput = runCode(getCodeFromProgram(correctProgram, true), number);
 
-            return setCode(source);
+            setCode(getCodeFromProgram(correctProgram));
+            setOutput(correctOutput);
         }
 
-        runGenetic({
-            code,
-            setCode,
-            output,
-            setOutput,
-            number,
-            population,
-            setPopulation,
-            correctValue
-        });
-    }, [output, processIsActive]);
+        if (status === 1) {
+            const correctValue = Number(output[0]);
 
-    // Отследить изменение программы, чтобы изменить вывод
-    useEffect(() => {
-        setOutput(runCode(code, number));
-    }, [code, number]);
+            const interval = setInterval(runGenetic, 50, {
+                setCode,
+                setOutput,
+                number,
+                population,
+                setPopulation,
+                correctValue,
+                setStatus
+            });
+
+            return () => {
+                clearInterval(interval);
+            };
+        }
+    }, [number, status]);
 
     return (
         <>
             <Menu
                 number={number}
                 setNumber={setNumber}
-                population={population}
                 setPopulation={setPopulation}
-                processIsActive={processIsActive}
-                setProcessIsActive={setProcessIsActive}
+                status={status}
+                setStatus={setStatus}
             />
 
             <Code

@@ -114,14 +114,22 @@ export function getLinesFromType(program, type) {
 }
 
 // Получить код по структуре программы
-export function getCodeFromProgram(program) {
+export function getCodeFromProgram(program, isProtected = false) {
     const lines = [getLinesFromType(program, "basic")];
+
+    if (isProtected) lines.push(["let counter = 0"]);
 
     const conditionLine = getLinesFromType(program, "condition")?.join(" ");
     if (conditionLine) {
         lines.push([
             `while (${conditionLine}) {`,
             ...getLinesFromType(program, "body").map((line) => "    " + line),
+            ...(
+                isProtected ? [
+                    "    counter++",
+                    "",
+                    "    if (counter > 1000) throw Error(\"Time limit exceed!\")"
+                ] : []),
             "}"
         ]);
     }
@@ -328,14 +336,13 @@ export function raise(program, phase = 0) {
 
 // Одна итерация генетического алгоритма
 export async function runGenetic({
-    code,
     setCode,
-    output,
     setOutput,
     number,
     population,
     setPopulation,
-    correctValue
+    correctValue,
+    setStatus
 }) {
     for (let i = 0; i < POPULATION_SIZE; i += 2) {
         const firstIndividual = population[i];
@@ -397,20 +404,22 @@ export async function runGenetic({
         };
 
         if (firstNewPhase === 2) {
-            const firstNewCode = getCodeFromProgram(firstNewProgram);
+            const firstNewCode = getCodeFromProgram(firstNewProgram, true);
             const firstNewOutput = runCode(firstNewCode, number);
             const firstNewDifference = getDifference(firstNewOutput[0], correctValue);
 
             firstNewIndividual.code = firstNewCode;
+            firstNewIndividual.output = firstNewOutput;
             firstNewIndividual.difference = firstNewDifference;
         }
 
         if (secondNewPhase === 2) {
-            const secondNewCode = getCodeFromProgram(secondNewProgram);
+            const secondNewCode = getCodeFromProgram(secondNewProgram, true);
             const secondNewOutput = runCode(secondNewCode, number);
             const secondNewDifference = getDifference(secondNewOutput[0], correctValue);
 
             secondNewIndividual.code = secondNewCode;
+            secondNewIndividual.output = secondNewOutput;
             secondNewIndividual.difference = secondNewDifference;
         }
 
@@ -433,15 +442,14 @@ export async function runGenetic({
         return Math.random() - 0.5;
     });
 
-    await sleep(0);
-
     setPopulation(population.slice(0, POPULATION_SIZE));
+    setCode(getCodeFromProgram(population[0].program));
 
-    const newCode = population[0].code || getCodeFromProgram(population[0].program);
-
-    if (code !== newCode) {
-        setCode(newCode);
+    if (population[0].phase < 2) {
+        setOutput(runCode(getCodeFromProgram(population[0].program, true), number));
     } else {
-        setOutput([...output]);
+        if (population[0].difference === 0) setStatus(2);
+
+        setOutput(population[0].output);
     }
 }

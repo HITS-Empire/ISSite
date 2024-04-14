@@ -1,5 +1,6 @@
 import Input from "../../../../Input";
 import Button from "../../../../Button";
+import Status from "../../../../Status";
 import { getPopulation } from "../Utils/genetic";
 import MenuWrapper from "../../../../MenuWrapper";
 import ButtonContainer from "../../../../ButtonContainer";
@@ -8,8 +9,8 @@ export default function Menu({
     number,
     setNumber,
     setPopulation,
-    processIsActive,
-    setProcessIsActive
+    status,
+    setStatus,
 }) {
     // Изменить номер нужного элемента последовательности
     const changeNumber = (event) => {
@@ -23,13 +24,13 @@ export default function Menu({
     // Запустить алгоритм
     const runProcess = () => {
         setPopulation(getPopulation());
-        setProcessIsActive(true);
+        setStatus(1);
     };
 
     // Остановить алгоритм
     const stopProcess = () => {
         setPopulation([]);
-        setProcessIsActive(false);
+        setStatus(0);
     };
 
     return (
@@ -43,14 +44,14 @@ export default function Menu({
                 description="Введите номер элемента"
                 value={number}
                 onChange={changeNumber}
-                disabled={processIsActive}
+                disabled={status !== 0}
             />
 
             <ButtonContainer>
                 <Button
                     type="primary"
                     onClick={runProcess}
-                    disabled={processIsActive}
+                    disabled={status !== 0}
                 >
                     Запустить
                 </Button>
@@ -58,11 +59,21 @@ export default function Menu({
                 <Button
                     type="soft"
                     onClick={stopProcess}
-                    disabled={!processIsActive}
+                    disabled={status === 0}
                 >
                     Отменить
                 </Button>
             </ButtonContainer>
+
+            <Status type={status - 1}>
+                {status > 0 && (
+                    status === 1 ? (
+                        "Выполняется создание алгоритма..."
+                    ) : (
+                        "Алгоритм успешно создан!"
+                    )
+                )}
+            </Status>
         </MenuWrapper>
     );
 }
