@@ -454,8 +454,15 @@ export function crossover(firstProgram, secondProgram) {
 
     let type = getRandomElement(newTypes);
 
-    const newInd = getProgram();
+    let phase = 0;
+    if (newTypes.length > 1) {
+        phase = 1;
+    }
+    if (newTypes.length > 3) {
+        phase = 2;
+    }
 
+    const newInd = getProgram(phase);
     shuffleProgram(newInd);
 
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
@@ -521,6 +528,7 @@ export function crossover(firstProgram, secondProgram) {
             }
         }
     }
+    if (usedGens.filter((gen) => gen === "let").length === 5) { console.log(newInd, usedGens, firstProgram, breakPointIndex, newIndLineIndex);}
 
     // ОСТАНОВИЛСЯ ВОТ ЗДЕСЬ
     
@@ -610,7 +618,10 @@ export function crossover(firstProgram, secondProgram) {
         }
     }
 
-    console.log(newInd);
+    // if (usedGens.filter(gen => gen === "let").length === 5) {
+    // console.log(usedGens, repetitiveGens, allGens, newInd, breakPointIndex, newIndLineIndex, type);
+    // }
+
     return newInd;
 }
 
@@ -652,6 +663,7 @@ export async function runGenetic({
     setPopulation,
     correctValue
 }) {
+
     for (let i = 0; i < POPULATION_SIZE; i++) {
         const secondIndividualIndex = i + Math.floor(Math.random() * (POPULATION_SIZE - i));
 
