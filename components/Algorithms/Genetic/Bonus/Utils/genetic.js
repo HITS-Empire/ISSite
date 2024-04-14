@@ -556,14 +556,14 @@ export async function runGenetic({
         let firstNewPhase = newPhase;
         let secondNewPhase = newPhase;
 
-        if (firstNewPhase === 0 && firstCountOfRightLines > 1) {
+        if (firstNewPhase === 0 && firstCountOfRightLines > 3) {
             firstCountOfRightLines += raise(
                 firstNewProgram,
                 firstNewPhase
             );
             firstNewPhase++;
         }
-        if (firstNewPhase === 1 && firstCountOfRightLines > 6) {
+        if (firstNewPhase === 1 && firstCountOfRightLines > 8) {
             firstCountOfRightLines += raise(
                 firstNewProgram,
                 firstNewPhase
@@ -571,14 +571,14 @@ export async function runGenetic({
             firstNewPhase++;
         }
 
-        if (secondNewPhase === 0 && secondCountOfRightLines > 1) {
+        if (secondNewPhase === 0 && secondCountOfRightLines > 3) {
             secondCountOfRightLines += raise(
                 secondNewProgram,
                 secondNewPhase
             );
             secondNewPhase++;
         }
-        if (secondNewPhase === 1 && secondCountOfRightLines > 6) {
+        if (secondNewPhase === 1 && secondCountOfRightLines > 8) {
             secondCountOfRightLines += raise(
                 secondNewProgram,
                 secondNewPhase
