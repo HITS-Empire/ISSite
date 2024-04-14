@@ -295,8 +295,6 @@ export function crossover(firstIndividual, secondIndividual) {
     });
 
     const allGenes = [...commonGenes, ...remainingGenes]; // Все гены для вставки
-    allGenes.sort(() => Math.random() - 0.5);
-
     let index = 0;
 
     for (let i = 0; i < linesForCrossover.length; i++) {
