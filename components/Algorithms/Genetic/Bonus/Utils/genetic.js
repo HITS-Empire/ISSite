@@ -18,17 +18,18 @@ const infoAboutGenesByTypes = {
 };
 
 // Выполнить код в изменённом контексте console.log
-export function runCode(code, n = 0) {
+export function runCode(code, number = 0) {
     const messages = [];
     const console = {};
 
     console.log = (message) => messages.push(message);
-    n;
-
-    try {
-        eval(code);
-    } catch (error) {
-        messages.push(error.message);
+    number;
+    for (let n = 1; n < number; n++) {
+        try {
+            eval(code);    
+        } catch (error) {
+            messages.push(error.message);
+        }
     }
 
     return messages;
@@ -238,8 +239,14 @@ export function getPopulation() {
 
 // Получить разницу между выводом и искомым значением
 export function getDifference(value, correctValue) {
-    if (typeof value === "string") return Infinity;
-    return Math.abs(value - correctValue);
+    let difference = 0;
+    
+    for (let i = 0; i < value.length; i++) {
+        if (typeof value[i] === "string") return Infinity;
+        difference += Math.abs(value - correctValue);
+    }
+
+    return difference;
 }
 
 // Кроссинговер
@@ -339,8 +346,8 @@ export async function runGenetic({
     number,
     population,
     setPopulation,
-    correctValue,
-    setStatus
+    setStatus,
+    correctSequence
 }) {
     for (let i = 0; i < POPULATION_SIZE; i += 2) {
         const firstIndividual = population[i];
@@ -404,7 +411,7 @@ export async function runGenetic({
         if (firstNewPhase === 2) {
             const firstNewCode = getCodeFromProgram(firstNewProgram, true);
             const firstNewOutput = runCode(firstNewCode, number);
-            const firstNewDifference = getDifference(firstNewOutput[0], correctValue);
+            const firstNewDifference = getDifference(firstNewOutput, correctSequence);
 
             firstNewIndividual.code = firstNewCode;
             firstNewIndividual.output = firstNewOutput;
@@ -414,7 +421,7 @@ export async function runGenetic({
         if (secondNewPhase === 2) {
             const secondNewCode = getCodeFromProgram(secondNewProgram, true);
             const secondNewOutput = runCode(secondNewCode, number);
-            const secondNewDifference = getDifference(secondNewOutput[0], correctValue);
+            const secondNewDifference = getDifference(secondNewOutput, correctSequence);
 
             secondNewIndividual.code = secondNewCode;
             secondNewIndividual.output = secondNewOutput;

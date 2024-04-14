@@ -12,6 +12,9 @@ export default function Genetic() {
     // Код, который показывается пользователю
     const [code, setCode] = useState("");
 
+    // Правильная послежовательность
+    const [correctSequence, setCorrectSequence] = useState([]);
+
     // Вывод программы
     const [output, setOutput] = useState([]);
 
@@ -32,19 +35,18 @@ export default function Genetic() {
 
             setCode(getCodeFromProgram(correctProgram));
             setOutput(correctOutput);
+            setCorrectSequence(correctOutput);
         }
 
         if (status === 1) {
-            const correctValue = Number(output[0]);
-
             const interval = setInterval(runGenetic, 50, {
                 setCode,
                 setOutput,
                 number,
                 population,
                 setPopulation,
-                correctValue,
-                setStatus
+                setStatus,
+                correctSequence
             });
 
             return () => {
@@ -61,6 +63,8 @@ export default function Genetic() {
                 setPopulation={setPopulation}
                 status={status}
                 setStatus={setStatus}
+                correctSequence={correctSequence} 
+                setCorrectSequence={setCorrectSequence}
             />
 
             <Code
