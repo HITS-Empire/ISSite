@@ -628,7 +628,10 @@ export async function runGenetic({
             }
             return Math.random() - 0.5;
         }
-        return a.difference - b.difference;
+        if (a.difference !== b.difference) {
+            return a.difference - b.difference;
+        }
+        return Math.random() - 0.5;
     });
 
     await sleep(0);
