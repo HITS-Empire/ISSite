@@ -183,7 +183,7 @@ export function getCodeFromProgram(program) {
 }
 
 // Проверить линию на правильность
-export function lineIsRight(line) {
+export function lineIsRight(line, location) {
     const typesOfGenes = line.map((gen) => {
         for (const type in infoAboutGenesByTypes) {
             if (infoAboutGenesByTypes[type].indexOf(gen) !== -1) {
@@ -197,8 +197,8 @@ export function lineIsRight(line) {
     for (let i = 0; i < line.length; i++) {
         const typeOfGen = typesOfGenes[i];
 
-        if (typeOfGen === "let") {
-            if (i > 0 || line.length === 1) return false;
+        if (typeOfGen === "definition") {
+            if (i > 0 || i === line.length - 1) return false;
             if (typesOfGenes[i + 1] !== "variable") return false;
             if (line.length > 2 && typesOfGenes[i + 2] !== "assignment") return false;
         }
@@ -213,6 +213,7 @@ export function lineIsRight(line) {
             const typeOfNextGen = typesOfGenes[i + 1];
 
             if (typeOfPreviosGen !== "variable") return false;
+            if (location === "basic" && typeOfNextGen !== "number") return false;
             if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
         }
         if (typeOfGen === "operator") {
@@ -255,7 +256,7 @@ export function getCountOfRightLines(program) {
 
     program.forEach((part) => {
         part.lines.forEach((line) => {
-            count += lineIsRight(line);
+            count += lineIsRight(line, part.type);
         });
     });
 
@@ -317,9 +318,9 @@ export function $crossover(firstProgram, secondProgram) {
         // Если выбрали работающую линию
         if (Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) break;
     } while ((
-        lineIsRight(firstProgram[indexOfRandomPart].lines[indexOfRandomLine])
+        lineIsRight(firstProgram[indexOfRandomPart].lines[indexOfRandomLine], randomPart.type)
     ) && (
-        lineIsRight(secondProgram[indexOfRandomPart].lines[indexOfRandomLine])
+        lineIsRight(secondProgram[indexOfRandomPart].lines[indexOfRandomLine], randomPart.type)
     ));
 
     // Использованные гены
@@ -422,10 +423,10 @@ export function crossover(firstProgram, secondProgram) {
     let newIndLineIndex = getRandomIndex(newInd.find((part) => part.type === type).lines);
     let newIndLine = newInd.find((part) => part.type === type).lines[newIndLineIndex];
 
-    const conditionOfAvailableLine = 1 / 100;
+    const conditionOfAvailableLine = 1 / 1000;
 
     // Если выбрали работающую линию
-    while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex]) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex])) {
+    while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex], type) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex], type)) {
         if (Math.random() < conditionOfAvailableLine) break;
         type = getRandomElement(newTypes);
 
@@ -610,10 +611,11 @@ export async function runGenetic({
     setPopulation,
     correctValue
 }) {
-
     for (let i = 0; i < POPULATION_SIZE; i++) {
-        const firstIndividual = getRandomElement(population);
-        const secondIndividual = getRandomElement(population);
+        const secondRandomIndex = i + Math.floor(Math.random() * (POPULATION_SIZE - i));
+
+        const firstIndividual = population[0];
+        const secondIndividual = population[secondRandomIndex];
 
         const firstNewProgram = crossover(firstIndividual.program, secondIndividual.program);
         const secondNewProgram = crossover(secondIndividual.program, firstIndividual.program);
