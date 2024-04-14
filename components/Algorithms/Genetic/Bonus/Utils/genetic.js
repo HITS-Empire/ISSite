@@ -6,53 +6,7 @@ import { sleep } from "../../../../../utils/helpers";
 
 const POPULATION_SIZE = 4096; // Количество особей в популяции
 const MUTATION_RATE = 0.2; // Вероятность мутации
-const CROSSOVER_IN_RIGHT_LINES_RATE = 0.01; // Вероятность кроссинговера в правильных линиях
-
-// Информация о возможных генах в программе
-const infoAboutGensInProgram = {
-    "basic": {
-        set: ["let", "a", "b", "c", "i", "=", "0", "1"],
-        count: {
-            "let": 4,
-            "a": 1,
-            "b": 1,
-            "c": 1,
-            "i": 1,
-            "=": 3,
-            "0": 1,
-            "1": 2
-        }
-    },
-    "condition": {
-        set: ["i", "<", "n", "-", "2"],
-        count: {
-            "i": 1,
-            "<": 1,
-            "n": 1,
-            "-": 1,
-            "2": 1
-        }
-    },
-    "body": {
-        set: ["a", "b", "c", "i", "=", "+", "+=", "1"],
-        count: {
-            "a": 2,
-            "b": 3,
-            "c": 2,
-            "i": 1,
-            "=": 3,
-            "+": 1,
-            "+=": 1,
-            "1": 1
-        }
-    },
-    "console": {
-        set: ["b"],
-        count: {
-            "b": 1
-        }
-    }
-};
+const CROSSOVER_IN_RIGHT_LINES_RATE = 0.001; // Вероятность кроссинговера в правильных линиях
 
 // Информация о генах по типам
 const infoAboutGenesByTypes = {
@@ -181,7 +135,7 @@ export function getCodeFromProgram(program) {
 }
 
 // Проверить линию на правильность
-export function lineIsRight(line, location) {
+export function lineIsRight(line) {
     const typesOfGenes = line.map((gen) => {
         for (const type in infoAboutGenesByTypes) {
             if (infoAboutGenesByTypes[type].indexOf(gen) !== -1) {
@@ -196,9 +150,11 @@ export function lineIsRight(line, location) {
         const typeOfGen = typesOfGenes[i];
 
         if (typeOfGen === "definition") {
-            if (i > 0 || i === line.length - 1) return false;
-            if (typesOfGenes[i + 1] !== "variable") return false;
-            if (line.length > 2 && typesOfGenes[i + 2] !== "assignment") return false;
+            if (i > 0 || line.length === 1) return false;
+
+            const typeOfNextGen = typesOfGenes[i + 1];
+
+            if (typeOfNextGen !== "variable") return false;
         }
         if (typeOfGen === "assignment") {
             if (i === 0 || i === line.length - 1) return false;
@@ -211,7 +167,6 @@ export function lineIsRight(line, location) {
             const typeOfNextGen = typesOfGenes[i + 1];
 
             if (typeOfPreviosGen !== "variable") return false;
-            // if (location === "basic" && typeOfNextGen !== "number") return false;
             if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
         }
         if (typeOfGen === "operator") {
@@ -223,7 +178,7 @@ export function lineIsRight(line, location) {
             if (typeOfPreviosGen !== "variable" && typeOfPreviosGen !== "number") return false;
             if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
         }
-        if (typeOfGen === "variable") {
+        if (typeOfGen === "variable" || typeOfGen === "number") {
             if (i > 0) {
                 const typeOfPreviosGen = typesOfGenes[i - 1];
                 if (typeOfPreviosGen === "variable" || typeOfPreviosGen === "number") return false;
@@ -231,16 +186,6 @@ export function lineIsRight(line, location) {
             if (i < line.length - 1) {
                 const typeOfNextGen = typesOfGenes[i + 1];
                 if (typeOfNextGen === "variable" || typeOfNextGen === "number") return false;
-            }
-        }
-        if (typeOfGen === "number") {
-            if (i > 0) {
-                const typeOfPreviosGen = typesOfGenes[i - 1];
-                if (typeOfPreviosGen !== "operator") return false;
-            }
-            if (i < line.length - 1) {
-                const typeOfNextGen = typesOfGenes[i + 1];
-                if (typeOfNextGen !== "operator") return false;
             }
         }
     }
@@ -254,7 +199,7 @@ export function getCountOfRightLines(program) {
 
     program.forEach((part) => {
         part.lines.forEach((line) => {
-            count += lineIsRight(line, part.type);
+            count += lineIsRight(line);
         });
     });
 
@@ -343,7 +288,7 @@ export function getDifference(value, correctValue) {
 //     const conditionOfAvailableLine = 1 / 1000;
 
 //     // Если выбрали работающую линию
-//     while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex], type) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex], type)) {
+//     while (lineIsRight(firstProgram.find((part) => part.type === type).lines[newIndLineIndex]) && lineIsRight(secondProgram.find((part) => part.type === type).lines[newIndLineIndex])) {
 //         if (Math.random() < conditionOfAvailableLine) break;
 //         type = getRandomElement(newTypes);
 
@@ -509,7 +454,7 @@ export function crossover(firstIndividual, secondIndividual) {
             const copyOfLine = [...line];
 
             if (index === indexOfRandomPart) {
-                if (!lineIsRight(line, part.type) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
+                if (!lineIsRight(line) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
                     linesForCrossover.push(copyOfLine);
                     firstGenes.push(...line);
                 }
@@ -520,7 +465,7 @@ export function crossover(firstIndividual, secondIndividual) {
 
         if (index === indexOfRandomPart) {
             secondIndividual.program[index].lines.forEach((line) => {
-                if (!lineIsRight(line, part.type) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
+                if (!lineIsRight(line) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
                     secondGenes.push(...line);
                 }
             });
