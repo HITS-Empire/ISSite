@@ -9,6 +9,8 @@ export default function Menu({
     setNumber,
     status,
     setStatus,
+    fitness,
+    maxFitness
 }) {
     // Изменить номер нужного элемента последовательности
     const changeNumber = (event) => {
@@ -27,6 +29,11 @@ export default function Menu({
     // Остановить алгоритм
     const stopProcess = () => {
         setStatus(0);
+    };
+
+    // Получить процент генерации кода
+    const getAlgorithmPercent = () => {
+        return ((maxFitness - fitness) / maxFitness * 100).toFixed(1);
     };
 
     return (
@@ -64,7 +71,7 @@ export default function Menu({
             <Status type={status - 1}>
                 {status > 0 && (
                     status === 1 ? (
-                        "Выполняется создание алгоритма..."
+                        `Создание кода: ${getAlgorithmPercent()}%`
                     ) : (
                         "Алгоритм успешно создан!"
                     )
