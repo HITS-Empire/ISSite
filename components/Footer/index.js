@@ -19,7 +19,7 @@ export default function Footer() {
                         titles={["Алгоритм кластеризации"]}
                     />
                     <Navigation
-                        href="/genetika/baza"
+                        href="/genetika"
                         titles={["Генетический алгоритм"]}
                     />
                     <Navigation

@@ -29,7 +29,7 @@ export default function Header() {
                         isResizing={true}
                     />
                     <Navigation
-                        href="/genetika/bonus"
+                        href="/genetika"
                         titles={["Генетический алгоритм", "Генетика"]}
                         isResizing={true}
                     />

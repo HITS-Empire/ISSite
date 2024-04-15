@@ -122,7 +122,7 @@ export function getField(count) {
     const startX = getRandomElement(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
     const startY = getRandomElement(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
 
-    const numberOfTractors = 500;
+    const numberOfTractors = 100;
     var tractors = [];
 
     for (let i = 0; i < numberOfTractors; i++) {

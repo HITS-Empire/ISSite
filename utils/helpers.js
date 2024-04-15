@@ -4,14 +4,43 @@ const expressionQuotesFromStart = /^"*/;
 // Кавычки с конца строки
 const expressionQuotesFromEnd = /"*$/;
 
+// Скопировать переменную
+export function copy(value) {
+    if (Array.isArray(value)) {
+        return value.map((item) => copy(item));
+    }
+
+    if (typeof value === "object") {
+        const newObject = {};
+
+        for (const key in value) {
+            newObject[key] = copy(value[key]);
+        }
+
+        return newObject;
+    }
+
+    return value;
+}
+
 // Получить случайное число, близкое к 1
 export function getNearRandom() {
     return Math.sin(Math.acos(Math.random()));
 }
 
+// Получить случайное целое число в интервале от 0 до N
+export function getRandomNumber(number) {
+    return Math.floor(Math.random() * number);
+}
+
+// Получить случайный индекс массива
+export function getRandomIndex(array) {
+    return array ? getRandomNumber(array.length) : -1;
+}
+
 // Получить случайный элемент массива
 export function getRandomElement(array) {
-    return array?.[Math.floor(Math.random() * array.length)];
+    return array?.[getRandomIndex(array)];
 }
 
 // Задержаться на какое-то время (в мс)

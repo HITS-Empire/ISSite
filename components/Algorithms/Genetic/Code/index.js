@@ -29,7 +29,7 @@ export default function Code({
                 </code>
 
                 <code className={style.output}>
-                    {output}
+                    {output.join("\n")}
                 </code>
             </div>
         </div>
