@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
 import {
     runCode,
-    runGenetic,
-    getPopulation,
     getCodeFromProgram,
+    getCorrectFibonacciOutput,
     getCorrectFibonacciProgram
-} from "../components/Algorithms/Genetic/Utils/genetic";
+} from "../utils/genetic";
+import { useState, useEffect } from "react";
 import Menu from "../components/Algorithms/Genetic/Menu";
 import Code from "../components/Algorithms/Genetic/Code";
+
+// Скомпилировано ли API
+let apiIsCompiled = false;
 
 export default function Genetic() {
     // Код, который показывается пользователю
@@ -22,39 +24,90 @@ export default function Genetic() {
     // Номер элемента последовательности
     const [number, setNumber] = useState(8);
 
+    // Текущая крутость программы и максимальная крутость
+    const [fitness, setFitness] = useState(0);
+    const [maxFitness, setMaxFitness] = useState(0);
+
+    // ID алгоритма для работы с API
+    const [id, setId] = useState();
+
+    // Ответ на запрос
+    const [data, setData] = useState();
+
+    // Рассчитать максимальную крутость программы
+    useEffect(() => {
+        const correctOutput = getCorrectFibonacciOutput();
+        let sum = 0;
+
+        correctOutput.forEach((output) => {
+            sum += Number(output);
+        });
+
+        setMaxFitness(sum);
+
+        // Скомпилировать API холостым вызовом
+        if (!apiIsCompiled) {
+            fetch("/api/genetika/run");
+
+            apiIsCompiled = true;
+        }
+    }, []);
+
     // Запустить или остановить программу
     useEffect(() => {
         if (status === 0) {
             const program = getCorrectFibonacciProgram();
             const newCode = getCodeFromProgram(program);
-            const newOutput = runCode(newCode, number);
 
             setCode(newCode);
-            setOutput(newOutput);
+            setOutput(runCode(newCode, number));
+            setId();
         }
 
         if (status === 1) {
-            const correctOutput = runCode(code, -1);
-            const population = getPopulation(correctOutput);
-
-            const interval = setInterval(runGenetic, 50, {
-                setCode,
-                setOutput,
-                setStatus,
-                number,
-                population,
-                correctOutput
-            });
-
-            return () => {
-                clearInterval(interval);
-            };
+            setId(String(Math.random()));
+            setFitness(maxFitness);
         }
 
         if (status === 2) {
             setOutput(runCode(code, number));
+            setId();
         }
     }, [number, status]);
+
+    // Обработка ответов на запросы
+    useEffect(() => {
+        if (!id) return setData();
+
+        if (data) {
+            const {
+                id: currentId,
+                code: newCode,
+                fitness: newFitness
+            } = data;
+
+            if (id !== currentId) return;
+
+            setCode(newCode);
+            setOutput(runCode(newCode, number));
+            setFitness(newFitness);
+
+            if (newFitness === 0) {
+                return setStatus(2);
+            }
+        }
+
+        // Создать новый запрос с задержкой
+        setTimeout(async () => {
+            const response = await fetch("/api/genetika/run", {
+                method: "POST",
+                body: id
+            });
+            const newData = await response.json();
+
+            setData(newData);
+        }, 50);
+    }, [id, data]);
 
     return (
         <>
@@ -63,6 +116,8 @@ export default function Genetic() {
                 setNumber={setNumber}
                 status={status}
                 setStatus={setStatus}
+                fitness={fitness}
+                maxFitness={maxFitness}
             />
 
             <Code
