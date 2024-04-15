@@ -84,7 +84,7 @@ export default function Ant() {
 
         return () => {
             clearInterval(interval);
-        }
+        };
     }, [processIsActive, processIsPaused]);
 
     return (

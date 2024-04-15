@@ -3,12 +3,6 @@ import { useRef, useState, useEffect } from "react";
 import Menu from "../components/Algorithms/NeuralNetwork/Menu";
 import Field from "../components/Algorithms/NeuralNetwork/Field";
 
-// Доступные роуты API
-const routes = [
-    { url: "/api/neyro/correct", method: "POST" },
-    { url: "/api/neyro/predict", method: "POST" }
-];
-
 // Скомпилировано ли API
 let apiIsCompiled = false;
 
@@ -50,9 +44,9 @@ export default function NeuralNetwork() {
 
         // Скомпилировать API холостыми вызовами
         if (!apiIsCompiled) {
-            routes.forEach((route) => {
-                fetch(route.url, { mathod: route.method });
-            });
+            fetch("/api/neyro/correct");
+            fetch("/api/neyro/predict");
+
             apiIsCompiled = true;
         }
     }, []);
