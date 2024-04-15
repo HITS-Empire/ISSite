@@ -2,7 +2,7 @@ import {
     copy,
     getRandomNumber,
     getRandomElement
-} from "../../../../utils/helpers";
+} from "./helpers";
 
 const COUNTERS = "ijklm"; // Названия счётчиков
 const VARIABLES = "abcdefghopqrstuvwxyz"; // Названия переменных
@@ -132,6 +132,11 @@ export function getCorrectFibonacciProgram() {
             }
         ]
     };
+}
+
+// Получить корректный вывод для чисел Фибоначчи
+export function getCorrectFibonacciOutput() {
+    return runCode(getCodeFromProgram(getCorrectFibonacciProgram()), -1);
 }
 
 // Получить случайную программу
@@ -291,14 +296,7 @@ export function mutation(program, depth = 0) {
 }
 
 // Одна итерация генетического алгоритма
-export async function runGenetic({
-    setCode,
-    setOutput,
-    setStatus,
-    number,
-    population,
-    correctOutput
-}) {
+export function runGenetic(population, correctOutput) {
     for (let i = 0; i < POPULATION_SIZE; i += 2) {
         const firstProgram = population[i].program;
         const secondProgram = population[i + 1].program;
@@ -334,9 +332,4 @@ export async function runGenetic({
     sortPopulation(population);
 
     population.splice(POPULATION_SIZE);
-
-    setCode(population[0].code);
-    setOutput(runCode(population[0].code, number));
-
-    if (population[0].fitness === 0) setStatus(2);
 }
