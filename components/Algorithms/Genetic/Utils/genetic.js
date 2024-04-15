@@ -33,7 +33,7 @@ export function runCode(code, number = -1) {
     };
 
     if (number === -1) {
-        for (let i = 1; i <= SEQUENCE_SIZE; i++) {
+        for (let i = 0; i < SEQUENCE_SIZE; i++) {
             evalWrapper(i);
         }
     } else {
