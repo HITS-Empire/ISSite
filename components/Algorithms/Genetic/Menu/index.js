@@ -40,7 +40,7 @@ export default function Menu({
                 description="Введите номер элемента"
                 value={number}
                 onChange={changeNumber}
-                disabled={status !== 0}
+                disabled={status === 1}
             />
 
             <ButtonContainer>

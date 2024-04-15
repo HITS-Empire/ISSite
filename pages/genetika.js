@@ -50,6 +50,10 @@ export default function Genetic() {
                 clearInterval(interval);
             };
         }
+
+        if (status === 2) {
+            setOutput(runCode(code, number));
+        }
     }, [number, status]);
 
     return (
