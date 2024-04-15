@@ -1,21 +1,21 @@
-import { 
-    getRandomIndex, 
+import {
+    copy,
+    getRandomNumber,
     getRandomElement
 } from "../../../../utils/helpers";
 
-const SEQUENCE_SIZE = 8; // Количество первых чисел для сравнения
-const POPULATION_SIZE = 256; // Количество особей в популяции
-const MUTATION_RATE = 0.2; // Вероятность мутации
-const CROSSOVER_IN_RIGHT_LINES_RATE = 0.01; // Вероятность кроссинговера в правильных линиях
+const COUNTERS = "ijklm"; // Названия счётчиков
+const VARIABLES = "abcdefghopqrstuvwxyz"; // Названия переменных
+const VARIABLES_COUNT = 3; // Количество переменных в программе (min: 1, max: 20)
+const MAX_PROGRAM_DEPTH = 4; // Максимальная глубина программы (min: 2, max: 7)
+const MAX_OPERATION_COUNT = 8; // Максимальное количество операций
 
-// Информация о генах по типам
-const infoAboutGenesByTypes = {
-    "definition": ["let"],
-    "variable": ["a", "b", "c", "i", "n"],
-    "assignment": ["=", "+="],
-    "operator": ["<", "+", "-"],
-    "number": ["0", "1", "2"]
-};
+const SEQUENCE_SIZE = 16; // Количество первых чисел для сравнения
+const POPULATION_SIZE = 128; // Количество особей в популяции
+const MUTATION_RATE = 0.4; // Вероятность мутации
+
+// Доступные переменные
+const AVAILABLE_VARIABLES = VARIABLES.slice(0, VARIABLES_COUNT);
 
 // Выполнить код в изменённом контексте console.log
 export function runCode(code, number = -1) {
@@ -36,319 +36,258 @@ export function runCode(code, number = -1) {
         for (let i = 1; i <= SEQUENCE_SIZE; i++) {
             evalWrapper(i);
         }
-    } else if (number === 0) {
-        messages.push("Console is empty");
     } else {
         evalWrapper(number);
     }
 
+    if (messages.length === 0) {
+        messages.push("Console is empty");
+    }
+
     return messages;
-};
+}
 
-// Получить часть программы
-export function getPartOfProgram(type) {
+// Получить нужное количество отступов для программы
+export function getSpaces(count) {
+    return new Array(count * 4).fill(" ").join("");
+}
+
+// Получить код из программы
+export function getCodeFromProgram(operation, count = 0) {
+    if (typeof operation === "string") return operation;
+
+    const { type, body } = operation;
+
+    const spaces = getSpaces(count);
+
     switch (type) {
-        case "basic":
-            return {
-                type: "basic",
-                lines: [
-                    ["let", "i", "=", "0"],
-                    ["let", "a", "=", "1"],
-                    ["let", "b", "=", "1"],
-                    ["let", "c"]
-                ]
-            };
-        case "condition":
-            return {
-                type: "condition",
-                lines: [
-                    ["i", "<", "n", "-", "2"]
-                ]
-            };
-        case "body":
-            return {
-                type: "body",
-                lines: [
-                    ["c", "=", "a", "+", "b"],
-                    ["a", "=", "b"],
-                    ["b", "=", "c"],
-                    ["i", "+=", "1"]
-                ]
-            };
+        case "program":
+            return body.map((value) => {
+                return `${spaces}${getCodeFromProgram(value, count)}`;
+            }).join("\n");
+        case "definition":
+            return body.map((value) => {
+                return `${spaces}let ${getCodeFromProgram(value, count)} = 0`;
+            }).join("\n");
+        case "increment":
+            return body.map((value) => {
+                return `${spaces}${getCodeFromProgram(value, count)}++`;
+            }).join("\n");
+        case "addition":
+            return body.map((value) => getCodeFromProgram(value, count)).join(" + ");
+        case "assignment":
+            return `${spaces}${body.map((value) => getCodeFromProgram(value, count)).join(" = ")}`;
+        case "cycle":
+            const counter = COUNTERS[count];
+
+            return [
+                `${spaces}for (let ${counter} = 0; ${counter} < n; ${counter}++) {`,
+                body.map((value) => getCodeFromProgram(value, count + 1)).join("\n"),
+                `${spaces}}`
+            ].join("\n");
         case "console":
-            return {
-                type: "console",
-                lines: [
-                    ["b"]
+            return `${spaces}console.log(${body.map((value) => getCodeFromProgram(value)).join(", ")})`;
+    }
+}
+
+// Получить корректную программу для чисел Фибоначчи
+export function getCorrectFibonacciProgram() {
+    return {
+        type: "program",
+        body: [
+            {
+                type: "definition",
+                body: ["a", "b", "c"]
+            },
+            {
+                type: "increment",
+                body: ["b"]
+            },
+            {
+                type: "cycle",
+                body: [
+                    {
+                        type: "assignment",
+                        body: [
+                            "c",
+                            {
+                                type: "addition",
+                                body: ["a", "b"]
+                            }
+                        ]
+                    },
+                    {
+                        type: "assignment",
+                        body: ["a", "b"]
+                    },
+                    {
+                        type: "assignment",
+                        body: ["b", "c"]
+                    }
                 ]
-            };
-    }
-}
-
-// Получить начальную программу
-export function getProgram(phase = 0) {
-    const program = [getPartOfProgram("basic")];
-
-    if (phase > 0) {
-        program.push(getPartOfProgram("condition"), getPartOfProgram("body"));
-    }
-    if (phase > 1) {
-        program.push(getPartOfProgram("console"));
-    }
-
-    return program;
-};
-
-export function shuffleProgram(program, count = 128) {
-    for (let i = 0; i < count; i++) {
-        const randomPart = getRandomElement(program);
-
-        const firstLine = getRandomElement(randomPart.lines);
-        const secondLine = getRandomElement(randomPart.lines);
-
-        for (let j = 0; j < 4; j++) {
-            const firstIndex = getRandomIndex(firstLine);
-            const secondIndex = getRandomIndex(secondLine);
-
-            [
-                firstLine[firstIndex], secondLine[secondIndex]
-            ] = [
-                secondLine[secondIndex], firstLine[firstIndex]
-            ];
-        }
-    }
-};
-
-// Получить линии программы по типу
-export function getLinesFromType(program, type) {
-    return program.find((part) => part.type === type)?.lines.map((line) => line.join(" "));
-}
-
-// Получить код по структуре программы
-export function getCodeFromProgram(program, isProtected = false) {
-    const lines = [getLinesFromType(program, "basic")];
-
-    if (isProtected) lines.push(["let counter = 0"]);
-
-    const conditionLine = getLinesFromType(program, "condition")?.join(" ");
-    if (conditionLine) {
-        lines.push([
-            `while (${conditionLine}) {`,
-            ...getLinesFromType(program, "body").map((line) => "    " + line),
-            ...(
-                isProtected ? [
-                    "    counter++",
-                    "",
-                    "    if (counter > 100) throw Error(\"Time limit exceed\")"
-                ] : []
-            ),
-            "}"
-        ]);
-    }
-
-    const consoleLine = getLinesFromType(program, "console")?.join(" ");
-    if (consoleLine) {
-        lines.push([`console.log(${consoleLine})`]);
-    }
-
-    return lines.map((line) => line.join("\n")).join("\n\n");
-}
-
-// Проверить линию на правильность
-export function lineIsRight(line) {
-    const typesOfGenes = line.map((gen) => {
-        for (const type in infoAboutGenesByTypes) {
-            if (infoAboutGenesByTypes[type].indexOf(gen) !== -1) {
-                return type;
+            },
+            {
+                type: "console",
+                body: ["a"]
             }
+        ]
+    };
+}
+
+// Получить случайную программу
+export function getRandomProgram(parent = null, depth = 0) {
+    let type, body = [];
+
+    if (parent === "program" || parent === "cycle") {
+        const types = ["increment", "assignment"];
+
+        if (depth < MAX_PROGRAM_DEPTH - 1) {
+            types.push("cycle");
         }
-    });
 
-    let countOfAssignments = 0;
+        type = getRandomElement(types);
 
-    for (let i = 0; i < line.length; i++) {
-        const typeOfGen = typesOfGenes[i];
-
-        if (typeOfGen === "definition") {
-            if (i > 0 || line.length === 1) return false;
-
-            const typeOfNextGen = typesOfGenes[i + 1];
-
-            if (typeOfNextGen !== "variable") return false;
+        if (type === "increment") {
+            body.push(getRandomElement(AVAILABLE_VARIABLES));
         }
-        if (typeOfGen === "assignment") {
-            if (i === 0 || i === line.length - 1) return false;
-
-            countOfAssignments++;
-
-            if (countOfAssignments > 1) return false;
-
-            const typeOfPreviosGen = typesOfGenes[i - 1];
-            const typeOfNextGen = typesOfGenes[i + 1];
-
-            if (typeOfPreviosGen !== "variable") return false;
-            if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
+        if (type === "assignment") {
+            body.push(
+                getRandomElement(AVAILABLE_VARIABLES),
+                getRandomProgram("assignment", depth + 1)
+            );
         }
-        if (typeOfGen === "operator") {
-            if (i === 0 || i === line.length - 1) return false;
+        if (type === "cycle") {
+            const count = getRandomNumber(MAX_OPERATION_COUNT - 1) + 1;
 
-            const typeOfPreviosGen = typesOfGenes[i - 1];
-            const typeOfNextGen = typesOfGenes[i + 1];
-
-            if (typeOfPreviosGen !== "variable" && typeOfPreviosGen !== "number") return false;
-            if (typeOfNextGen !== "variable" && typeOfNextGen !== "number") return false;
-        }
-        if (typeOfGen === "variable" || typeOfGen === "number") {
-            if (i > 0) {
-                const typeOfPreviosGen = typesOfGenes[i - 1];
-                if (typeOfPreviosGen === "variable" || typeOfPreviosGen === "number") return false;
-            }
-            if (i < line.length - 1) {
-                const typeOfNextGen = typesOfGenes[i + 1];
-                if (typeOfNextGen === "variable" || typeOfNextGen === "number") return false;
+            for (let i = 0; i < count; i++) {
+                body.push(getRandomProgram("cycle", depth + 1));
             }
         }
     }
+    if (parent === "addition" || parent === "assignment" || parent === "console") {
+        if (depth === MAX_PROGRAM_DEPTH || Math.random() < 0.5) {
+            return getRandomElement(AVAILABLE_VARIABLES);
+        }
 
-    return true;
-}
+        type = "addition";
 
-// Получить количество правильных линий в программе
-export function getCountOfRightLines(program) {
-    let count = 0;
+        body.push(
+            getRandomProgram("addition", depth + 1),
+            getRandomProgram("addition", depth + 1)
+        );
+    }
+    if (!parent) {
+        type = "program";
 
-    program.forEach((part) => {
-        part.lines.forEach((line) => {
-            count += lineIsRight(line);
+        const count = getRandomNumber(MAX_OPERATION_COUNT - 3) + 1;
+
+        body.push({
+            type: "definition",
+            body: Array.from(AVAILABLE_VARIABLES)
         });
-    });
 
-    return count;
+        for (let i = 0; i < count; i++) {
+            body.push(getRandomProgram("program", depth + 1));
+        }
+
+        body.push({
+            type: "console",
+            body: [getRandomProgram("console", depth + 2)]
+        });
+    }
+
+    return {
+        type,
+        body
+    };
+}
+
+// Отсортировать популяцию по крутости
+export function sortPopulation(population) {
+    population.sort((a, b) => {
+        if (a.fitness === Infinity && b.fitness === Infinity || a.fitness === b.fitness) {
+            return Math.random() - 0.5;
+        }
+
+        if (a.fitness === Infinity) return 1;
+        if (b.fitness === Infinity) return -1;
+
+        return a.fitness - b.fitness;
+    });
 }
 
 // Получить начальную популяцию
-export function getPopulation() {
+export function getPopulation(correctOutput) {
     const population = [];
-    const phase = 0;
 
     for (let i = 0; i < POPULATION_SIZE; i++) {
-        const program = getProgram(phase);
+        const program = getRandomProgram();
+        const code = getCodeFromProgram(program);
+        const output = runCode(code, -1);
+        const fitness = getFitness(output, correctOutput);
 
-        shuffleProgram(program);
-
-        const countOfRightLines = getCountOfRightLines(program);
-
-        population.push({
-            program,
-            phase,
-            countOfRightLines
-        });
+        population.push({ program, code, fitness });
     }
+
+    sortPopulation(population);
 
     return population;
 }
 
 // Получить разницу между выводом и искомым значением
-export function getDifference(output, correctOutput) {
-    let difference = 0;
+export function getFitness(output, correctOutput) {
+    let fitness = 0;
     
     for (let i = 0; i < output.length; i++) {
         if (Number.isNaN(Number(output[i]))) return Infinity;
 
-        difference += Math.abs(output[i] - correctOutput[i]);
+        fitness += Math.abs(output[i] - correctOutput[i]);
     }
 
-    return difference;
+    return fitness;
 }
 
 // Кроссинговер
-export function crossover(firstIndividual, secondIndividual) {
-    const phase = Math.min(firstIndividual.phase, secondIndividual.phase);
-    const childProgram = getProgram(phase);
+export function crossover(firstProgram, secondProgram) {
+    // Начать программу с определения переменных
+    const body = [copy(firstProgram.body[0])];
 
-    const linesForCrossover = []; // Линии, которые будут подвержены кроссинговеру
+    const firstGenes = firstProgram.body.slice(1, -1);
+    const secondGenes = secondProgram.body.slice(1, -1);
 
-    const firstGenes = []; // Все гены из линий для кроссинговера
-    const secondGenes = []; // Все гены, которые нужно скопировать
+    // Случайный разделитель
+    const separator = getRandomNumber(Math.min(firstGenes, secondGenes));
 
-    // Индекс случайной части программы для кроссинговера
-    const indexOfRandomPart = getRandomIndex(childProgram);
+    // Скопировать часть из первой программы
+    body.push(...copy(firstGenes.slice(0, separator)));
 
-    // Скопировать первую программу и заполнить информацию для кроссинговера
-    childProgram.forEach((part, index) => {
-        part.lines = firstIndividual.program[index].lines.map((line) => {
-            const copyOfLine = [...line];
+    // Скопировать часть из второй программы
+    body.push(...copy(secondGenes.slice(separator)));
 
-            if (index === indexOfRandomPart) {
-                if (!lineIsRight(line) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
-                    linesForCrossover.push(copyOfLine);
-                    firstGenes.push(...line);
-                }
-            }
+    // Закончить программу выводом в консоль
+    body.push(copy(firstProgram.body[firstProgram.body.length - 1]));
 
-            return copyOfLine;
-        });
-
-        if (index === indexOfRandomPart) {
-            secondIndividual.program[index].lines.forEach((line) => {
-                if (!lineIsRight(line) || Math.random() < CROSSOVER_IN_RIGHT_LINES_RATE) {
-                    secondGenes.push(...line);
-                }
-            });
-        }
-    });
-
-    const commonGenes = []; // Общие гены для обеих частей
-    const remainingGenes = []; // Оставшиеся гены
-
-    // Получить общие гены для обеих частей
-    firstGenes.forEach((gen) => {
-        const index = secondGenes.indexOf(gen);
-
-        if (index === -1) {
-            remainingGenes.push(gen);
-        } else {
-            secondGenes.splice(index, 1);
-            commonGenes.push(gen);
-        }
-    });
-
-    const allGenes = [...commonGenes, ...remainingGenes]; // Все гены для вставки
-    let index = 0;
-
-    for (let i = 0; i < linesForCrossover.length; i++) {
-        linesForCrossover[i] = allGenes.slice(index, index + linesForCrossover[i].length);
-        index += linesForCrossover[i].length;
-    }
-
-    return childProgram;
+    return {
+        type: "program",
+        body
+    };
 }
 
 // Мутация
-export function mutation(program) {
-    for (let i = 0; i < 4; i++) {
+export function mutation(program, depth = 0) {
+    const { type, body } = program;
+
+    for (let i = 0; i < body.length; i++) {
+        if (type === "program") {
+            if (i === 0 || i === body.length - 1) continue;
+        }
+
         if (Math.random() < MUTATION_RATE) {
-            shuffleProgram(program, 1);
+            body[i] = getRandomProgram(type, depth + 1);
+        } else if (typeof body[i] !== "string") {
+            mutation(body[i], depth + 1);
         }
     }
-}
-
-// Вырастить особь
-export function raise(program, phase = 0) {
-    const growth = [];
-
-    if (phase === 0) {
-        growth.push(getPartOfProgram("condition"), getPartOfProgram("body"));
-    }
-    if (phase === 1) {
-        growth.push(getPartOfProgram("console"));
-    }
-
-    shuffleProgram(growth);
-
-    program.push(...growth);
-
-    return getCountOfRightLines(growth);
 }
 
 // Одна итерация генетического алгоритма
@@ -361,105 +300,43 @@ export async function runGenetic({
     correctOutput
 }) {
     for (let i = 0; i < POPULATION_SIZE; i += 2) {
-        const firstIndividual = population[i];
-        const secondIndividual = population[i + 1];
+        const firstProgram = population[i].program;
+        const secondProgram = population[i + 1].program;
 
-        const firstNewProgram = crossover(firstIndividual, secondIndividual);
-        const secondNewProgram = crossover(secondIndividual, firstIndividual);
+        const firstNewProgram = crossover(firstProgram, secondProgram);
+        const secondNewProgram = crossover(secondProgram, firstProgram);
 
         mutation(firstNewProgram);
         mutation(secondNewProgram);
 
-        let firstCountOfRightLines = getCountOfRightLines(firstNewProgram);
-        let secondCountOfRightLines = getCountOfRightLines(secondNewProgram);
+        const firstNewCode = getCodeFromProgram(firstNewProgram);
+        const firstNewOutput = runCode(firstNewCode, -1);
+        const firstNewFitness = getFitness(firstNewOutput, correctOutput);
 
-        const newPhase = Math.min(firstIndividual.phase, secondIndividual.phase);
+        const secondNewCode = getCodeFromProgram(secondNewProgram);
+        const secondNewOutput = runCode(secondNewCode, -1);
+        const secondNewFitness = getFitness(secondNewOutput, correctOutput);
 
-        let firstNewPhase = newPhase;
-        let secondNewPhase = newPhase;
-
-        if (firstNewPhase === 0 && firstCountOfRightLines > 3) {
-            firstCountOfRightLines += raise(
-                firstNewProgram,
-                firstNewPhase
-            );
-            firstNewPhase++;
-        }
-        if (firstNewPhase === 1 && firstCountOfRightLines > 8) {
-            firstCountOfRightLines += raise(
-                firstNewProgram,
-                firstNewPhase
-            );
-            firstNewPhase++;
-        }
-
-        if (secondNewPhase === 0 && secondCountOfRightLines > 3) {
-            secondCountOfRightLines += raise(
-                secondNewProgram,
-                secondNewPhase
-            );
-            secondNewPhase++;
-        }
-        if (secondNewPhase === 1 && secondCountOfRightLines > 8) {
-            secondCountOfRightLines += raise(
-                secondNewProgram,
-                secondNewPhase
-            );
-            secondNewPhase++;
-        }
-
-        const firstNewIndividual = {
-            program: firstNewProgram,
-            phase: firstNewPhase,
-            countOfRightLines: firstCountOfRightLines
-        };
-        const secondNewIndividual = {
-            program: secondNewProgram,
-            phase: secondNewPhase,
-            countOfRightLines: secondCountOfRightLines
-        };
-
-        if (firstNewPhase === 2) {
-            const firstNewCode = getCodeFromProgram(firstNewProgram, true);
-            const firstNewOutput = runCode(firstNewCode, -1);
-
-            firstNewIndividual.difference = getDifference(firstNewOutput, correctOutput);
-        }
-
-        if (secondNewPhase === 2) {
-            const secondNewCode = getCodeFromProgram(secondNewProgram, true);
-            const secondNewOutput = runCode(secondNewCode, -1);
-
-            secondNewIndividual.difference = getDifference(secondNewOutput, correctOutput);
-        }
-
-        population.push(firstNewIndividual, secondNewIndividual);
+        population.push(
+            {
+                program: firstNewProgram,
+                code: firstNewCode,
+                fitness: firstNewFitness
+            },
+            {
+                program: secondNewProgram,
+                code: secondNewCode,
+                fitness: secondNewFitness
+            }
+        );
     }
 
-    population.sort((a, b) => {
-        if (a.phase !== b.phase) {
-            return b.phase - a.phase;
-        }
-        if (a.phase < 2 || a.difference === Infinity && b.difference === Infinity) {
-            if (a.countOfRightLines !== b.countOfRightLines) {
-                return b.countOfRightLines - a.countOfRightLines;
-            }
-            return Math.random() - 0.5;
-        }
-        if (a.difference !== b.difference) {
-            return a.difference - b.difference;
-        }
-        return Math.random() - 0.5;
-    });
+    sortPopulation(population);
 
     population.splice(POPULATION_SIZE);
 
-    const output = runCode(getCodeFromProgram(population[0].program, true), number);
+    setCode(population[0].code);
+    setOutput(runCode(population[0].code, number));
 
-    setCode(getCodeFromProgram(population[0].program));
-    setOutput(output);
-
-    console.log(population[0].difference);
-
-    if (population[0].difference === 0) setStatus(2);
+    if (population[0].fitness === 0) setStatus(2);
 }

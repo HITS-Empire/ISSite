@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import {
     runCode,
-    getProgram,
     runGenetic,
+    getPopulation,
     getCodeFromProgram,
-    getPopulation
+    getCorrectFibonacciProgram
 } from "../components/Algorithms/Genetic/Utils/genetic";
 import Menu from "../components/Algorithms/Genetic/Menu";
 import Code from "../components/Algorithms/Genetic/Code";
@@ -25,16 +25,17 @@ export default function Genetic() {
     // Запустить или остановить программу
     useEffect(() => {
         if (status === 0) {
-            const correctProgram = getProgram(2);
-            const correctOutput = runCode(getCodeFromProgram(correctProgram, true), number);
+            const program = getCorrectFibonacciProgram();
+            const newCode = getCodeFromProgram(program);
+            const newOutput = runCode(newCode, number);
 
-            setCode(getCodeFromProgram(correctProgram));
-            setOutput([correctOutput[correctOutput.length - 1]]);
+            setCode(newCode);
+            setOutput(newOutput);
         }
 
         if (status === 1) {
-            const population = getPopulation();
             const correctOutput = runCode(code, -1);
+            const population = getPopulation(correctOutput);
 
             const interval = setInterval(runGenetic, 50, {
                 setCode,
