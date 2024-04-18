@@ -11,7 +11,7 @@ const MAX_PROGRAM_DEPTH = 4; // Максимальная глубина прог
 const MAX_OPERATION_COUNT = 8; // Максимальное количество операций
 
 const SEQUENCE_SIZE = 16; // Количество первых чисел для сравнения
-const POPULATION_SIZE = 128; // Количество особей в популяции
+const POPULATION_SIZE = 512; // Количество особей в популяции
 const MUTATION_RATE = 0.4; // Вероятность мутации
 
 // Доступные переменные
@@ -169,7 +169,7 @@ export function getRandomProgram(parent = null, depth = 0) {
             }
         }
     }
-    if (parent === "addition" || parent === "assignment" || parent === "console") {
+    if (parent === "assignment" || parent === "console") {
         if (depth === MAX_PROGRAM_DEPTH || Math.random() < 0.5) {
             return getRandomElement(AVAILABLE_VARIABLES);
         }
@@ -177,14 +177,14 @@ export function getRandomProgram(parent = null, depth = 0) {
         type = "addition";
 
         body.push(
-            getRandomProgram("addition", depth + 1),
-            getRandomProgram("addition", depth + 1)
+            getRandomElement(AVAILABLE_VARIABLES),
+            getRandomElement(AVAILABLE_VARIABLES)
         );
     }
     if (!parent) {
         type = "program";
 
-        const count = getRandomNumber(MAX_OPERATION_COUNT - 3) + 1;
+        const count = getRandomNumber(MAX_OPERATION_COUNT - 2) + 2;
 
         body.push({
             type: "definition",
@@ -254,14 +254,14 @@ export function getFitness(output, correctOutput) {
 
 // Кроссинговер
 export function crossover(firstProgram, secondProgram) {
-    // Начать программу с определения переменных
-    const body = [copy(firstProgram.body[0])];
-
     const firstGenes = firstProgram.body.slice(1, -1);
     const secondGenes = secondProgram.body.slice(1, -1);
 
     // Случайный разделитель
     const separator = getRandomNumber(Math.min(firstGenes, secondGenes));
+
+    // Начать программу с определения переменных
+    const body = [copy(firstProgram.body[0])];
 
     // Скопировать часть из первой программы
     body.push(...copy(firstGenes.slice(0, separator)));
