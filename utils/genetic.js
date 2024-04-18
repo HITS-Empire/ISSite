@@ -11,8 +11,9 @@ const MAX_PROGRAM_DEPTH = 4; // Максимальная глубина прог
 const MAX_OPERATION_COUNT = 8; // Максимальное количество операций
 
 const SEQUENCE_SIZE = 16; // Количество первых чисел для сравнения
-const POPULATION_SIZE = 512; // Количество особей в популяции
+const POPULATION_SIZE = 128; // Количество особей в популяции
 const MUTATION_RATE = 0.4; // Вероятность мутации
+const RAISE_RATE = 0.4; // Вероятность роста
 
 // Доступные переменные
 const AVAILABLE_VARIABLES = VARIABLES.slice(0, VARIABLES_COUNT);
@@ -284,7 +285,15 @@ export function mutation(program, depth = 0) {
 
     for (let i = 0; i < body.length; i++) {
         if (type === "program") {
-            if (i === 0 || i === body.length - 1) continue;
+            if (i === 0) continue;
+
+            if (i === body.length - 1) {
+                if (Math.random() < MUTATION_RATE) {
+                    body[i].body[0] = getRandomProgram("console", depth + 2);
+                }
+
+                continue;
+            }
         }
 
         if (Math.random() < MUTATION_RATE) {
@@ -295,9 +304,16 @@ export function mutation(program, depth = 0) {
     }
 }
 
+// Рост
+export function raise(program) {
+    if (Math.random() < RAISE_RATE && program.body.length - 2 < MAX_OPERATION_COUNT) {
+        program.body.push(getRandomProgram("program", 1), program.body.pop());
+    }
+}
+
 // Одна итерация генетического алгоритма
 export function runGenetic(population, correctOutput) {
-    for (let i = 0; i < POPULATION_SIZE; i += 2) {
+    for (let i = 0; i < POPULATION_SIZE; i++) {
         const firstProgram = population[i].program;
         const secondProgram = population[i + 1].program;
 
@@ -306,6 +322,9 @@ export function runGenetic(population, correctOutput) {
 
         mutation(firstNewProgram);
         mutation(secondNewProgram);
+
+        raise(firstNewProgram);
+        raise(secondNewProgram);
 
         const firstNewCode = getCodeFromProgram(firstNewProgram);
         const firstNewOutput = runCode(firstNewCode, -1);
