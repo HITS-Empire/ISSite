@@ -39,7 +39,7 @@ export default function Field({
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.lineWidth = 3;
-        ctx.fillStyle = "#bababa";
+        ctx.fillStyle = "#140029";
         ctx.strokeStyle = ctx.fillStyle;
 
         vertices.forEach((vertex) => {

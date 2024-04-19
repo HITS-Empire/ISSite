@@ -17,7 +17,7 @@ export function refreshField({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineWidth = 3;
-    ctx.strokeStyle = "#bababa";
+    ctx.strokeStyle = "#140029";
 
     lines.forEach(({ from, to }) => {
         ctx.beginPath();
