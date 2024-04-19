@@ -53,11 +53,11 @@ export default function BasicGenetic() {
                 generation: 0
             };
 
-            for (let i = 0; i < 200; i++) {
+            for (let i = 0; i < 512; i++) {
                 data.population.push(randomPath(vertices.length));
             }
 
-            const interval = setInterval(pathOfTravelingSalesman, 100, {
+            const interval = setInterval(pathOfTravelingSalesman, 10, {
                 data,
                 canvas,
                 ctx,

@@ -28,7 +28,7 @@ export function refreshField({
     });
 
     ctx.lineWidth = 8;
-    ctx.fillStyle = data.generation > 10 ? "#3fa643" : "#9747ff"
+    ctx.fillStyle = data.generation > vertices.length ** 3 ? "#3fa643" : "#9747ff"
     ctx.strokeStyle = ctx.fillStyle;
 
     for (let i = 0; i < data.bestPath.length; i++) {
@@ -121,16 +121,15 @@ export function pathOfTravelingSalesman({
         return newPath;
     };
 
-    const newPopulation = [];
-    for (let i = 0; i < data.population.length / 2; i++) {
-        const firstPath = data.population[Math.floor(Math.random() * (i + 1))];
-        const secondPath  = data.population[Math.floor(Math.random() * (i + 1))];
+    const newPopulation = [...data.population];
+    for (let i = 0; i < data.population.length - 1; i++) {
+        const firstPath = data.population[i];
+        const secondPath  = data.population[i + 1];
 
         const newFirstPath = crossover(firstPath , secondPath);
         const newSecondPath = crossover(secondPath, firstPath);
-        
-        newPopulation.push(mutate(newFirstPath));
-        newPopulation.push(mutate(newSecondPath));
+
+        newPopulation.push(mutate(newFirstPath), mutate(newSecondPath));
     }
 
     newPopulation.sort((a, b) => fitness(b) - fitness(a));
@@ -138,7 +137,7 @@ export function pathOfTravelingSalesman({
     const newBestPath = newPopulation[0];
     const newBestFitness = fitness(newBestPath);
 
-    data.population = newPopulation;
+    data.population = newPopulation.slice(0, data.population.length);
     data.generation++;
 
     if (newBestFitness > data.bestFitness) {
@@ -148,7 +147,7 @@ export function pathOfTravelingSalesman({
         refreshField({ data, canvas, ctx, vertices, lines });
     }
 
-    if (data.generation > 10) {
+    if (data.generation > vertices.length ** 3) {
         refreshField({ data, canvas, ctx, vertices, lines });
         setStatus(2);
     }
