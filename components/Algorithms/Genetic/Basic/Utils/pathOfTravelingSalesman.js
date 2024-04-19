@@ -110,6 +110,11 @@ export async function pathOfTravelingSalesman(
     ctx.closePath();
     ctx.stroke();
 
+    setPopulation(newPopulation);
+    if (newBestFitness < bestFitness) {    
+        setBestPath(newBestPath);
+        setBestFitness(newBestFitness);
+    }
     await sleep(500);
 
     ctx.beginPath();
@@ -124,14 +129,6 @@ export async function pathOfTravelingSalesman(
     ctx.stroke();
 
     generation += 1;
-
-    setPopulation(newPopulation);
-    if (newBestFitness < bestFitness) {    
-        setBestPath(newBestPath);
-        setBestFitness(newBestFitness);
-    }
-
-    await sleep(500);
     
     if (bestFitness > 0.999 || generation > 100) {
         return;
