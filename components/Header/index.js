@@ -13,11 +13,11 @@ export default function Header() {
 
             <nav className={style.nav}>
                 <ul className={style.ul}>
-                    <Navigation
+                    {/* <Navigation
                         href="/"
                         titles={["Главная", "Главная"]}
                         isResizing={true}
-                    />
+                    /> */}
                     <Navigation
                         href="/labirint"
                         titles={["А*", "А*"]}

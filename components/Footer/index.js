@@ -6,10 +6,10 @@ export default function Footer() {
         <footer className={style.footer}>
             <nav className={style.nav}>
                 <ul className={style.ul}>
-                    <Navigation
+                    {/* <Navigation
                         href="/"
                         titles={["Главная"]}
-                    />
+                    /> */}
                     <Navigation
                         href="/labirint"
                         titles={["А*"]}
