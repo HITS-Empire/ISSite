@@ -1,8 +1,8 @@
-import Input from "../../../Input";
-import Button from "../../../Button";
-import Status from "../../../Status";
-import MenuWrapper from "../../../MenuWrapper";
-import ButtonContainer from "../../../ButtonContainer";
+import Input from "../../../../Input";
+import Button from "../../../../Button";
+import Status from "../../../../Status";
+import MenuWrapper from "../../../../MenuWrapper";
+import ButtonContainer from "../../../../ButtonContainer";
 
 export default function Menu({
     number,
@@ -38,7 +38,7 @@ export default function Menu({
 
     return (
         <MenuWrapper
-            title="Генетический алгоритм"
+            title="Бонусный генетический алгоритм"
             description="Сейчас вы узрите, как выполняется генерация кода для последовательности Фибоначчи."
         >
             <Input

@@ -5,13 +5,13 @@ import {
     getCorrectFibonacciProgram
 } from "../utils/genetic";
 import { useState, useEffect } from "react";
-import Menu from "../components/Algorithms/Genetic/Menu";
-import Code from "../components/Algorithms/Genetic/Code";
+import Menu from "../components/Algorithms/Genetic/Bonus/Menu";
+import Code from "../components/Algorithms/Genetic/Bonus/Code";
 
 // Скомпилировано ли API
 let apiIsCompiled = false;
 
-export default function Genetic() {
+export default function BonusGenetic() {
     // Код, который показывается пользователю
     const [code, setCode] = useState("");
 
@@ -47,7 +47,7 @@ export default function Genetic() {
 
         // Скомпилировать API холостым вызовом
         if (!apiIsCompiled) {
-            fetch("/api/genetika/run");
+            fetch("/api/kod/run");
 
             apiIsCompiled = true;
         }
@@ -99,7 +99,7 @@ export default function Genetic() {
 
         // Создать новый запрос с задержкой
         setTimeout(async () => {
-            const response = await fetch("/api/genetika/run", {
+            const response = await fetch("/api/kod/run", {
                 method: "POST",
                 body: id
             });

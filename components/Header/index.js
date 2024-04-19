@@ -29,8 +29,13 @@ export default function Header() {
                         isResizing={true}
                     />
                     <Navigation
-                        href="/genetika"
-                        titles={["Генетический алгоритм", "Генетика"]}
+                        href="/kommivoyazhyor"
+                        titles={["Коммивояжёр", "Коммивояжёр"]}
+                        isResizing={true}
+                    />
+                    <Navigation
+                        href="/kod"
+                        titles={["Генерация кода", "Код"]}
                         isResizing={true}
                     />
                     <Navigation
