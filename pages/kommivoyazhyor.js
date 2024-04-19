@@ -23,6 +23,16 @@ export default function BasicGenetic() {
     // Статус программы (0 - не активно, 1 - выполняется поиск, 2 - поиск завершён)
     const [status, setStatus] = useState(0);
 
+    // Перезагрузить поле
+    const refreshField = () => {
+        setVertices([]);
+        setLines([]);
+
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    };
+
     // Создать Canvas
     useEffect(() => {
         createCanvas({
@@ -35,14 +45,7 @@ export default function BasicGenetic() {
 
     // Запустить или остановить программу
     useEffect(() => {
-        if (status === 0) {
-            setVertices([]);
-            setLines([]);
-
-            if (ctx) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-        }
+        if (status === 0) refreshField();
 
         if (status === 1) {
             // Данные для работы алгоритма
@@ -75,6 +78,7 @@ export default function BasicGenetic() {
     return (
         <>
             <Menu
+                refreshField={refreshField}
                 vertices={vertices}
                 status={status}
                 setStatus={setStatus}

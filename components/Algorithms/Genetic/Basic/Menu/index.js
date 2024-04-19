@@ -4,6 +4,7 @@ import MenuWrapper from "../../../../MenuWrapper";
 import ButtonContainer from "../../../../ButtonContainer";
 
 export default function Menu({
+    refreshField,
     vertices,
     status,
     setStatus
@@ -15,7 +16,7 @@ export default function Menu({
 
     // Остановить алгоритм
     const stopProcess = () => {
-        setStatus(0);
+        status === 0 ? refreshField() : setStatus(0);
     };
 
     return (
