@@ -2,7 +2,30 @@ import Button from "../../../../Button";
 import MenuWrapper from "../../../../MenuWrapper";
 import ButtonContainer from "../../../../ButtonContainer";
 
-export default function Menu() {
+export default function Menu({
+    setVertices,
+    vertices,
+    setLines,
+    setStop,
+    canvas,
+    ctx
+}) {
+    const refreshCanvas = () => {
+        setVertices([]);
+        setLines([]);
+        setStop(true);
+
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    const getPathOfTravelingSalesman = () => {
+        if (vertices.length === 0 || !ctx) return;
+
+        setStop(false);
+    }
+
     return (
         <MenuWrapper
             title="Базовый генетический алгоритм"
@@ -11,14 +34,14 @@ export default function Menu() {
             <ButtonContainer>
                 <Button
                     type="primary"
-                    onClick={() => {}}
+                    onClick={getPathOfTravelingSalesman}
                 >
                     Запустить
                 </Button>
 
                 <Button
                     type="soft"
-                    onClick={() => {}}
+                    onClick={refreshCanvas}
                 >
                     Перезагрузить
                 </Button>
