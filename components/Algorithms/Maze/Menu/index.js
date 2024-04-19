@@ -20,24 +20,6 @@ export default function Menu({
         setProcessIsActive(true);
     };
 
-    // Изменить размеры поля
-    const changeCountEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setCount(Math.min(Math.max(value, 0), 128));
-    };
-
-    // Изменить задержку работы алгоритма
-    const changeRenderingDelayEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setRenderingDelay(Math.min(Math.max(value, 0), 2048));
-    };
-
     let statusDescription;
     switch (status) {
         case 1:
@@ -54,21 +36,23 @@ export default function Menu({
             description="Сейчас вы узрите, как работает алгоритм нахождения пути в лабиринте."
         >
             <Input
-                type="text"
                 label="Размеры поля"
                 description="Введите размеры поля"
+                isNumber={true}
+                max={128}
                 value={count}
+                setValue={setCount}
                 disabled={processIsActive}
-                onChange={changeCountEvent}
             />
 
             <Input
-                type="text"
                 label="Задержка отрисовки"
                 description="Введите задержку отрисовки"
+                isNumber={true}
+                max={1024}
                 value={renderingDelay}
+                setValue={setRenderingDelay}
                 disabled={processIsActive}
-                onChange={changeRenderingDelayEvent}
             />
 
             <ButtonContainer>

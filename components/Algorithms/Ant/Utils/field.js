@@ -59,7 +59,7 @@ export function getField(count) {
 
     if (foodCell) {
         foodCell.type = 0;
-        foodCell.food = 1;
+        foodCell.food = 16;
     }
 
     return {

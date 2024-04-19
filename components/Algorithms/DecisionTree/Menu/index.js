@@ -54,15 +54,6 @@ export default function Menu({
         setPrediction();
     };
 
-    // Изменить процент оптимизации
-    const changeOptimizationPercentageEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setOptimizationPercentage(Math.min(Math.max(value, 0), 100));
-    };
-
     return (
         <MenuWrapper
             className={style.menu}
@@ -98,12 +89,13 @@ export default function Menu({
             </ButtonContainer>
 
             <Input
-                type="text"
                 label="Процент оптимизации"
                 description="Введите процент оптимизации"
+                isNumber={true}
+                max={100}
                 value={optimizationPercentage}
+                setValue={setOptimizationPercentage}
                 disabled={!trainingSet || processIsActive}
-                onChange={changeOptimizationPercentageEvent}
             />
 
             <ButtonContainer>
