@@ -28,6 +28,7 @@ export default function Menu({
         return `rgb(${red}, ${green}, ${blue})`;
     }
 
+    // Посчитать расстояние между точками
     const distance = (first, second) => {
         return Math.sqrt(Math.pow(first.x - second.x, 2) + Math.pow(first.y - second.y, 2));
     }

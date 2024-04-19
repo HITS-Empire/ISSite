@@ -7,6 +7,7 @@ export default function Field({
     canvas,
     ctx
 }) {
+    // Установить точку на поле
     const setPoint = (e) => {
         if (!ctx) return;
 
