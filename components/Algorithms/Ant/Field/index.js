@@ -95,13 +95,9 @@ export default function Field({
         ctx.fillRect(cell.x, cell.y, ceilBorder, ceilBorder);
     };
 
-    // Изменено количество еды в ячейке
-    const changeFoodEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        foodCell.food = Math.min(Math.max(value, 0), 64);
+    // Изменить количество еды в ячейке
+    const changeFood = (value) => {
+        foodCell.food = value;
 
         setEmptyCell(getEmptyCell(field));
         setCellsWithFood(getCellsWithFood(field));
@@ -217,11 +213,12 @@ export default function Field({
             <div className={style.window}>
                 <div className={style.inputContainer}>
                     <Input
-                        type="text"
                         label="Количество еды в ячейке"
                         description="Введите количество еды"
+                        isNumber={true}
+                        max={64}
                         value={foodCell.food}
-                        onChange={changeFoodEvent}
+                        setValue={changeFood}
                     />
                 </div>
 

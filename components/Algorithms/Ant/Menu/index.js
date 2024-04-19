@@ -33,28 +33,10 @@ export default function Menu({
 
     // Добавить еду
     const addFood = () => {
-        emptyCell.food = 1;
+        emptyCell.food = 16;
 
         setCellsWithFood([...cellsWithFood, emptyCell]);
         setEmptyCell(getEmptyCell(field));
-    };
-
-    // Изменить размеры поля
-    const changeCountEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setCount(Math.min(Math.max(value, 0), 128));
-    };
-
-    // Изменить количество муравьёв
-    const changePopulationEvent = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setPopulation(Math.min(Math.max(value, 0), 64));
     };
 
     return (
@@ -64,12 +46,13 @@ export default function Menu({
             description="Сейчас вы узрите муравьиную колонию, которая кипит жизнью."
         >
             <Input
-                type="text"
                 label="Размеры поля"
                 description="Введите размеры поля"
+                isNumber={true}
+                max={128}
                 value={count}
+                setValue={setCount}
                 disabled={processIsActive}
-                onChange={changeCountEvent}
             />
 
             <ButtonContainer>
@@ -91,12 +74,13 @@ export default function Menu({
             </ButtonContainer>
 
             <Input
-                type="text"
                 label="Количество муравьёв"
                 description="Введите количество муравьёв"
+                isNumber={true}
+                max={64}
                 value={population}
+                setValue={setPopulation}
                 disabled={processIsActive}
-                onChange={changePopulationEvent}
             />
 
             <ButtonContainer>

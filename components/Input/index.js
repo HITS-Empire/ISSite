@@ -1,21 +1,32 @@
 import style from "./style.module.scss";
 
 export default function Input({
-    type,
+    type = "text",
     label,
     placeholder,
-    maxLength,
+    isNumber = false,
+    min = 0,
+    max = 0,
     value,
-    disabled,
-    onChange
+    setValue,
+    disabled
 }) {
+    const onChange = (event) => {
+        const value = event.target.value;
+
+        if (!isNumber) return setValue(value);
+
+        if (!/^\d*$/.test(value)) return;
+
+        setValue(Math.min(Math.max(event.target.value, min), max));
+    };
+
     return (
         <div className={style.input}>
             <label>{label}</label>
             <input
                 type={type}
                 placeholder={placeholder}
-                maxLength={maxLength}
                 value={value}
                 disabled={disabled}
                 autoFocus={true}

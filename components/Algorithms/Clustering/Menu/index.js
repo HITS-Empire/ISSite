@@ -19,33 +19,6 @@ export default function Menu({
     minAmount,
     setMinAmount,
 }) {
-    // Изменить количество кластеров
-    const changeAmountOfClusters = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setClusters(Math.min(Math.max(value, 0), 32));
-    };
-
-    // Изменить радиус поиска
-    const changeRadius = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setRadius(Math.min(Math.max(value, 0), 2048));
-    }
-
-    // Изменить минимальное количество
-    const changeMinAmount = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setMinAmount(Math.min(Math.max(value, 0), 1024));
-    };
-
     // Функция для определения цвета 
     const randomColor = (addition = 128) => {
         const red = Math.floor(Math.random() * 128) + addition; // Генерация красного цвета от 128 до 255
@@ -54,7 +27,7 @@ export default function Menu({
 
         return `rgb(${red}, ${green}, ${blue})`;
     }
-    
+
     const distance = (first, second) => {
         return Math.sqrt(Math.pow(first.x - second.x, 2) + Math.pow(first.y - second.y, 2));
     }
@@ -164,28 +137,6 @@ export default function Menu({
             ctx.strokeStyle = color;
             ctx.lineWidth = 5;
 
-            //cluster.points.sort(( first, second) => first.x - second.x);
-            //cluster.points.sort(( first, second) => first.x - second.x || first.y - second.y);
-
-            //cluster.points = Array.from(new Set(cluster.points.map(a => JSON.stringify(a)))).map(str => JSON.parse(str));
-            /*
-            cluster.points.sort((a, b) => {
-                let sumDistancesA = 0;
-                let sumDistancesB = 0;
-
-                for (let i = 0; i < cluster.points.length; i++) {
-                    if (cluster.points[i] !== a) {
-                        sumDistancesA += distance(a, cluster.points[i]);
-                    }
-                    if (cluster.points[i] !== b) {
-                        sumDistancesB += distance(b, cluster.points[i]);
-                    }
-                }
-
-                return sumDistancesA - sumDistancesB;
-            });
-            */
-
             for (let i = 0; i < cluster.points.length - 1; i++) {
                 let minDistance = 100000000;
                 let indexMinDistance = -1;
@@ -246,27 +197,30 @@ export default function Menu({
             description="Сейчас вы узрите, как работает алгоритм кластеризации."
         >
             <Input
-                type="text"
                 label="kMeans и WARD: Количество кластеров"
                 description="Введите количество кластеров"
+                isNumber={true}
+                max={32}
                 value={clusters}
-                onChange={changeAmountOfClusters}
+                setValue={setClusters}
             />
 
             <Input
-                type="text"
                 label="DBSCAN: Радиус поиска"
                 description="Введите радиус поиска"
+                isNumber={true}
+                max={2048}
                 value={radius}
-                onChange={changeRadius}
+                setValue={setRadius}
             />
 
             <Input
-                type="text"
                 label="DBSCAN: Количество точек в радиусе"
                 description="Введите количество точек в радиусе"
+                isNumber={true}
+                max={1024}
                 value={minAmount}
-                onChange={changeMinAmount}
+                setValue={setMinAmount}
             />
 
             <ButtonContainer>

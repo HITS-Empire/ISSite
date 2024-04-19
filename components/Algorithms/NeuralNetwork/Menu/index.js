@@ -32,15 +32,6 @@ export default function Menu({
         }
     }
 
-    // Получить правильную цифру
-    const getCorrectDigit = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setCorrectDigit(Math.min(Math.max(value, 0), 9));
-    }
-
     // Изменить веса, если нейросеть не распознала цифру
     const newBackpropagation = async () => {
         setIsFixed(1);
@@ -153,11 +144,12 @@ export default function Menu({
             </Status>
 
             <Input
-                type="text"
                 label="Правильная цифра"
                 description="Введите правильную цифру"
+                isNumber={true}
+                max={9}
                 value={correctDigit}
-                onChange={getCorrectDigit}
+                setValue={setCorrectDigit}
                 disabled={!condition || isFixed}
             />
 

@@ -12,15 +12,6 @@ export default function Menu({
     fitness,
     maxFitness
 }) {
-    // Изменить номер нужного элемента последовательности
-    const changeNumber = (event) => {
-        const value = event.target.value;
-
-        if (!/^\d*$/.test(value)) return;
-
-        setNumber(Math.min(Math.max(value, 0), 1024));
-    };
-
     // Запустить алгоритм
     const runProcess = () => {
         setStatus(1);
@@ -42,11 +33,12 @@ export default function Menu({
             description="Сейчас вы узрите, как выполняется генерация кода для последовательности Фибоначчи."
         >
             <Input
-                type="text"
                 label="Номер элемента"
                 description="Введите номер элемента"
+                isNumber={true}
+                max={1024}
                 value={number}
-                onChange={changeNumber}
+                setValue={setNumber}
                 disabled={status === 1}
             />
 
