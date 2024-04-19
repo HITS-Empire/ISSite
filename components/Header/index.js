@@ -13,11 +13,11 @@ export default function Header() {
 
             <nav className={style.nav}>
                 <ul className={style.ul}>
-                    <Navigation
+                    {/* <Navigation
                         href="/"
                         titles={["Главная", "Главная"]}
                         isResizing={true}
-                    />
+                    /> */}
                     <Navigation
                         href="/labirint"
                         titles={["А*", "А*"]}
@@ -29,8 +29,13 @@ export default function Header() {
                         isResizing={true}
                     />
                     <Navigation
-                        href="/genetika"
-                        titles={["Генетический алгоритм", "Генетика"]}
+                        href="/kommivoyazhyor"
+                        titles={["Коммивояжёр", "Коммивояжёр"]}
+                        isResizing={true}
+                    />
+                    <Navigation
+                        href="/kod"
+                        titles={["Генерация кода", "Код"]}
                         isResizing={true}
                     />
                     <Navigation
