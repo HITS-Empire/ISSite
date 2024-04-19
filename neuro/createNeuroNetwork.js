@@ -203,8 +203,6 @@ const goThroughEpochs = (NN, imagesData, digits, epochs) => {
 
             NN.backpropagation(targets);
         }
-
-        console.log(i, correct);
     }
 };
 
