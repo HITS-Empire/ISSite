@@ -11,13 +11,16 @@ export function randomPath(size) {
 
 export async function pathOfTravelingSalesman(
     setBestFitness,
+    setGeneration,
     setPopulation,
     bestFitness,
     setBestPath,
     population,
+    generation,
     bestPath, 
     vertices,
-    ctx, 
+    setStop,
+    ctx,
 ) {    
     const fitness = (path) => {
         let totalDistance = 0;
@@ -78,8 +81,6 @@ export async function pathOfTravelingSalesman(
         return newPath;
     };
 
-    let generation = 0;
-
     const newPopulation = [];
     for (let i = 0; i < population.length / 2; i++) {
         const firstPath = population[Math.floor(Math.random() * (i + 1))];
@@ -92,7 +93,7 @@ export async function pathOfTravelingSalesman(
         newPopulation.push(mutate(newSecondPath));
     }
 
-    newPopulation.sort((a, b) => fitness(a) - fitness(b));
+    newPopulation.sort((a, b) => fitness(b) - fitness(a));
 
     const newBestPath = newPopulation[0];
     
@@ -110,11 +111,6 @@ export async function pathOfTravelingSalesman(
     ctx.closePath();
     ctx.stroke();
 
-    setPopulation(newPopulation);
-    if (newBestFitness < bestFitness) {    
-        setBestPath(newBestPath);
-        setBestFitness(newBestFitness);
-    }
     await sleep(500);
 
     ctx.beginPath();
@@ -128,9 +124,20 @@ export async function pathOfTravelingSalesman(
     ctx.closePath();
     ctx.stroke();
 
-    generation += 1;
     
-    if (bestFitness > 0.999 || generation > 100) {
+    console.log(generation);
+
+    setPopulation(newPopulation);
+    setGeneration(prevGeneration => prevGeneration + 1);
+    if (newBestFitness > bestFitness) {    
+        setBestPath(newBestPath);
+        setBestFitness(newBestFitness);
+    }
+    await sleep (500);
+
+    if (generation > 10) {
+        setStop(true);
+        await sleep(500);
         return;
     }
 }

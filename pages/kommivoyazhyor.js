@@ -23,7 +23,8 @@ export default function BasicGenetic() {
 
     // Лучший путь
     const [bestPath, setBestPath] = useState([]);
-    const [bestFintness, setBestFitness] = useState(0);
+    const [bestFitness, setBestFitness] = useState(0);
+    const [generation, setGeneration] = useState(0);
 
     useEffect(() => {
         if (vertices.length === 0 || stop) return;
@@ -41,6 +42,7 @@ export default function BasicGenetic() {
             ctx.beginPath();
             ctx.moveTo(vertices[bestPath[0] - 1].x, vertices[bestPath[0] - 1].y);
             ctx.strokeStyle = 'red';
+            ctx.lineWidth = 5;
         
             for (let i = 0; i < bestPath.length; i++) {
                 ctx.lineTo(vertices[bestPath[i] - 1].x, vertices[bestPath[i] - 1].y);
@@ -48,19 +50,31 @@ export default function BasicGenetic() {
         
             ctx.closePath();
             ctx.stroke();
+            ctx.lineWidth = 2;
             
+            ctx.fillStyle = "white";
+
+            vertices.forEach((vertex) => {
+              ctx.beginPath();
+              ctx.arc(vertex.x, vertex.y, 15, 0, 2 * Math.PI);
+              ctx.fill();
+            });
+
             return;
         }
 
         pathOfTravelingSalesman(
             setBestFitness,
+            setGeneration,
             setPopulation,
-            bestFintness,
+            bestFitness,
             setBestPath,
             population,
+            generation,
             bestPath, 
             vertices,
-            ctx, 
+            setStop,
+            ctx,
         );
 
     }, [population, stop]);
@@ -80,6 +94,9 @@ export default function BasicGenetic() {
             <Menu 
                 setPopulation={setPopulation}
                 setVertices={setVertices}
+                setGeneration={setGeneration}
+                setBestPath={setBestPath}
+                setBestFitness={setBestFitness}
                 setStop={setStop}
                 vertices={vertices}
                 setLines={setLines}

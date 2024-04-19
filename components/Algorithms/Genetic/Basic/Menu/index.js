@@ -3,8 +3,11 @@ import MenuWrapper from "../../../../MenuWrapper";
 import ButtonContainer from "../../../../ButtonContainer";
 
 export default function Menu({
+    setBestFitness,
+    setGeneration,
     setPopulation,
     setVertices,
+    setBestPath,
     vertices,
     setLines,
     setStop,
@@ -16,7 +19,10 @@ export default function Menu({
         setLines([]);
         setStop(true);
         setPopulation([]);
-        
+        setGeneration(0);
+        setBestPath([]);
+        setBestFitness(0);
+
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
@@ -45,7 +51,7 @@ export default function Menu({
                     type="soft"
                     onClick={refreshCanvas}
                 >
-                    Перезагрузить
+                    Остановить
                 </Button>
             </ButtonContainer>
         </MenuWrapper>
