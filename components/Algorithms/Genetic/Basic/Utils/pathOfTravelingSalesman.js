@@ -9,7 +9,7 @@ export function randomPath(size) {
     return path;
 };
 
-export async function pathOfTravelingSalesman({
+export async function pathOfTravelingSalesman(
     setBestFitness,
     setPopulation,
     bestFitness,
@@ -18,7 +18,7 @@ export async function pathOfTravelingSalesman({
     bestPath, 
     vertices,
     ctx, 
-}) {    
+) {    
     const fitness = (path) => {
         let totalDistance = 0;
         for (let i = 0; i < path.length - 1; i++) {
@@ -78,17 +78,15 @@ export async function pathOfTravelingSalesman({
         return newPath;
     };
 
-    const POPULATION_SIZE = 200;
-
     let generation = 0;
 
     const newPopulation = [];
-    for (let i = 0; i < POPULATION_SIZE / 2; i++) {
+    for (let i = 0; i < population.length / 2; i++) {
         const firstPath = population[Math.floor(Math.random() * (i + 1))];
         const secondPath  = population[Math.floor(Math.random() * (i + 1))];
 
         const newFirstPath = crossover(firstPath , secondPath);
-        const newSecondPath = crossover(secondPath, firstPath );
+        const newSecondPath = crossover(secondPath, firstPath);
         
         newPopulation.push(mutate(newFirstPath));
         newPopulation.push(mutate(newSecondPath));
@@ -96,17 +94,11 @@ export async function pathOfTravelingSalesman({
 
     newPopulation.sort((a, b) => fitness(a) - fitness(b));
 
-    setPopulation(newPopulation);
-
     const newBestPath = newPopulation[0];
     
     const newBestFitness = fitness(newBestPath);
 
-    if (newBestFitness < bestFitness) {
-        setBestPath(newBestPath);
-        setBestFitness(newBestFitness);
-    }
-    console.log(newBestPath);
+    console.log(bestPath);
     ctx.beginPath();
     ctx.moveTo(vertices[newBestPath[0] - 1].x, vertices[newBestPath[0] - 1].y);
     ctx.strokeStyle = 'gray';
@@ -133,6 +125,14 @@ export async function pathOfTravelingSalesman({
 
     generation += 1;
 
+    setPopulation(newPopulation);
+    if (newBestFitness < bestFitness) {    
+        setBestPath(newBestPath);
+        setBestFitness(newBestFitness);
+    }
+
+    await sleep(500);
+    
     if (bestFitness > 0.999 || generation > 100) {
         return;
     }

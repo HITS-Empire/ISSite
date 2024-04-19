@@ -3,6 +3,7 @@ import MenuWrapper from "../../../../MenuWrapper";
 import ButtonContainer from "../../../../ButtonContainer";
 
 export default function Menu({
+    setPopulation,
     setVertices,
     vertices,
     setLines,
@@ -14,7 +15,8 @@ export default function Menu({
         setVertices([]);
         setLines([]);
         setStop(true);
-
+        setPopulation([]);
+        
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }

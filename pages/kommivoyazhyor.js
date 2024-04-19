@@ -26,15 +26,17 @@ export default function BasicGenetic() {
     const [bestFintness, setBestFitness] = useState(0);
 
     useEffect(() => {
+        if (vertices.length === 0 || stop) return;
         let newPopulation = Array.from({ length: 200 }, () =>
             randomPath(vertices.length)
         );
+
         setPopulation(newPopulation);   
-    }, [vertices]);
+    }, [stop]);
 
     useEffect(() => {
-        if (!ctx || vertices.length === 0) return;
-        
+        if (!ctx || vertices.length === 0 || population.length === 0) return;
+
         if (stop) {
             ctx.beginPath();
             ctx.moveTo(vertices[bestPath[0] - 1].x, vertices[bestPath[0] - 1].y);
@@ -46,9 +48,11 @@ export default function BasicGenetic() {
         
             ctx.closePath();
             ctx.stroke();
+            
+            return;
         }
 
-        const interval = setInterval(pathOfTravelingSalesman, 500, {
+        pathOfTravelingSalesman(
             setBestFitness,
             setPopulation,
             bestFintness,
@@ -57,12 +61,9 @@ export default function BasicGenetic() {
             bestPath, 
             vertices,
             ctx, 
-        });
+        );
 
-        return () => {
-            clearInterval(interval);
-        };
-    }, [stop]);
+    }, [population, stop]);
 
     // Создать Canvas
     useEffect(() => {
@@ -77,6 +78,7 @@ export default function BasicGenetic() {
     return (
         <>
             <Menu 
+                setPopulation={setPopulation}
                 setVertices={setVertices}
                 setStop={setStop}
                 vertices={vertices}
