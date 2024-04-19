@@ -13,6 +13,7 @@ const MAX_OPERATION_COUNT = 8; // Максимальное количество 
 const SEQUENCE_SIZE = 16; // Количество первых чисел для сравнения
 const POPULATION_SIZE = 128; // Количество особей в популяции
 const MUTATION_RATE = 0.4; // Вероятность мутации
+const RAISE_RATE = 0.4; // Вероятность роста
 
 // Доступные переменные
 const AVAILABLE_VARIABLES = VARIABLES.slice(0, VARIABLES_COUNT);
@@ -169,7 +170,7 @@ export function getRandomProgram(parent = null, depth = 0) {
             }
         }
     }
-    if (parent === "addition" || parent === "assignment" || parent === "console") {
+    if (parent === "assignment" || parent === "console") {
         if (depth === MAX_PROGRAM_DEPTH || Math.random() < 0.5) {
             return getRandomElement(AVAILABLE_VARIABLES);
         }
@@ -177,14 +178,14 @@ export function getRandomProgram(parent = null, depth = 0) {
         type = "addition";
 
         body.push(
-            getRandomProgram("addition", depth + 1),
-            getRandomProgram("addition", depth + 1)
+            getRandomElement(AVAILABLE_VARIABLES),
+            getRandomElement(AVAILABLE_VARIABLES)
         );
     }
     if (!parent) {
         type = "program";
 
-        const count = getRandomNumber(MAX_OPERATION_COUNT - 3) + 1;
+        const count = getRandomNumber(MAX_OPERATION_COUNT - 2) + 2;
 
         body.push({
             type: "definition",
@@ -254,14 +255,14 @@ export function getFitness(output, correctOutput) {
 
 // Кроссинговер
 export function crossover(firstProgram, secondProgram) {
-    // Начать программу с определения переменных
-    const body = [copy(firstProgram.body[0])];
-
     const firstGenes = firstProgram.body.slice(1, -1);
     const secondGenes = secondProgram.body.slice(1, -1);
 
     // Случайный разделитель
     const separator = getRandomNumber(Math.min(firstGenes, secondGenes));
+
+    // Начать программу с определения переменных
+    const body = [copy(firstProgram.body[0])];
 
     // Скопировать часть из первой программы
     body.push(...copy(firstGenes.slice(0, separator)));
@@ -284,7 +285,15 @@ export function mutation(program, depth = 0) {
 
     for (let i = 0; i < body.length; i++) {
         if (type === "program") {
-            if (i === 0 || i === body.length - 1) continue;
+            if (i === 0) continue;
+
+            if (i === body.length - 1) {
+                if (Math.random() < MUTATION_RATE) {
+                    body[i].body[0] = getRandomProgram("console", depth + 2);
+                }
+
+                continue;
+            }
         }
 
         if (Math.random() < MUTATION_RATE) {
@@ -295,9 +304,16 @@ export function mutation(program, depth = 0) {
     }
 }
 
+// Рост
+export function raise(program) {
+    if (Math.random() < RAISE_RATE && program.body.length - 2 < MAX_OPERATION_COUNT) {
+        program.body.push(getRandomProgram("program", 1), program.body.pop());
+    }
+}
+
 // Одна итерация генетического алгоритма
 export function runGenetic(population, correctOutput) {
-    for (let i = 0; i < POPULATION_SIZE; i += 2) {
+    for (let i = 0; i < POPULATION_SIZE; i++) {
         const firstProgram = population[i].program;
         const secondProgram = population[i + 1].program;
 
@@ -306,6 +322,9 @@ export function runGenetic(population, correctOutput) {
 
         mutation(firstNewProgram);
         mutation(secondNewProgram);
+
+        raise(firstNewProgram);
+        raise(secondNewProgram);
 
         const firstNewCode = getCodeFromProgram(firstNewProgram);
         const firstNewOutput = runCode(firstNewCode, -1);

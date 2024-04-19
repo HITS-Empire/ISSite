@@ -7,13 +7,11 @@ export function cellIsExists(row, column, count) {
 
 // Стереть барьеры вокруг ячейки
 export function clearBorders(cell, count, field) {
-    const { row, column } = cell;
+    for (let i = 0; i < 4; i++) {
+        const { row, column } = getNextCell(i, cell);
 
-    for (let i = -1; i <= 1; i++) {
-        for (let j = -1; j <= 1; j++) {
-            if (cellIsExists(row + i, column + j, count) && field[row + i][column + j].type === 1) {
-                field[row + i][column + j].type = 0;
-            }
+        if (cellIsExists(row, column, count) && field[row][column].type === 1) {
+            field[row][column].type = 0;
         }
     }
 }
@@ -76,12 +74,20 @@ export function getField(count) {
             }
             if (tractor.x < count - 2) {
                 directions.push("EAST");
+            } else if (tractor.x < count - 1) {
+                if (Math.random() < 0.2 && field[tractor.x + 1][tractor.y].type === 1) {
+                    setCell(tractor.x + 1, tractor.y, 0);
+                }
             }
             if (tractor.y > 0) {
                 directions.push("NORTH");
             }
             if (tractor.y < count - 2) {
                 directions.push("SOUTH");
+            } else if (tractor.y < count - 1) {
+                if (Math.random() < 0.2 && field[tractor.x][tractor.y + 1].type === 1) {
+                    setCell(tractor.x, tractor.y + 1, 0);
+                }
             }
     
             const direction = getRandomElement(directions);
@@ -114,7 +120,6 @@ export function getField(count) {
                         setCell(tractor.x, tractor.y + 1, 0);
                     }
                     tractor.y += 2;
-                    break;
             }
         }
     }
@@ -122,8 +127,8 @@ export function getField(count) {
     const startX = getRandomElement(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
     const startY = getRandomElement(Array(count).fill(0).map((item, index) => index).filter(x => isEven(x)));
 
-    const numberOfTractors = 100;
-    var tractors = [];
+    const numberOfTractors = 1;
+    let tractors = [];
 
     for (let i = 0; i < numberOfTractors; i++) {
         tractors.push({ x: startX, y: startY });
