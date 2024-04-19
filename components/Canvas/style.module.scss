@@ -15,4 +15,8 @@
         max-width: 100%;
         margin: 10px auto 20px auto;
     }
+
+    &.disabled {
+        pointer-events: none;
+    }
 }

@@ -1,38 +1,22 @@
+import Status from "../../../../Status";
 import Button from "../../../../Button";
 import MenuWrapper from "../../../../MenuWrapper";
 import ButtonContainer from "../../../../ButtonContainer";
 
 export default function Menu({
-    setBestFitness,
-    setGeneration,
-    setPopulation,
-    setVertices,
-    setBestPath,
     vertices,
-    setLines,
-    setStop,
-    canvas,
-    ctx
+    status,
+    setStatus
 }) {
-    const refreshCanvas = () => {
-        setVertices([]);
-        setLines([]);
-        setStop(true);
-        setPopulation([]);
-        setGeneration(0);
-        setBestPath([]);
-        setBestFitness(0);
+    // Запустить алгоритм
+    const runProcess = () => {
+        setStatus(1);
+    };
 
-        if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-
-    const getPathOfTravelingSalesman = () => {
-        if (vertices.length === 0 || !ctx) return;
-
-        setStop(false);
-    }
+    // Остановить алгоритм
+    const stopProcess = () => {
+        setStatus(0);
+    };
 
     return (
         <MenuWrapper
@@ -42,18 +26,29 @@ export default function Menu({
             <ButtonContainer>
                 <Button
                     type="primary"
-                    onClick={getPathOfTravelingSalesman}
+                    onClick={runProcess}
+                    disabled={vertices.length <= 1}
                 >
                     Запустить
                 </Button>
 
                 <Button
                     type="soft"
-                    onClick={refreshCanvas}
+                    onClick={stopProcess}
                 >
-                    Остановить
+                    Отменить
                 </Button>
             </ButtonContainer>
+
+            <Status type={status - 1}>
+                {status > 0 && (
+                    status === 1 ? (
+                        "Выполняется поиск пути..."
+                    ) : (
+                        "Путь успешно найден!"
+                    )
+                )}
+            </Status>
         </MenuWrapper>
     );
 }

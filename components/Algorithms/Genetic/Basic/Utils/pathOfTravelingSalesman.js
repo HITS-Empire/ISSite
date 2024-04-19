@@ -1,5 +1,3 @@
-import { sleep } from "../../../../../utils/helpers";
-
 export function randomPath(size) {
     const path = new Array(size).fill(0).map((_, i) => i + 1);
     for (let i = path.length - 1; i > 0; i--) {
@@ -9,21 +7,60 @@ export function randomPath(size) {
     return path;
 };
 
-export async function pathOfTravelingSalesman(
-    setBestFitness,
-    setGeneration,
-    setPopulation,
-    bestFitness,
-    setBestPath,
-    population,
-    generation,
-    bestPath, 
-    vertices,
-    setStop,
+export function refreshField({
+    data,
+    canvas,
     ctx,
-) {    
+    vertices,
+    lines
+}) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#bababa";
+
+    lines.forEach(({ from, to }) => {
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.closePath();
+        ctx.stroke();
+    });
+
+    ctx.lineWidth = 8;
+    ctx.fillStyle = data.generation > 10 ? "#3fa643" : "#9747ff"
+    ctx.strokeStyle = ctx.fillStyle;
+
+    for (let i = 0; i < data.bestPath.length; i++) {
+        const firstVertex = vertices[data.bestPath[i] - 1];
+        const secondVertex = vertices[data.bestPath[(i + 1) % data.bestPath.length] - 1];
+
+        ctx.beginPath();
+        ctx.moveTo(firstVertex.x, firstVertex.y);
+        ctx.lineTo(secondVertex.x, secondVertex.y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    vertices.forEach((vertex) => {
+        ctx.beginPath();
+        ctx.arc(vertex.x, vertex.y, 10, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+    });
+}
+
+export function pathOfTravelingSalesman({
+    data,
+    canvas,
+    ctx,
+    vertices,
+    lines,
+    setStatus
+}) {
     const fitness = (path) => {
         let totalDistance = 0;
+
         for (let i = 0; i < path.length - 1; i++) {
             const cityA = path[i];
             const cityB = path[i + 1];
@@ -34,17 +71,20 @@ export async function pathOfTravelingSalesman(
             totalDistance += Math.sqrt((firstVertex.x - secondVertex.x) ** 2 + (firstVertex.y - secondVertex.y) ** 2);
             
         }
+
         return 1 / totalDistance;
     };
 
     const mutate = (path) => {
         const newPath = [...path];
+
         for (let i = 0; i < newPath.length; i++) {
             if (Math.random() < 0.7) {
                 const j = Math.floor(Math.random() * newPath.length);
                 [newPath[i], newPath[j]] = [newPath[j], newPath[i]];
             }
         }
+
         return newPath;
     };
 
@@ -82,9 +122,9 @@ export async function pathOfTravelingSalesman(
     };
 
     const newPopulation = [];
-    for (let i = 0; i < population.length / 2; i++) {
-        const firstPath = population[Math.floor(Math.random() * (i + 1))];
-        const secondPath  = population[Math.floor(Math.random() * (i + 1))];
+    for (let i = 0; i < data.population.length / 2; i++) {
+        const firstPath = data.population[Math.floor(Math.random() * (i + 1))];
+        const secondPath  = data.population[Math.floor(Math.random() * (i + 1))];
 
         const newFirstPath = crossover(firstPath , secondPath);
         const newSecondPath = crossover(secondPath, firstPath);
@@ -96,48 +136,20 @@ export async function pathOfTravelingSalesman(
     newPopulation.sort((a, b) => fitness(b) - fitness(a));
 
     const newBestPath = newPopulation[0];
-    
     const newBestFitness = fitness(newBestPath);
 
-    console.log(bestPath);
-    ctx.beginPath();
-    ctx.moveTo(vertices[newBestPath[0] - 1].x, vertices[newBestPath[0] - 1].y);
-    ctx.strokeStyle = 'gray';
+    data.population = newPopulation;
+    data.generation++;
 
-    for (let i = 0; i < newBestPath.length; i++) {
-        ctx.lineTo(vertices[newBestPath[i] - 1].x, vertices[newBestPath[i] - 1].y);
+    if (newBestFitness > data.bestFitness) {
+        data.bestPath = newBestPath;
+        data.bestFitness = newBestFitness;
+
+        refreshField({ data, canvas, ctx, vertices, lines });
     }
 
-    ctx.closePath();
-    ctx.stroke();
-
-    await sleep(500);
-
-    ctx.beginPath();
-    ctx.moveTo(vertices[newBestPath[0] - 1].x, vertices[newBestPath[0] - 1].y);
-    ctx.strokeStyle = 'white';
-
-    for (let i = 0; i < newBestPath.length; i++) {
-        ctx.lineTo(vertices[newBestPath[i] - 1].x, vertices[newBestPath[i] - 1].y);
-    }
-
-    ctx.closePath();
-    ctx.stroke();
-
-    
-    console.log(generation);
-
-    setPopulation(newPopulation);
-    setGeneration(prevGeneration => prevGeneration + 1);
-    if (newBestFitness > bestFitness) {    
-        setBestPath(newBestPath);
-        setBestFitness(newBestFitness);
-    }
-    await sleep (500);
-
-    if (generation > 10) {
-        setStop(true);
-        await sleep(500);
-        return;
+    if (data.generation > 10) {
+        refreshField({ data, canvas, ctx, vertices, lines });
+        setStatus(2);
     }
 }

@@ -6,12 +6,16 @@ export default function Canvas({
     onMouseDown,
     onMouseUp,
     onMouseMove,
-    onMouseOut
+    onMouseOut,
+    disabled
 }) {
     let classNames = [style.canvas];
 
     if (className) {
         classNames.push(className);
+    }
+    if (disabled) {
+        classNames.push(style.disabled);
     }
 
     classNames = classNames.join(" ");
