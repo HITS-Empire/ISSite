@@ -203,6 +203,8 @@ const goThroughEpochs = (NN, imagesData, digits, epochs) => {
 
             NN.backpropagation(targets);
         }
+
+        console.log("Текущая эпоха:", i, "|", "Угадано:", correct);
     }
 };
 
