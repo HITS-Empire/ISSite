@@ -171,7 +171,7 @@ export function getRandomProgram(parent = null, depth = 0) {
         }
     }
     if (parent === "assignment" || parent === "console") {
-        if (depth === MAX_PROGRAM_DEPTH || Math.random() < 0.5) {
+        if (depth >= MAX_PROGRAM_DEPTH || Math.random() < 0.5) {
             return getRandomElement(AVAILABLE_VARIABLES);
         }
 
@@ -313,7 +313,7 @@ export function raise(program) {
 
 // Одна итерация генетического алгоритма
 export function runGenetic(population, correctOutput) {
-    for (let i = 0; i < POPULATION_SIZE; i++) {
+    for (let i = 0; i < POPULATION_SIZE - 1; i++) {
         const firstProgram = population[i].program;
         const secondProgram = population[i + 1].program;
 
