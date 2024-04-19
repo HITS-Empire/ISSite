@@ -6,10 +6,10 @@ export default function Footer() {
         <footer className={style.footer}>
             <nav className={style.nav}>
                 <ul className={style.ul}>
-                    <Navigation
+                    {/* <Navigation
                         href="/"
                         titles={["Главная"]}
-                    />
+                    /> */}
                     <Navigation
                         href="/labirint"
                         titles={["А*"]}
@@ -19,8 +19,12 @@ export default function Footer() {
                         titles={["Алгоритм кластеризации"]}
                     />
                     <Navigation
-                        href="/genetika"
-                        titles={["Генетический алгоритм"]}
+                        href="/kommivoyazhyor"
+                        titles={["Коммивояжёр"]}
+                    />
+                    <Navigation
+                        href="/kod"
+                        titles={["Генерация кода"]}
                     />
                     <Navigation
                         href="/muravey"
